@@ -4,14 +4,26 @@ function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [ipfsHash, setIpfsHash] = useState<string>("");
   const [timestamp, setTimestamp] = useState<string>("");
-  const [text, setText] = useState<string>("");
+  const [formData, setFormData] = useState({
+    name: "",
+    patientId: "",
+    diagnose: "",
+    treatment: "",
+    issuedBy: "",
+  });
 
   const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedFile(event.target.files?.[0] || null);
   };
 
-  const textChangeHandler = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setText(event.target.value);
+  const textChangeHandler = (
+    event: React.ChangeEvent<HTMLTextAreaElement>,
+    field: string
+  ) => {
+    setFormData({
+      ...formData,
+      [field]: event.target.value,
+    });
   };
 
   const handleFileSubmission = async () => {
@@ -66,10 +78,12 @@ function App() {
         cidVersion: 0,
       });
 
-      const formData = new FormData();
-      formData.append("file", new Blob([text], { type: "text/plain" }), "file.txt");
-      formData.append("pinataMetadata", metadata);
-      formData.append("pinataOptions", options);
+      const textData = JSON.stringify(formData);
+
+      const formDataText = new FormData(); // Rename formData to formDataText
+      formDataText.append("file", new Blob([textData], { type: "text/plain" }), "file.txt");
+      formDataText.append("pinataMetadata", metadata);
+      formDataText.append("pinataOptions", options);
 
       const res = await fetch(
         "https://api.pinata.cloud/pinning/pinFileToIPFS",
@@ -78,7 +92,7 @@ function App() {
           headers: {
             Authorization: `Bearer ${import.meta.env.VITE_PINATA_JWT}`,
           },
-          body: formData,
+          body: formDataText,
         }
       );
 
@@ -103,13 +117,51 @@ function App() {
 
       <hr />
 
-      <label className="form-label">Enter Plain Text:</label>
-      <textarea value={text} onChange={textChangeHandler}></textarea>
+      <div>
+        <label>Name:</label>
+        <input
+          type="text"
+          value={formData.name}
+          onChange={(e) => textChangeHandler(e, "name")}
+        />
+      </div>
+      <div>
+        <label>Patient ID:</label>
+        <input
+          type="text"
+          value={formData.patientId}
+          onChange={(e) => textChangeHandler(e, "patientId")}
+        />
+      </div>
+      <div>
+        <label>Diagnose:</label>
+        <input
+          type="text"
+          value={formData.diagnose}
+          onChange={(e) => textChangeHandler(e, "diagnose")}
+        />
+      </div>
+      <div>
+        <label>Treatment:</label>
+        <input
+          type="text"
+          value={formData.treatment}
+          onChange={(e) => textChangeHandler(e, "treatment")}
+        />
+      </div>
+      <div>
+        <label>Issued by:</label>
+        <input
+          type="text"
+          value={formData.issuedBy}
+          onChange={(e) => textChangeHandler(e, "issuedBy")}
+        />
+      </div>
       <button onClick={handleTextSubmission}>Submit Text</button>
 
       {ipfsHash && timestamp && (
         <div>
-          <p>IpfsHash: {ipfsHash}</p>
+          <p>IPFS Hash: <a href={`ipfs://${ipfsHash}`}>{ipfsHash}</a></p>
           <p>Timestamp: {timestamp}</p>
         </div>
       )}
