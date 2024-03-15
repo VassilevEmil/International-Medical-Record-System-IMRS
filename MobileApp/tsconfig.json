@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "allowJs": true, 
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "jsx": "react-native",
+    "lib": ["es6"],
+    "noEmit": true,
+    "strict": true,
+    "target": "es2015",
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules", "babel.config.ts", "metro.config.js", "jest.config.ts"]
+}

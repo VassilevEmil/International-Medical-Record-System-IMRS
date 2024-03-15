@@ -17,7 +17,7 @@ function App() {
   };
 
   const textChangeHandler = (
-    event: React.ChangeEvent<HTMLTextAreaElement>,
+    event: React.ChangeEvent<HTMLInputElement>,
     field: string
   ) => {
     setFormData({
@@ -81,7 +81,11 @@ function App() {
       const textData = JSON.stringify(formData);
 
       const formDataText = new FormData(); // Rename formData to formDataText
-      formDataText.append("file", new Blob([textData], { type: "text/plain" }), "file.txt");
+      formDataText.append(
+        "file",
+        new Blob([textData], { type: "text/plain" }),
+        "file.txt"
+      );
       formDataText.append("pinataMetadata", metadata);
       formDataText.append("pinataOptions", options);
 
@@ -161,7 +165,9 @@ function App() {
 
       {ipfsHash && timestamp && (
         <div>
-          <p>IPFS Hash: <a href={`ipfs://${ipfsHash}`}>{ipfsHash}</a></p>
+          <p>
+            IPFS Hash: <a href={`ipfs://${ipfsHash}`}>{ipfsHash}</a>
+          </p>
           <p>Timestamp: {timestamp}</p>
         </div>
       )}
