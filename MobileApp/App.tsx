@@ -1,38 +1,53 @@
 import * as React from "react";
 import { View, Text } from "react-native";
+
+// Navigation
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-// Screen imports:
+// Icon
+import Ionicons from "react-native-vector-icons/Ionicons";
+
+// Screens
 import MedicalRecordsScreen from "./screens/MedicalRecordsScreen";
+import HomeScreen from "./screens/HomeScreen";
 
-// This will be deleted later on: // It does not belong here
-function HomeScreen() {
-  return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>Home Screen</Text>
-    </View>
-  );
-}
-
-const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="MedicalRecords">
-        <Stack.Screen
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+
+            if (route.name === "Home") {
+              iconName = focused ? "home" : "home-outline";
+            } else if (route.name === "MedicalRecords") {
+              iconName = focused ? "list" : "list"; // change later, cant find normal one
+            }
+
+            // You can return any component that you like here!
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: "blue",
+          tabBarInactiveTintColor: "gray",
+        })}
+      >
+        {/* ... START OF THE TAB COMPONENTS ... */}
+        <Tab.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ tabBarLabel: "Home" }}
+        />
+        <Tab.Screen
           name="MedicalRecords"
           component={MedicalRecordsScreen}
-          options={{ headerShown: true, title: "Medical Records" }}
+          options={{ tabBarLabel: "Records" }}
         />
-        <Stack.Screen
-          name="HomeScreen"
-          component={HomeScreen}
-          options={{ headerShown: true, title: "HomeScreen" }}
-        />
-        {/* Other screens go below */}
-      </Stack.Navigator>
+        {/* ... add other tabs/screens as needed ... */}
+      </Tab.Navigator>
     </NavigationContainer>
   );
 }

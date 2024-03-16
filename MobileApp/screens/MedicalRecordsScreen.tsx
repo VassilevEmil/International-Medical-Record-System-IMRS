@@ -9,6 +9,9 @@ import {
 import Icon from "react-native-vector-icons/Ionicons";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 
+console.log(Icon);
+console.log(MaterialIcon);
+
 const MedicalRecordsScreen = () => {
   return (
     <ScrollView style={styles.container}>
