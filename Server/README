@@ -1,5 +1,7 @@
 !IMPORTANT!
 
+"npm run start"
+
 After making any change you need to compile TS to JS:
 
 1. Make sure you are at src dir and run terminal.
