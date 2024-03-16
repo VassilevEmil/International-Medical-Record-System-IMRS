@@ -1,14 +1,13 @@
-import http from 'http';
+require('dotenv').config()
+import express, { Application } from 'express';
+import medicalRecordRoutes from './routes/medicalRecords';
 
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World\n');
-});
+const app: Application = express();
 
-const PORT = process.env.PORT || 3000;
+// Middleware
+app.use(express.json());
 
-server.listen(PORT, () => {
+// Routes
+app.use('/medicalRecords', medicalRecordRoutes);
 
-  console.log(`Server running on port ${PORT}`);
-});
+export default app;
