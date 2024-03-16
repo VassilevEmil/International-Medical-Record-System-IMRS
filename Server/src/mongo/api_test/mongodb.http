@@ -1,0 +1,17 @@
+@baseUrl = https://localhost:27017/
+
+
+###
+POST {{{{baseUrl}}}}/
+Content-Type: application/json
+
+{
+    "patientId": "546d8c3a9e8bebfdd",
+    "doctorId": "546",
+    "dateTime":"2014",
+    "symptoms":["headache","nausea"],
+    "diagnose":"Migraine",
+    "issuedBy": "John Doe",
+    "createdAt": "12-12-12"
+
+}
