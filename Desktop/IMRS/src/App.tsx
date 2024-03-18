@@ -35,31 +35,17 @@ function App() {
 
       const formData = new FormData();
       formData.append("file", selectedFile);
-      const metadata = JSON.stringify({
-        name: "File name",
+      
+      const res = await fetch("https://localhost:3000/medicalRecords/medicalRecord", {
+        method: "POST",
+        body: formData,
       });
-      formData.append("pinataMetadata", metadata);
-
-      const options = JSON.stringify({
-        cidVersion: 0,
-      });
-      formData.append("pinataOptions", options);
-
-      const res = await fetch(
-        "https://api.pinata.cloud/pinning/pinFileToIPFS",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_PINATA_JWT}`,
-          },
-          body: formData,
-        }
-      );
+      
       const resData = await res.json();
 
-      if (resData.IpfsHash && resData.Timestamp) {
-        setIpfsHash(resData.IpfsHash);
-        setTimestamp(resData.Timestamp);
+      if (resData.ipfsHash && resData.timestamp) {
+        setIpfsHash(resData.ipfsHash);
+        setTimestamp(resData.timestamp);
       } else {
         console.error("Invalid response format:", resData);
       }
@@ -70,41 +56,19 @@ function App() {
 
   const handleTextSubmission = async () => {
     try {
-      const metadata = JSON.stringify({
-        name: "Plain Text File",
+      const res = await fetch("https://localhost:3000/medicalRecords/medicalRecord", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
-
-      const options = JSON.stringify({
-        cidVersion: 0,
-      });
-
-      const textData = JSON.stringify(formData);
-
-      const formDataText = new FormData(); // Rename formData to formDataText
-      formDataText.append(
-        "file",
-        new Blob([textData], { type: "text/plain" }),
-        "file.txt"
-      );
-      formDataText.append("pinataMetadata", metadata);
-      formDataText.append("pinataOptions", options);
-
-      const res = await fetch(
-        "https://api.pinata.cloud/pinning/pinFileToIPFS",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_PINATA_JWT}`,
-          },
-          body: formDataText,
-        }
-      );
 
       const resData = await res.json();
 
-      if (resData.IpfsHash && resData.Timestamp) {
-        setIpfsHash(resData.IpfsHash);
-        setTimestamp(resData.Timestamp);
+      if (resData.textCID && resData.imageCID) {
+        setIpfsHash(resData.textCID);
+        setTimestamp("");
       } else {
         console.error("Invalid response format:", resData);
       }
@@ -163,12 +127,12 @@ function App() {
       </div>
       <button onClick={handleTextSubmission}>Submit Text</button>
 
-      {ipfsHash && timestamp && (
+      {ipfsHash && (
         <div>
           <p>
             IPFS Hash: <a href={`ipfs://${ipfsHash}`}>{ipfsHash}</a>
           </p>
-          <p>Timestamp: {timestamp}</p>
+          {timestamp && <p>Timestamp: {timestamp}</p>}
         </div>
       )}
     </>

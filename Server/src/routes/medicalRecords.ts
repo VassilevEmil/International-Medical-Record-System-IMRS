@@ -19,7 +19,6 @@ router.post("/medicalRecord", async (req: Request, res: Response) => {
       language,
       patientId,
       symptoms,
-      createdAt,
     } = req.body;
 
     const medicalRecord = await createMedicalRecord(
@@ -31,9 +30,9 @@ router.post("/medicalRecord", async (req: Request, res: Response) => {
       contentText,
       contentImage,
       language,
-      symptoms,
-      createdAt
+      symptoms
     );
+
     console.log("MEDICAL RECORD -----", medicalRecord);
     const encryptedMedicalRecord = await encrypt.encrypt(medicalRecord);
 

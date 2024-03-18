@@ -9,8 +9,7 @@ export function createMedicalRecord(
   contentText: string,
   contentImage: string | undefined, //Not required
   language: "EN" | "DK",
-  symptoms: string,
-  createdAt: string
+  symptoms: string
 ): MedicalRecord {
   const medicalRecord: MedicalRecord = {
     id: generateId(),

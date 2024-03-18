@@ -1,7 +1,7 @@
 import mongoose, { Schema, Model } from "mongoose";
 
 // Define patient schema
-const PatientSchema = new Schema({
+const MedicalRecordSchema = new Schema({
   patientId: {
     type: String,
     required: true,
@@ -36,4 +36,5 @@ const PatientSchema = new Schema({
 // Define patient model type
 
 // Export patient model
-module.exports = mongoose.model("patients", PatientSchema);
+module.exports = mongoose.model("Medical records", MedicalRecordSchema);
+export { MedicalRecordSchema };
