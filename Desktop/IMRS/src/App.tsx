@@ -36,7 +36,7 @@ function App() {
       const formData = new FormData();
       formData.append("file", selectedFile);
       
-      const res = await fetch("https://localhost:3000/medicalRecords/medicalRecord", {
+      const res = await fetch("http://localhost:3000/medicalRecords/medicalRecord", {
         method: "POST",
         body: formData,
       });
@@ -56,7 +56,7 @@ function App() {
 
   const handleTextSubmission = async () => {
     try {
-      const res = await fetch("https://localhost:3000/medicalRecords/medicalRecord", {
+      const res = await fetch("http://localhost:3000/medicalRecords/medicalRecord", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
