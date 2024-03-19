@@ -1,6 +1,5 @@
-import { Document, Model, model, Schema } from "mongoose";
+import mongoose, { Document, Schema, Model } from 'mongoose';
 
-// Define patient model type
 export interface MedicalRecordModelInterface extends Document {
   doctorFirstName: string;
   doctorLastName: string;
@@ -10,10 +9,9 @@ export interface MedicalRecordModelInterface extends Document {
   contentImage: string;
   language: string;
   patientId: string;
-  symptoms: string;
 }
 
-const MedicalRecordSchema: Schema<MedicalRecordModelInterface> = new Schema({
+export const MedicalRecordSchema: Schema = new mongoose.Schema({
   doctorFirstName: {
     type: String,
     required: false,
@@ -45,10 +43,9 @@ const MedicalRecordSchema: Schema<MedicalRecordModelInterface> = new Schema({
   patientId: {
     type: String,
     required: false,
-  },
+  }
 });
 
-const MedicalRecordModel: Model<MedicalRecordModelInterface> =
-  model<MedicalRecordModelInterface>("MedicalRecord", MedicalRecordSchema);
+const MedicalRecordModel: Model<MedicalRecordModelInterface> = mongoose.model<MedicalRecordModelInterface>('MedicalRecord', MedicalRecordSchema);
 
 export default MedicalRecordModel;

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { expect } from "chai";
-import MedicalRecordModel from "../../mongo/MedicalRecordSchema/MedicalRecordSchema";
 import { MedicalRecord } from "../../models/medicalRecord";
+import MedicalRecordModel from "../models/medicalRecord";
 
 beforeAll(async () => {
   await mongoose.connect("mongodb://localhost:27017/", {});
