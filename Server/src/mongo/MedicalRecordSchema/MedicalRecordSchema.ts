@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 // Define patient schema
 const MedicalRecordSchema = new Schema({
@@ -31,10 +31,6 @@ const MedicalRecordSchema = new Schema({
     required: false,
   },
   patientId: {
-    type: String,
-    required: false,
-  },
-  symptoms: {
     type: String,
     required: false,
   },

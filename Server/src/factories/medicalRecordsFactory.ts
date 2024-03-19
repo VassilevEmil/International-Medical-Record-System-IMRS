@@ -9,7 +9,6 @@ export function createMedicalRecord(
   contentText: string,
   contentImage: string | undefined, //Not required
   language: "EN" | "DK",
-  symptoms: string
 ): MedicalRecord {
   const medicalRecord: MedicalRecord = {
     id: generateId(),
@@ -22,8 +21,6 @@ export function createMedicalRecord(
     contentText: contentText,
     contentImage: contentImage,
     language: language,
-    symptoms: symptoms,
-    isEncrypted: false, //?? Maybe useless, we'll see
   };
 
   return medicalRecord;

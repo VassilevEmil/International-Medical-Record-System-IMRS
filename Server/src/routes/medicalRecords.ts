@@ -18,7 +18,6 @@ router.post("/medicalRecord", async (req: Request, res: Response) => {
       contentImage,
       language,
       patientId,
-      symptoms,
     } = req.body;
 
     const medicalRecord = await createMedicalRecord(
@@ -29,7 +28,6 @@ router.post("/medicalRecord", async (req: Request, res: Response) => {
       contentText,
       contentImage,
       language,
-      symptoms,
       patientId
     );
 
