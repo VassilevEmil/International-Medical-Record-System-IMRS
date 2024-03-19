@@ -1,7 +1,6 @@
 import pinataSDK from "@pinata/sdk";
-import fs from "fs";
+import MedicalRecordModel from "../mongo/models/medicalRecord";
 import { MedicalRecord } from "../models/medicalRecord";
-import MedicalRecordModel from "../mongo/MedicalRecordModel/MedicalRecordModel";
 
 const pinata = new pinataSDK(process.env.PINATA_API_KEY, process.env.PINATA_SECRET_API_KEY);
 
@@ -47,8 +46,8 @@ export async function uploadMedicalRecord(medicalRecord: MedicalRecord) {
     }
 
 
-    return { textCID: textResult.IpfsHash };
-    //return { textCID: textResult.IpfsHash, imageCID: imagePath };
+    //return { textCID: textResult.IpfsHash };
+    return { textCID: textResult.IpfsHash, imageCID: 'fake "imagePath" string for now' };
   } catch (error) {
     console.error("Error uploading to Pinata:", error);
     throw error;
