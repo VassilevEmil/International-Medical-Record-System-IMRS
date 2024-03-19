@@ -1,7 +1,6 @@
 import { MedicalRecord } from "../models/medicalRecord";
 
 export function createMedicalRecord(
-  patientId: string,
   doctorFirstName: string,
   doctorLastName: string,
   sendingInstitution: string,
@@ -9,10 +8,10 @@ export function createMedicalRecord(
   contentText: string,
   contentImage: string | undefined, //Not required
   language: "EN" | "DK",
+  patientId: string
 ): MedicalRecord {
   const medicalRecord: MedicalRecord = {
     id: generateId(),
-    patientId: patientId,
     doctorFirstName: doctorFirstName,
     doctorLastName: doctorLastName,
     sendingInstitution: sendingInstitution,
@@ -21,6 +20,7 @@ export function createMedicalRecord(
     contentText: contentText,
     contentImage: contentImage,
     language: language,
+    patientId: patientId
   };
 
   return medicalRecord;
