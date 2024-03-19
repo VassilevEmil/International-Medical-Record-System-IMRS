@@ -11,6 +11,4 @@ export interface MedicalRecord {
   contentText: string;
   contentImage?: string; //Assuming we encrypt using AES, expect to receive binary
   language: "EN" | "DK";
-  symptoms: string;
-  isEncrypted: boolean;
 }

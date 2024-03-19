@@ -46,10 +46,6 @@ const MedicalRecordSchema: Schema<MedicalRecordModelInterface> = new Schema({
     type: String,
     required: false,
   },
-  symptoms: {
-    type: String,
-    required: false,
-  },
 });
 
 const MedicalRecordModel: Model<MedicalRecordModelInterface> =
