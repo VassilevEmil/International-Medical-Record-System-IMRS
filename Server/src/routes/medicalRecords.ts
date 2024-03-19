@@ -22,7 +22,6 @@ router.post("/medicalRecord", async (req: Request, res: Response) => {
     } = req.body;
 
     const medicalRecord = await createMedicalRecord(
-      patientId,
       doctorFirstName,
       doctorLastName,
       sendingInstitution,
@@ -30,7 +29,8 @@ router.post("/medicalRecord", async (req: Request, res: Response) => {
       contentText,
       contentImage,
       language,
-      symptoms
+      symptoms,
+      patientId
     );
 
     console.log("MEDICAL RECORD -----", medicalRecord);

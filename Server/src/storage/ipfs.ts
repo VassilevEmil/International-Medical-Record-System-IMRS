@@ -1,18 +1,9 @@
 import pinataSDK from "@pinata/sdk";
 import fs from "fs";
 import { MedicalRecord } from "../models/medicalRecord";
-import mongoose from "mongoose";
-import { MedicalRecordSchema } from "../mongo/MedicalRecordSchema/MedicalRecordSchema";
+import MedicalRecordModel from "../mongo/MedicalRecordModel/MedicalRecordModel";
 
-const pinata = new pinataSDK(
-  process.env.PINATA_API_KEY,
-  process.env.PINATA_SECRET_API_KEY
-);
-
-const MedicalRecordModel = mongoose.model("MedicalRecord", MedicalRecordSchema);
-
-//  key = "b455b488582980fd72b1"
-// secret = 32a4fad27c665880402a5e1715e5f07a288fcf399b3faf372b11243293cf5d1c
+const pinata = new pinataSDK(process.env.API_KEY, process.env.API_SECRET);
 
 export async function uploadMedicalRecord(medicalRecord: MedicalRecord) {
   try {
@@ -38,8 +29,8 @@ export async function uploadMedicalRecord(medicalRecord: MedicalRecord) {
     // Save the medical record to MongoDB
     const newMedicalRecord = new MedicalRecordModel({
       ...medicalRecord,
-      textCID: textResult.IpfsHash,
-      imageCID: imagePath,
+      // textCID: textResult.IpfsHash,
+      // imageCID: imagePath,
     });
     await newMedicalRecord.save();
 

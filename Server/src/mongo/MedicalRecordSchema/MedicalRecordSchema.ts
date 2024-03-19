@@ -1,40 +1,43 @@
-import mongoose, { Schema, Model } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 // Define patient schema
 const MedicalRecordSchema = new Schema({
+  doctorFirstName: {
+    type: String,
+    required: false,
+  },
+  doctorLastName: {
+    type: String,
+    required: false,
+  },
+  sendingInstitution: {
+    type: String,
+    required: false,
+  },
+  diagnosisName: {
+    type: String,
+    required: false,
+  },
+  contentText: {
+    type: String,
+    required: false,
+  },
+  contentImage: {
+    type: String,
+    required: false,
+  },
+  language: {
+    type: String,
+    required: false,
+  },
   patientId: {
     type: String,
-    required: true,
-  },
-  patientName: {
-    type: String,
-    required: true,
-  },
-  doctorId: {
-    type: String,
-    required: true,
+    required: false,
   },
   symptoms: {
     type: String,
-    required: true,
-  },
-  diagnose: {
-    type: String,
-    required: true,
-  },
-  issuedBy: {
-    type: String,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    required: true,
-    default: new Date(),
+    required: false,
   },
 });
 
-// Define patient model type
-
-// Export patient model
-module.exports = mongoose.model("Medical records", MedicalRecordSchema);
-export { MedicalRecordSchema };
+export default mongoose.model("MedicalRecord", MedicalRecordSchema);
