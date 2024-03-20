@@ -20,16 +20,20 @@ console.log(MaterialIcon);
 const MedicalRecordsScreen = () => {
   const dispatch: AppDispatch = useDispatch();
 
-  const { data, loading, error } = useSelector(
-    (state: any) => state.medicalRecords
-  );
+  // const { data, loading, error } = useSelector(
+  //   (state: any) => state.medicalRecords
+  // );
+  const state = useSelector((state: any) => state.medicalRecords);
 
   useEffect(() => {
     // JUST FOR POC DISPATCH ACTION WHEN COMPONENT MOUNTS
     dispatch(fetchMedicalRecords());
   }, [dispatch]);
 
-  console.log(data);
+  if (state) {
+    console.log(state);
+    console.log(state.data);
+  }
 
   return (
     <ScrollView style={styles.container}>
