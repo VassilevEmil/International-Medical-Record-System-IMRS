@@ -1,5 +1,3 @@
-import { Patient } from "./patient";
-
 export interface MedicalRecord {
   id: string;
   patientId: string;

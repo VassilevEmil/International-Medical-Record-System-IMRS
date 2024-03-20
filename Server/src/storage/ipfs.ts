@@ -10,7 +10,7 @@ export async function uploadMedicalRecord(medicalRecord: MedicalRecord) {
     const recordJson = JSON.stringify(recordWithoutImage);
 
     const textResult = await pinata.pinJSONToIPFS(recordWithoutImage);
-    console.log(`Text data uploaded: ${textResult.IpfsHash}`);
+    console.log(`Text data uploaded: ${"ipfs://"+ textResult.IpfsHash}`);
 
     // let imagePath = null;
     // console.log("Content IMAGE ", medicalRecord.contentImage);
@@ -47,7 +47,7 @@ export async function uploadMedicalRecord(medicalRecord: MedicalRecord) {
 
 
     //return { textCID: textResult.IpfsHash };
-    return { textCID: textResult.IpfsHash, imageCID: 'fake "imagePath" string for now' };
+    return { textCID: "ipfs://"+ textResult.IpfsHash, imageCID: "ipfs://" + 'fake "imagePath" string for now' };
   } catch (error) {
     console.error("Error uploading to Pinata:", error);
     throw error;
