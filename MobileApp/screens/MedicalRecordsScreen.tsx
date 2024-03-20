@@ -8,11 +8,29 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { AppDispatch, RootState } from "../redux/store";
+
+import { fetchMedicalRecords } from "../redux/thunks/MedicalRecords/medicalRecordsThunk";
 
 console.log(Icon);
 console.log(MaterialIcon);
 
 const MedicalRecordsScreen = () => {
+  const dispatch: AppDispatch = useDispatch();
+
+  const { data, loading, error } = useSelector(
+    (state: any) => state.medicalRecords
+  );
+
+  useEffect(() => {
+    // JUST FOR POC DISPATCH ACTION WHEN COMPONENT MOUNTS
+    dispatch(fetchMedicalRecords());
+  }, [dispatch]);
+
+  console.log(data);
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.yearSection}>

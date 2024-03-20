@@ -1,15 +1,15 @@
 import { combineReducers } from 'redux';
-import authReducer from './authReducer';
-import userPreferencesReducer from './userPreferencesReducer';
+//import authReducer from './authReducer';
+//import userPreferencesReducer from './userPreferencesReducer';
 
 // reducer imports below
-import medicalRecordReducer from './MedicalRecords/medicalRecordReducer'
+import medicalRecordsReducer from './MedicalRecords/medicalRecordsReducer';
 
-const rootReducer = combineReducers({
+export const rootReducer = combineReducers({
   //userPreferences: userPreferencesReducer,
   //auth: authReducer,
-  records: medicalRecordReducer,
+  records: medicalRecordsReducer,
   // ... other reducers
 });
 
-export default rootReducer;
+export type RootReducer = ReturnType<typeof rootReducer>;
