@@ -12,6 +12,6 @@ export interface MedicalRecord {
   language: Language,
   title: string,
   text: string[],
-  files?: FormData[] ,
+  files?: Express.Multer.File[] ,
   typeOfRecord: TypeOfRecord
 }

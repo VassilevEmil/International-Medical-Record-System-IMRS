@@ -23,8 +23,9 @@ export const InstitutionSchema: Schema = new mongoose.Schema({
         required: true
     },
     country: {
-        type: Country,
-        required: true
+        type: String,
+        required: true,
+        enum: Object.values(Country)
     },
     address: {
         type: String,

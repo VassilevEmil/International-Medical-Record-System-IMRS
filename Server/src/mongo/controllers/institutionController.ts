@@ -1,3 +1,4 @@
+import { error } from "console";
 import { Institution } from "../../models/institution";
 import InstitutionModel from "../models/institution";
 
@@ -12,12 +13,11 @@ export async function addInstitution(institutionData: Institution): Promise<void
     }
 }
 
-export async function getInstitutionById(institutionId: string): Promise<Institution | null> {
+export async function getInstitutionById(institutionId: string): Promise<Institution> {
     try {
         const institution = await InstitutionModel.findOne({ institutionId: institutionId });
         if (!institution) {
-            console.log("Institution not found.");
-            return null;
+            throw error;
         }
         console.log("Institution found:", institution);
 

@@ -1,26 +1,36 @@
+import { error } from "console";
+import { Country, Language, TypeOfRecord } from "../enums";
+import { Institution } from "../models/institution";
 import { MedicalRecord } from "../models/medicalRecord";
+import { addInstitution, getInstitutionById } from "../mongo/controllers/institutionController";
 
-export function createMedicalRecord(
-  doctorFirstName: string,
-  doctorLastName: string,
-  sendingInstitution: string,
-  diagnosisName: string,
-  contentText: string,
-  contentImage: string | undefined, //Not required
-  language: "EN" | "DK",
-  patientId: string
-): MedicalRecord {
+export async function createMedicalRecord(
+    institutionId: string,
+    patientId: string,
+    title: string,
+    textInput: string[],
+    typeOfRecord: TypeOfRecord,
+    doctorId: string,
+    doctorFirstName: string,
+    doctorLastName: string,
+    language: Language,
+    fileInput?: Express.Multer.File[],
+): Promise<MedicalRecord> {
+  const institution = await getInstitution(institutionId);
+
   const medicalRecord: MedicalRecord = {
     id: generateId(),
+    patientId: patientId,
+    doctorId: doctorId,
     doctorFirstName: doctorFirstName,
     doctorLastName: doctorLastName,
-    sendingInstitution: sendingInstitution,
-    dateCreated: new Date(),
-    diagnosisName: diagnosisName,
-    contentText: contentText,
-    contentImage: contentImage,
+    institution: institution,
+    timeStamp: new Date(),
     language: language,
-    patientId: patientId
+    title: title,
+    text: textInput,
+    files: fileInput || undefined,
+    typeOfRecord: typeOfRecord
   };
 
   return medicalRecord;
@@ -28,4 +38,30 @@ export function createMedicalRecord(
 
 function generateId(): string {
   return Math.random().toString(36).substring(2, 15); // Random ass id
+}
+
+async function getInstitution(institutionId: string): Promise<Institution> {
+    try {
+      const institution = await getInstitutionById(institutionId);
+      if(!institution){
+        //!! CHANGE LATER
+
+        const institution: Institution = {
+          id: "123",
+          institutionId: institutionId,
+          name: "Test Hospital",
+          country: Country.Denmark,
+          address: "WhateverTown 101",
+        }
+
+        addInstitution(institution);
+
+        //throw error;
+      }
+      return institution;
+    }
+    catch (error) {
+      throw `Institution not found with id: ${institutionId} `;
+    }
+
 }

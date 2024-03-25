@@ -1,50 +1,69 @@
+import multer from 'multer';
 import express, { Request, Response } from "express";
 import { createMedicalRecord } from "../factories/medicalRecordsFactory";
 import { Encrypt } from "../services/encrypt";
 import { uploadMedicalRecord } from "../storage/ipfs";
 import { getAllMedicalHistoriesByPatientId, getTenMostRecentMedicalHistoriesById, uploadMedicalHistory } from "../mongo/controllers/medicalHistoryController";
+import { addInstitution } from '../mongo/controllers/institutionController';
+import { Institution } from '../models/institution';
+import { Country } from '../enums';
 
 const router = express.Router();
 const encrypt = new Encrypt();
 
+const storage = multer.memoryStorage(); // Keeps files in memory
+const upload = multer({ storage: storage });
+
 // Post a new Medical Record
-router.post("/medicalRecord", async (req: Request, res: Response) => {
+router.post("/", upload.array('fileInput'), async (req: Request, res: Response) => {
   try {
     const {
-      doctorFirstName,
-      doctorLastName,
-      sendingInstitution,
-      diagnosisName,
-      contentText,
-      contentImage,
-      language,
+      institutionId,
       patientId,
-    } = req.body;
-
-    const medicalRecord = await createMedicalRecord(
+      title,
+      textInput,
+      fileInput,
+      typeOfRecord,
+      doctorId,
       doctorFirstName,
       doctorLastName,
-      sendingInstitution,
-      diagnosisName,
-      contentText,
-      contentImage,
       language,
-      patientId
+    } = req.body;
+    console.log(req.files); // This should log the file information
+    console.log("Fuke Unasdj ", fileInput);
+    console.log("request body: ", req.body);
+    const files = req.files as Express.Multer.File[] | undefined;
+
+
+    
+    const medicalRecord = await createMedicalRecord(
+      institutionId,
+      patientId,
+      title,
+      textInput,
+      typeOfRecord,
+      doctorId,
+      doctorFirstName,
+      doctorLastName,
+      language,
+      files,
     );
 
-    console.log("MEDICAL RECORD -----", medicalRecord);
+
     const encryptedMedicalRecord = await encrypt.encrypt(medicalRecord);
 
+    //!! Flow will be different, first upload to our system and then let it go to IPFS?
+
     const ipfsResultPaths = await uploadMedicalRecord(encryptedMedicalRecord);
-      console.log("ipfsResults ", ipfsResultPaths.imageCID, ipfsResultPaths.textCID);
+    console.log("ipfsResults ", ipfsResultPaths.imageCID, ipfsResultPaths.textCID);
 
     const diagnosisList: string[] = [ipfsResultPaths.textCID, ipfsResultPaths.imageCID];
 
     uploadMedicalHistory(patientId, diagnosisList)
 
-    res.status(201).send("Diagnosis added");
+    res.status(201).send("Medical Record added");
   } catch (error) {
-    console.error("Failed to add medical record:", error);
+    console.error("Failed to add Medical Record:", error);
     res.status(500).send("Internal Server Error");
   }
 });
