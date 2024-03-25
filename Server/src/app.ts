@@ -6,7 +6,7 @@ import medicalRecordRoutes from './routes/medicalRecords';
 const app: Application = express();
 
 // MongoDB Connection
-const mongoDBUri: string = process.env.MONGODB_URI || 'mongodb://localhost:27017/IMRS';
+const mongoDBUri: string = process.env.MONGODB_URI as string;
 mongoose.connect(mongoDBUri, {}).then(() => console.log('Successfully connected to MongoDB.'))
 .catch(err => console.error('MongoDB connection error:', err));
 
