@@ -1,5 +1,4 @@
-import React, { useState, useCallback } from "react";
-import { useDropzone } from "react-dropzone";
+import { useState } from "react";
 import {
   TextField,
   MenuItem,
@@ -9,83 +8,15 @@ import {
   Grid,
   Box,
   Select,
-  Paper,
 } from "@mui/material";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { styled } from "@mui/system";
+import FileUpload from "../../components/FileUpload"; // Adjust the path as necessary
 
 const AddRecordScreen = () => {
   const [recordType, setRecordType] = useState("");
   const [title, setTitle] = useState("");
   const [comment, setComment] = useState("");
   const [language, setLanguage] = useState("");
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-
-  const getColor = (props) => {
-    if (props.isDragAccept) {
-      return "#00e676";
-    }
-    if (props.isDragReject) {
-      return "#ff1744";
-    }
-    if (props.isDragActive) {
-      return "#2196f3";
-    }
-    return "#eeeeee";
-  };
-
-  const StyledDropzone = styled("div")(
-    ({ isDragAccept, isDragReject, isDragActive }) => `
-    border-width: 2px;
-    border-radius: 2px;
-    border-color: ${getColor({ isDragAccept, isDragReject, isDragActive })};
-    border-style: dashed;
-    background: white;
-    color: #bdbdbd;
-    outline: none;
-    transition: border .24s ease-in-out;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-  `
-  );
-
-  const onDrop = useCallback((acceptedFiles) => {
-    setUploadedFiles(
-      acceptedFiles.map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file),
-        })
-      )
-    );
-  }, []);
-
-  const {
-    getRootProps,
-    getInputProps,
-    isDragActive,
-    isDragAccept,
-    isDragReject,
-  } = useDropzone({
-    onDrop,
-    accept: {
-      "image/*": [".jpeg", ".png"],
-      "application/pdf": [],
-      "text/plain": [],
-      "application/msword": [],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        [],
-    },
-  });
-
-  const files = uploadedFiles.map((file) => (
-    <li key={file.path}>
-      {file.path} - {file.size} bytes
-    </li>
-  ));
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   return (
     <Container maxWidth="sm">
@@ -136,34 +67,11 @@ const AddRecordScreen = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <Paper
-              variant="outlined"
-              {...getRootProps()}
-              sx={{ p: 2, mb: 2, textAlign: "center" }}
-            >
-              <input {...getInputProps()} />
-              <StyledDropzone
-                isDragActive={isDragActive}
-                isDragAccept={isDragAccept}
-                isDragReject={isDragReject}
-              >
-                <CloudUploadIcon sx={{ fontSize: 42 }} />
-                <Typography variant="body2">
-                  Drag 'n' drop some files here, or click to select files
-                </Typography>
-                <em>
-                  (Only images, PDFs, DOCs, and TXT files will be accepted)
-                </em>
-              </StyledDropzone>
-              <aside>
-                <Typography variant="subtitle1" sx={{ mt: 2 }}>
-                  Accepted files
-                </Typography>
-                <ul>{files}</ul>
-              </aside>
-            </Paper>
+            <FileUpload
+              setUploadedFiles={setUploadedFiles}
+              uploadedFiles={uploadedFiles}
+            />
           </Grid>
-
           <Grid item xs={12}>
             <Select
               fullWidth

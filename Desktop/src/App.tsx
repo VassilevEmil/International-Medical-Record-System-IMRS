@@ -1,5 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import React from "react";
+import { Route, Routes } from "react-router-dom";
 import "./App.css";
 
 // Screen imports below
@@ -8,12 +7,10 @@ import HomeScreen from "./screens/home";
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomeScreen />} />
-        <Route path="/addRecord" element={<AddRecordScreen />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<HomeScreen />} />
+      <Route path="/addRecord" element={<AddRecordScreen />} />
+    </Routes>
   );
 };
 
