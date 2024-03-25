@@ -10,6 +10,7 @@ import {
   Select,
 } from "@mui/material";
 import FileUpload from "../../components/FileUpload"; // Adjust the path as necessary
+import UploadRecordService from "../../services/UploadRecordService"; // Adjust the path as necessary
 
 const AddRecordScreen = () => {
   const [recordType, setRecordType] = useState("");
@@ -17,6 +18,50 @@ const AddRecordScreen = () => {
   const [comment, setComment] = useState("");
   const [language, setLanguage] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadStatus, setUploadStatus] = useState("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleUpload = async () => {
+    setUploadStatus("pending");
+    setErrorMessage("");
+
+    try {
+      const formData = new FormData();
+      formData.append("institutionId", "#4r4523ed");
+      formData.append("patientId", "233");
+      formData.append("title", title);
+      formData.append("textInput", comment);
+      uploadedFiles.forEach((file) => {
+        formData.append("fileInput", file);
+      });
+      formData.append("typeOfRecord", recordType);
+      formData.append("doctorId", "2d2423s");
+      formData.append("doctorFirstName", "Simas");
+      formData.append("doctorLastName", "Simukas");
+      formData.append("language", language);
+
+      const response = await UploadRecordService.uploadRecord(formData);
+
+      if (response.success) {
+        console.log(response.message, response.data);
+        setUploadStatus("succeeded");
+      } else {
+        console.error(response.message);
+        setUploadStatus("failed");
+        setErrorMessage(response.message);
+      }
+    } catch (error) {
+      setUploadStatus("failed");
+      setErrorMessage(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+    }
+  };
+
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // Prevent the default form submission behavior
+    handleUpload();
+  };
 
   return (
     <Container maxWidth="sm">
@@ -28,7 +73,12 @@ const AddRecordScreen = () => {
       >
         Add Record
       </Typography>
-      <Box component="form" noValidate autoComplete="off">
+      <Box
+        component="form"
+        noValidate
+        autoComplete="off"
+        onSubmit={handleFormSubmit}
+      >
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Select
@@ -90,12 +140,17 @@ const AddRecordScreen = () => {
             </Select>
           </Grid>
           <Grid item xs={12}>
-            <Button variant="contained" fullWidth>
+            <Button variant="contained" fullWidth type="submit">
               Add Record
             </Button>
           </Grid>
         </Grid>
       </Box>
+      {errorMessage && (
+        <Typography color="error" sx={{ mt: 2 }}>
+          Error: {errorMessage}
+        </Typography>
+      )}
     </Container>
   );
 };

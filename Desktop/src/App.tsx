@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import "./css/App.css";
+import "./App.css";
 
 // Screen imports below
 import AddRecordScreen from "./screens/AddRecord/addRecordScreen";
