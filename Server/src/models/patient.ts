@@ -1,14 +1,11 @@
-import { Doctor } from "./doctors";
-
 export interface Patient {
-    id: number;
-    username: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-    sex: 'M' | 'F';    
-    age: number;
-    mainDoctor: Doctor;
+    id: string,
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    address: string,
+    dateOfBirth: Date,
+    age: number,
+    phoneNumber: string
 }
-
-export const patients: Patient[] = [];

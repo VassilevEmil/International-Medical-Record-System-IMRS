@@ -1,12 +1,17 @@
+import { Language, TypeOfRecord } from "../enums"
+import { Institution } from "./institution"
+
 export interface MedicalRecord {
-  id: string;
-  patientId: string;
-  doctorFirstName: string;
-  doctorLastName: string;
-  sendingInstitution: string;
-  dateCreated: Date;
-  diagnosisName: string;
-  contentText: string;
-  contentImage?: string; //Assuming we encrypt using AES, expect to receive binary
-  language: "EN" | "DK";
+  id: string,
+  patientId: string,
+  doctorId: string,
+  doctorFirstName: string,
+  doctorLastName: string,
+  institution: Institution,
+  timeStamp: Date,
+  language: Language,
+  title: string,
+  text: string[],
+  files?: Express.Multer.File[] ,
+  typeOfRecord: TypeOfRecord
 }
