@@ -3,9 +3,10 @@
     <domain-config>
         <!-- Localhost config is NEEDED from react-native for the bundling to work  -->
         <domain-config cleartextTrafficPermitted="true">
-            <domain includeSubdomains="true">127.0.0.1</domain>
-            <domain includeSubdomains="true">10.0.0.1</domain>
-            <domain includeSubdomains="true">localhost</domain>
+            <domain includeSubdomains="false">127.0.0.1</domain>
+            <domain includeSubdomains="false">10.0.0.1</domain>
+            <domain includeSubdomains="false">localhost</domain>
+            <base-config cleartextTrafficPermitted="true"/>
         </domain-config>
 
         <domain includeSubdomains="true">my.domain.com</domain>
