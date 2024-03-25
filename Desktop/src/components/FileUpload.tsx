@@ -60,12 +60,10 @@ const FileUpload: FC<FileUploadProps> = ({
   const dropzoneOptions: DropzoneOptions = {
     onDrop,
     accept: {
-      "image/*": [".jpeg", ".png"],
+      "image/*": [".jpeg", ".png", ".svg"],
       "application/pdf": [],
-      "text/plain": [],
-      "application/msword": [],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        [],
+      // "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+      // [],
     },
   };
 
@@ -94,7 +92,7 @@ const FileUpload: FC<FileUploadProps> = ({
           Drag 'n' drop some files here, or click to select files
         </Typography>
         <Typography variant="caption">
-          (Only images, PDFs, DOCs, and TXT files will be accepted)
+          (Only images (svg, jpeg, png) and PDF files will be accepted)
         </Typography>
       </StyledDropzone>
       <List>
