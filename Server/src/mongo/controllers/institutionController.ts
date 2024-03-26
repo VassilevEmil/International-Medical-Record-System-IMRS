@@ -1,6 +1,7 @@
 import { error } from "console";
 import { Institution } from "../../models/institution";
 import InstitutionModel from "../models/institution";
+import { Country } from "../../enums";
 
 export async function addInstitution(institutionData: Institution): Promise<void> {
     try {
@@ -15,9 +16,21 @@ export async function addInstitution(institutionData: Institution): Promise<void
 
 export async function getInstitutionById(institutionId: string): Promise<Institution> {
     try {
-        const institution = await InstitutionModel.findOne({ institutionId: institutionId });
+        let institution: Institution | null = await InstitutionModel.findOne({ institutionId: institutionId });
         if (!institution) {
-            throw error;
+            institution = {
+                id: "123",
+                institutionId: institutionId,
+                name: "Test Hospital",
+                country: Country.Denmark,
+                address: "WhateverTown 101",
+              };
+
+            addInstitution(institution);
+            console.log("Institution not found but created", institution);
+
+            return institution;
+            //throw error;
         }
         console.log("Institution found:", institution);
 
