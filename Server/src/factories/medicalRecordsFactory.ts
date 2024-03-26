@@ -2,19 +2,22 @@ import { error } from "console";
 import { Country, Language, TypeOfRecord } from "../enums";
 import { Institution } from "../models/institution";
 import { MedicalRecord } from "../models/medicalRecord";
-import { addInstitution, getInstitutionById } from "../mongo/controllers/institutionController";
+import {
+  addInstitution,
+  getInstitutionById,
+} from "../mongo/controllers/institutionController";
 
 export async function createMedicalRecord(
-    institutionId: string,
-    patientId: string,
-    title: string,
-    textInput: string[],
-    typeOfRecord: TypeOfRecord,
-    doctorId: string,
-    doctorFirstName: string,
-    doctorLastName: string,
-    language: Language,
-    fileInput?: Express.Multer.File[],
+  institutionId: string,
+  patientId: string,
+  title: string,
+  textInput: string[],
+  typeOfRecord: TypeOfRecord,
+  doctorId: string,
+  doctorFirstName: string,
+  doctorLastName: string,
+  language: Language,
+  fileInput?: Express.Multer.File[]
 ): Promise<MedicalRecord> {
   const institution = await getInstitution(institutionId);
 
@@ -30,7 +33,7 @@ export async function createMedicalRecord(
     title: title,
     text: textInput,
     files: fileInput || undefined,
-    typeOfRecord: typeOfRecord
+    typeOfRecord: typeOfRecord,
   };
 
   return medicalRecord;
@@ -41,27 +44,25 @@ function generateId(): string {
 }
 
 async function getInstitution(institutionId: string): Promise<Institution> {
-    try {
-      const institution = await getInstitutionById(institutionId);
-      if(!institution){
-        //!! CHANGE LATER
+  try {
+    const institution = await getInstitutionById(institutionId);
+    if (!institution) {
+      //!! CHANGE LATER
 
-        const institution: Institution = {
-          id: "123",
-          institutionId: institutionId,
-          name: "Test Hospital",
-          country: Country.Denmark,
-          address: "WhateverTown 101",
-        }
+      const institution: Institution = {
+        id: "123",
+        institutionId: institutionId,
+        name: "Test Hospital",
+        country: Country.Denmark,
+        address: "WhateverTown 101",
+      };
 
-        addInstitution(institution);
+      addInstitution(institution);
 
-        //throw error;
-      }
-      return institution;
+      //throw error;
     }
-    catch (error) {
-      throw `Institution not found with id: ${institutionId} `;
-    }
-
+    return institution;
+  } catch (error) {
+    throw `Institution not found with id: ${institutionId} `;
+  }
 }
