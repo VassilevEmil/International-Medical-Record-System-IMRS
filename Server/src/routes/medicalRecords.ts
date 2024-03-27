@@ -80,16 +80,28 @@ router.post(
   }
 );
 
-// Get all Medical Histories
+// Get all Medical Histories + pagination
 router.get("/allMedicalHistories", async (req: Request, res: Response) => {
-  const { patientId } = req.query;
+  const { patientId, page, limit } = req.query;
+
+  console.log(" patientID: ", patientId);
 
   if (!patientId || typeof patientId !== "string") {
     return res.status(400).send("Patient ID is required and must be a string.");
   }
 
+  const pageNumber = typeof page === "string" ? parseInt(page, 10) : undefined;
+  const limitNumber =
+    typeof limit === "string" ? parseInt(limit, 10) : undefined;
+
   try {
-    const medicalHistories = await getAllMedicalHistoriesByPatientId(patientId);
+    const medicalHistories = await getAllMedicalHistoriesByPatientId(
+      patientId,
+      pageNumber,
+      limitNumber
+    );
+    console.log("Medical histories: ", medicalHistories);
+
     if (medicalHistories && medicalHistories.length > 0) {
       res.status(200).json(medicalHistories);
     } else {

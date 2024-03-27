@@ -1,34 +1,41 @@
-import 'dotenv/config';
-import express, { Application, Request, Response, NextFunction } from 'express';
-import mongoose from 'mongoose';
-import medicalRecordRoutes from './routes/medicalRecords';
+import "dotenv/config";
+import express, { Application, Request, Response, NextFunction } from "express";
+import mongoose from "mongoose";
+import medicalRecordRoutes from "./routes/medicalRecords";
+import { log } from "console";
 
 const app: Application = express();
 
 // MongoDB Connection
 const mongoDBUri: string = process.env.MONGODB_URI as string;
-mongoose.connect(mongoDBUri, {}).then(() => console.log('Successfully connected to MongoDB.'))
-.catch(err => console.error('MongoDB connection error:', err));
+mongoose
+  .connect(mongoDBUri, {})
+  .then(() => console.log("Successfully connected to MongoDB."))
+  .catch((err) => console.error("MongoDB connection error:", err));
+console.log("mongo string: ", process.env.MONGODB_URI);
 
 // Middleware
 app.use(express.json());
 
 // Enhanced Manual CORS Middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
-    res.header('Access-Control-Allow-Origin', '*'); // Allow all origins
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS'); // Allowed methods
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization'); // Allowed headers
-    
-    // Handle pre-flight requests for CORS
-    if (req.method === 'OPTIONS') {
-        res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
-        return res.status(200).json({});
-    }
+  res.header("Access-Control-Allow-Origin", "*"); // Allow all origins
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS"); // Allowed methods
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  ); // Allowed headers
 
-    next();
+  // Handle pre-flight requests for CORS
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
+    return res.status(200).json({});
+  }
+
+  next();
 });
 
 // Routes
-app.use('/medicalRecords', medicalRecordRoutes);
+app.use("/medicalRecords", medicalRecordRoutes);
 
 export default app;
