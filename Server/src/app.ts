@@ -1,41 +1,25 @@
-import "dotenv/config";
-import express, { Application, Request, Response, NextFunction } from "express";
-import mongoose from "mongoose";
-import medicalRecordRoutes from "./routes/medicalRecords";
-import { log } from "console";
+import 'dotenv/config';
+import express, { Application } from 'express';
+import { connectToDatabase } from './config/database';
+import { setupHttpsServer } from './config/httpsServer';
+import { corsMiddleware } from './middlewares/corsMiddleware';
+import medicalRecordRoutes from './routes/medicalRecords';
 
 const app: Application = express();
 
-// MongoDB Connection
-const mongoDBUri: string = process.env.MONGODB_URI as string;
-mongoose
-  .connect(mongoDBUri, {})
-  .then(() => console.log("Successfully connected to MongoDB."))
-  .catch((err) => console.error("MongoDB connection error:", err));
-console.log("mongo string: ", process.env.MONGODB_URI);
+// Connect to MongoDB
+connectToDatabase();
 
-// Middleware
+// Middlewares
 app.use(express.json());
+app.use(corsMiddleware);
 
-// Enhanced Manual CORS Middleware
-app.use((req: Request, res: Response, next: NextFunction) => {
-  res.header("Access-Control-Allow-Origin", "*"); // Allow all origins
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS"); // Allowed methods
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  ); // Allowed headers
-
-  // Handle pre-flight requests for CORS
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
-    return res.status(200).json({});
-  }
-
-  next();
-});
 
 // Routes
-app.use("/medicalRecords", medicalRecordRoutes);
+app.use('/medicalRecords', medicalRecordRoutes);
 
-export default app;
+// Route using SSL/mTLS
+//app.use('/medicalRecords', validateClientCertificate, medicalRecordRoutes);
+
+// Setup HTTPS Server
+setupHttpsServer(app);

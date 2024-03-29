@@ -26,15 +26,20 @@ export async function getInstitutionById(institutionId: string): Promise<Institu
                 address: "WhateverTown 101",
               };
 
-            addInstitution(institution);
-            console.log("Institution not found but created", institution);
-
+            try {
+                // Attempt to add the institution
+                await addInstitution(institution);
+                console.log("Institution not found but created", institution);
+            } catch (error) {
+                console.error("Error adding the institution:", error);
+                // Log the error and continue without throwing it
+            }
+            
             return institution;
-            //throw error;
         }
         console.log("Institution found:", institution);
 
-        return institution;
+        return institution; 
     } catch (error) {
         console.error("Error finding the institution:", error);
         throw error;
