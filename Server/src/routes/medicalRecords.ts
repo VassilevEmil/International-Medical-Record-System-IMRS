@@ -36,9 +36,7 @@ router.post(
         doctorLastName,
         language,
       } = req.body;
-      console.log(" these are the files", req.files); // This should log the file information
-      console.log("Fuke Unasdj ", fileInput);
-      console.log("request body: ", req.body);
+
       const files = req.files as Express.Multer.File[] | undefined;
 
       const medicalRecord = await createMedicalRecord(
