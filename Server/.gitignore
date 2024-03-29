@@ -27,3 +27,6 @@ Thumbs.db
 
 # Optional: TypeScript cache
 *.tsbuildinfo
+
+# SSL Certificates
+certs/
