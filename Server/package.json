@@ -5,7 +5,9 @@
   "main": "app.ts",
   "scripts": {
     "start": "nodemon --watch src --ext ts,json --exec ts-node src/app.ts",
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc",
+    "populate": "npm run build && node build/testDataPopulation/dataPopulationForTesting.js" 
   },
   "keywords": [],
   "author": "",
