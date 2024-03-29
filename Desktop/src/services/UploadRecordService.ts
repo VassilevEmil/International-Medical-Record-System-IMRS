@@ -6,7 +6,7 @@ interface UploadResponse {
 }
 
 export default class UploadRecordService {
-  private static apiUrl = "http://localhost:3000/medicalRecords/";
+  private static apiUrl = "https://localhost:3000/medicalRecords/";
 
   static async uploadRecord(formData: FormData): Promise<UploadResponse> {
     try {
@@ -26,9 +26,10 @@ export default class UploadRecordService {
         };
       } else {
         // HTTP errors
+        const text = await response.text(); // Ensure you await the text
         return {
           success: false,
-          message: `Server responded with status: ${response.status}`,
+          message: `Server responded with status: ${response.status}: '${text}'`,
         };
       }
     } catch (error) {
