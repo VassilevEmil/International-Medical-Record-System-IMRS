@@ -46,7 +46,21 @@ function generateId(): string {
 async function getInstitution(institutionId: string): Promise<Institution> {
   try {
     const institution = await getInstitutionById(institutionId);
+    if (!institution) {
+      //!! CHANGE LATER
 
+      const institution: Institution = {
+        id: "123",
+        institutionId: institutionId,
+        name: "Test Hospital",
+        country: Country.Denmark,
+        address: "WhateverTown 101",
+      };
+
+      addInstitution(institution);
+
+      //throw error;
+    }
     return institution;
   } catch (error) {
     throw `Institution not found with id: ${institutionId} `;

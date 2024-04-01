@@ -2,12 +2,15 @@ import MedicalHistoryModel from "../models/medicalHistory";
 
 export async function uploadMedicalHistory(
   patientId: string,
-  diagnosisList: string[]
+  diagnosisList: string[],
+  title: string,
+  fileInput?: Express.Multer.File[]
 ) {
   try {
     const newMedicalHistory = new MedicalHistoryModel({
       patientId,
       diagnosisList,
+      title,
       dateCreated: new Date(),
     });
     await newMedicalHistory.save();

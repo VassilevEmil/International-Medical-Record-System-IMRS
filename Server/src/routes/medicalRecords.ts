@@ -68,9 +68,12 @@ router.post(
       const diagnosisList: string[] = [
         ipfsResultPaths.textCID,
         ipfsResultPaths.imageCID,
+        // added to see if it makes  any difference when we add more fields here
+        title.toLowerCase(),
+        // files,
       ];
 
-      uploadMedicalHistory(patientId, diagnosisList);
+      uploadMedicalHistory(patientId, diagnosisList, title);
 
       res.status(201).send("Medical Record added");
     } catch (error) {
