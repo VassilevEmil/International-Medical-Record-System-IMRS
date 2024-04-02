@@ -1,21 +1,24 @@
-import axios from 'axios';
-import fs from 'fs';
+import axios from "axios";
+import fs from "fs";
 import MedicalRecordModel from "../mongo/models/medicalRecord";
 import { MedicalRecord } from "../models/medicalRecord";
+import { GridFSBucket } from "mongodb";
+import mongoose from "mongoose";
+import { Readable } from "stream";
 
 async function pinJSONToIPFS(json: any) {
-  const url = 'https://api.pinata.cloud/pinning/pinJSONToIPFS';
+  const url = "https://api.pinata.cloud/pinning/pinJSONToIPFS";
   try {
     const response = await axios.post(url, json, {
       headers: {
-        'Content-Type': 'application/json',
-        'pinata_api_key': process.env.PINATA_API_KEY,
-        'pinata_secret_api_key': process.env.PINATA_SECRET_API_KEY,
-      }
+        "Content-Type": "application/json",
+        pinata_api_key: process.env.PINATA_API_KEY,
+        pinata_secret_api_key: process.env.PINATA_SECRET_API_KEY,
+      },
     });
     return response.data;
   } catch (error) {
-    console.error('Error uploading JSON to Pinata:', error);
+    console.error("Error uploading JSON to Pinata:", error);
     throw error;
   }
 }
@@ -23,29 +26,36 @@ async function pinJSONToIPFS(json: any) {
 export async function uploadMedicalRecord(medicalRecord: MedicalRecord) {
   try {
     const recordWithoutImage = { ...medicalRecord, contentImage: undefined };
-    
+
     const textResult = await pinJSONToIPFS(recordWithoutImage);
     console.log(`Text data uploaded: ipfs://${textResult.IpfsHash}`);
 
     // Assuming imagePath logic is implemented here
 
-    // Save the medical record to MongoDB
-    try {
-      const newMedicalRecord = new MedicalRecordModel({
-        ...medicalRecord,
-        textCID: `ipfs://${textResult.IpfsHash}`,
-        // imageCID should be added here after implementing image upload
-      });
-      await newMedicalRecord.save();
-      console.log("Uploaded to database");
-    } catch (error) {
-      console.error("Failed to upload to database:", error);
-      throw error;
+    let imageCID = "";
+    if (medicalRecord.files && medicalRecord.files.length > 0) {
+      const file = medicalRecord.files[0]; // Assuming only one file is uploaded
+      const bucket = new GridFSBucket(mongoose.connection.db);
+      const uploadStream = bucket.openUploadStream(file.originalname);
+      const fileStream = Readable.from(file.buffer);
+      await fileStream.pipe(uploadStream);
+
+      imageCID = `mongodb://${uploadStream.id}`;
+      console.log(`Image uploaded to MongoDB: ${imageCID}`);
     }
 
-    return { textCID: `ipfs://${textResult.IpfsHash}`, imageCID: "ipfs://<fake_image_path>" };
+    // Save the medical record to MongoDB
+    const newMedicalRecord = new MedicalRecordModel({
+      ...medicalRecord,
+      textCID: `ipfs://${textResult.IpfsHash}`,
+      imageCID: imageCID,
+    });
+    await newMedicalRecord.save();
+    console.log("Uploaded to database");
+
+    return { textCID: `ipfs://${textResult.IpfsHash}`, imageCID: imageCID };
   } catch (error) {
-    console.error("Error uploading to Pinata:", error);
+    console.error("Error uploading medical record:", error);
     throw error;
   }
 }
