@@ -54,6 +54,8 @@ router.post(
 
       const encryptedMedicalRecord = await encrypt.encrypt(medicalRecord);
 
+      console.log("Medical recoooooooord::  ", medicalRecord);
+
       //!! Flow will be different, first upload to our system and then let it go to IPFS?
 
       const ipfsResultPaths = await uploadMedicalRecord(encryptedMedicalRecord);
