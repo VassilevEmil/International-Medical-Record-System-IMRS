@@ -72,49 +72,49 @@ export async function uploadMedicalRecord(medicalRecord: MedicalRecord) {
 }
 
 // for testing purposes, need to implement this elsewhere i guess
-export async function fetchFileFromMongoDB(fileId: string) {
-  await connectToDatabase();
-  const bucket = new GridFSBucket(mongoose.connection.db);
+// export async function fetchFileFromMongoDB(fileId: string) {
+//   await connectToDatabase();
+//   const bucket = new GridFSBucket(mongoose.connection.db);
 
-  try {
-    const fileObjectId = new ObjectId(fileId);
-    const downloadStream = bucket.openDownloadStream(fileObjectId);
+//   try {
+//     const fileObjectId = new ObjectId(fileId);
+//     const downloadStream = bucket.openDownloadStream(fileObjectId);
 
-    const chunks: any[] = [];
-    downloadStream.on("data", (chunk) => {
-      chunks.push(chunk);
-    });
+//     const chunks: any[] = [];
+//     downloadStream.on("data", (chunk) => {
+//       chunks.push(chunk);
+//     });
 
-    downloadStream.on("end", () => {
-      const buffer = Buffer.concat(chunks);
-      // At this point, 'buffer' contains the entire file content
-      // You can handle this buffer according to your application's needs
-      // For example, you can serve it to the client-side application
-      // Or you can save it to the server's filesystem
+//     downloadStream.on("end", () => {
+//       const buffer = Buffer.concat(chunks);
+//       // At this point, 'buffer' contains the entire file content
+//       // You can handle this buffer according to your application's needs
+//       // For example, you can serve it to the client-side application
+//       // Or you can save it to the server's filesystem
 
-      // If serving to the client-side, you can send the buffer in the response
-      // res.send(buffer);
+//       // If serving to the client-side, you can send the buffer in the response
+//       // res.send(buffer);
 
-      // If saving to the server's filesystem, you can write the buffer to a file
-      // fs.writeFileSync('path/to/save/file.pdf', buffer);
-    });
+//       // If saving to the server's filesystem, you can write the buffer to a file
+//       // fs.writeFileSync('path/to/save/file.pdf', buffer);
+//     });
 
-    downloadStream.on("error", (error) => {
-      console.error("Failed to fetch file from MongoDB:", error);
-    });
-  } catch (error) {
-    console.error("Failed to fetch file from MongoDB:", error);
-  }
-}
+//     downloadStream.on("error", (error) => {
+//       console.error("Failed to fetch file from MongoDB:", error);
+//     });
+//   } catch (error) {
+//     console.error("Failed to fetch file from MongoDB:", error);
+//   }
+// }
 
-// Example usage:
-const fileId = "660d1513c52c1fe7a24351c3"; // Replace with the actual file ID
-fetchFileFromMongoDB(fileId)
-  .then((imageDataUrl) => {
-    // for displaying the photo in the app
+// // Example usage:
+// const fileId = "660d1513c52c1fe7a24351c3"; // Replace with the actual file ID
+// fetchFileFromMongoDB(fileId)
+//   .then((imageDataUrl) => {
+//     // for displaying the photo in the app
 
-    console.log("Successfully fetched photo from MongoDB:", imageDataUrl);
-  })
-  .catch((error) => {
-    console.error("Failed to fetch photo from MongoDB:", error);
-  });
+//     console.log("Successfully fetched photo from MongoDB:", imageDataUrl);
+//   })
+//   .catch((error) => {
+//     console.error("Failed to fetch photo from MongoDB:", error);
+//   });
