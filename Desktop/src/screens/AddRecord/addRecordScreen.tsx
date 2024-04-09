@@ -9,8 +9,8 @@ import {
   Box,
   Select,
 } from "@mui/material";
-import FileUpload from "../../components/FileUpload"; // Adjust the path as necessary
-import UploadRecordService from "../../services/UploadRecordService"; // Adjust the path as necessary
+import FileUpload from "../../components/FileUpload"; 
+import UploadRecordService from "../../services/UploadRecordService";
 
 const AddRecordScreen = () => {
   const [recordType, setRecordType] = useState("");
@@ -59,7 +59,7 @@ const AddRecordScreen = () => {
   };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // Prevent the default form submission behavior
+    event.preventDefault(); 
     handleUpload();
   };
 
