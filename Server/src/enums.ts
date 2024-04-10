@@ -10,6 +10,7 @@ export enum TypeOfRecord {
     GeneralVisit = "GENERAL_VISIT",
     Bloodwork = "BLOODWORK",
     MedicalImaging = "MEDICAL_IMAGING",
+    Other = "Other",
 }
 
 export enum Country {

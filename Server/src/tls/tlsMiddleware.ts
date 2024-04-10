@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { TLSSocket } from 'tls';
 import crypto from 'crypto';
-import { isFingerprintValid } from '../mongo/controllers/SSLcertificatesController';
+import { isFingerprintValid } from '../mongo/controllers/tlsCertificatesController';
 
 export async function validateClientCertificate(req: Request, res: Response, next: NextFunction) {
     if (req.socket instanceof TLSSocket) {
@@ -26,7 +26,7 @@ export async function validateClientCertificate(req: Request, res: Response, nex
                 res.status(500).send('Internal Server Error');
             }
         } else {
-            res.status(400).send('Client SSL certificate required.');
+            res.status(400).send('Client TLS certificate required.');
         }
     } else {
         res.status(403).send('A secure TLS connection is required.');

@@ -6,6 +6,7 @@ import {
   addInstitution,
   getInstitutionById,
 } from "../mongo/controllers/institutionController";
+import { FileInfo } from "../models/fileInfo";
 
 export async function createMedicalRecord(
   institutionId: string,
@@ -17,7 +18,8 @@ export async function createMedicalRecord(
   doctorFirstName: string,
   doctorLastName: string,
   language: Language,
-  fileInput?: Express.Multer.File[]
+  fileInput: FileInfo[],
+  //fileInput?: Express.Multer.File[]
 ): Promise<MedicalRecord> {
   const institution = await getInstitution(institutionId);
 
@@ -39,7 +41,7 @@ export async function createMedicalRecord(
   return medicalRecord;
 }
 
-function generateId(): string {
+export function generateId(): string {
   return Math.random().toString(36).substring(2, 15); // Random ass id
 }
 

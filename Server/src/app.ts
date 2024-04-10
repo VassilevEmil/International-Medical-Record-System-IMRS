@@ -18,7 +18,7 @@ app.use(corsMiddleware);
 // Routes
 app.use('/medicalRecords', medicalRecordRoutes);
 
-// Route using SSL/mTLS
+// Route using TLS/mTLS
 //app.use('/medicalRecords', validateClientCertificate, medicalRecordRoutes);
 
 // Setup HTTPS Server
