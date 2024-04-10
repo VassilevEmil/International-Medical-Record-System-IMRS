@@ -9,7 +9,7 @@ import { log } from "console";
 import { ObjectId } from "mongodb";
 import { connectToDatabase } from "../config/database";
 
-async function pinJSONToIPFS(json: any) {
+export async function pinJSONToIPFS(json: any) {
   const url = "https://api.pinata.cloud/pinning/pinJSONToIPFS";
   try {
     const response = await axios.post(url, json, {
