@@ -27,20 +27,17 @@ describe("Medical Record Model", () => {
     const medicalRecord = new MedicalRecordModel(medicalRecordData);
     await medicalRecord.save();
 
-    const foundMedicalRecord = await MedicalRecordModel.findOne({
-      /* search criteria */
-    });
+    const foundMedicalRecord = await MedicalRecordModel.findOne({});
 
     // Assert that foundMedicalRecord is not null
     assert.strictEqual(foundMedicalRecord !== null, true);
-    // Additional assertions as needed
   });
 });
 
 // Mock environment variables
-process.env.PINATA_API_KEY = "24964e16bf1d30252910";
+process.env.PINATA_API_KEY = "24964e16bf0250";
 process.env.PINATA_SECRET_API_KEY =
-  "9a30035ba0f9add5b0c970fa4c86f16fee0d4fe578b11eb97e1ae6446809e183";
+  "9a30035ba0f9add5b0c970fa4c86f16fee0d4fe578b97e1ae64e183";
 
 // Mock axios post method
 jest.mock("axios");
