@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema, Model } from 'mongoose';
+import mongoose, { Document, Schema, Model } from "mongoose";
 
 export interface MedicalRecordModelInterface extends Document {
   doctorFirstName: string;
@@ -43,9 +43,13 @@ export const MedicalRecordSchema: Schema = new mongoose.Schema({
   patientId: {
     type: String,
     required: false,
-  }
+  },
 });
 
-const MedicalRecordModel: Model<MedicalRecordModelInterface> = mongoose.model<MedicalRecordModelInterface>('MedicalRecord', MedicalRecordSchema);
+export const MedicalRecordModel: Model<MedicalRecordModelInterface> =
+  mongoose.model<MedicalRecordModelInterface>(
+    "MedicalRecord",
+    MedicalRecordSchema
+  );
 
 export default MedicalRecordModel;
