@@ -3,7 +3,7 @@ import { Country, Language, TypeOfRecord } from "../enums";
 import { Institution } from "../models/institution";
 import { MedicalRecord } from "../models/medicalRecord";
 import { Patient } from "../models/patient";
-import { addSSLCertificate } from "../mongo/controllers/SSLcertificatesController";
+import { addTLSCertificate } from "../mongo/controllers/TLScertificatesController";
 import { addInstitution } from "../mongo/controllers/institutionController";
 import mongoose from 'mongoose';
 
@@ -30,8 +30,8 @@ async function dataPopulationForTesting(){
     };
     await addInstitution(institution);
 
-    // SSL certificates
-    await addSSLCertificate(process.env.TEST_FINGERPRINT_SSL as string, institution);
+    // TLS certificates
+    await addTLSCertificate(process.env.TEST_FINGERPRINT_TLS as string, institution);
 
 
     // Patients

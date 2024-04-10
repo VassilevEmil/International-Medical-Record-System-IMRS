@@ -1,4 +1,5 @@
 import { Language, TypeOfRecord } from "../enums"
+import { FileInfo } from "./fileInfo"
 import { Institution } from "./institution"
 
 export interface MedicalRecord {
@@ -12,6 +13,6 @@ export interface MedicalRecord {
   language: Language,
   title: string,
   text: string[],
-  files?: Express.Multer.File[] ,
+  files?: FileInfo[],
   typeOfRecord: TypeOfRecord
 }

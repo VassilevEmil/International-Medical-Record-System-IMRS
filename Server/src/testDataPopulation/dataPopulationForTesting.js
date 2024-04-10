@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
 const enums_1 = require("../src/enums");
-const SSLcertificatesController_1 = require("../src/mongo/controllers/SSLcertificatesController");
+const TLScertificatesController_1 = require("../src/mongo/controllers/TLScertificatesController");
 const institutionController_1 = require("../src/mongo/controllers/institutionController");
 const mongoose_1 = __importDefault(require("mongoose"));
 const mongoDBUri = process.env.MONGODB_URI;
@@ -31,8 +31,8 @@ function dataPopulationForTesting() {
             address: "Horsens, Sundvej 30",
         };
         yield (0, institutionController_1.addInstitution)(institution);
-        // SSL certificates
-        yield (0, SSLcertificatesController_1.addSSLCertificate)(process.env.TEST_FINGERPRINT_SSL, institution);
+        // TLS certificates
+        yield (0, TLScertificatesController_1.addTLSCertificate)(process.env.TEST_FINGERPRINT_TLS, institution);
         // Patients
         const patient1 = {
             id: "100",

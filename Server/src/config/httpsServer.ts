@@ -8,7 +8,7 @@ export const setupHttpsServer = (app: Application) => {
     const certificatePath = process.env.CERTIFICATE_PATH || './certs/certificate.crt';  
 
     if (!fs.existsSync(privateKeyPath) || !fs.existsSync(certificatePath)) {
-        console.error('SSL certificate or key not found. Ensure server.key and server.cert are present.');
+        console.error('TLS certificate or key not found. Ensure server.key and server.cert are present.');
         process.exit(1);
     }
 

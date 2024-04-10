@@ -1,12 +1,12 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 import { InstitutionInterface, InstitutionSchema } from './institution';
 
-export interface SSLcertificatesInterface extends Document {
+export interface TLScertificatesInterface extends Document {
     fingerPrintSHA256: string,
     institution: InstitutionInterface
 }
 
-export const SSLcertificatesSchema: Schema = new mongoose.Schema({
+export const TLScertificatesSchema: Schema = new mongoose.Schema({
     fingerPrintSHA256: {
         type: String,
         required: true
@@ -17,6 +17,6 @@ export const SSLcertificatesSchema: Schema = new mongoose.Schema({
     }
 });
 
-const SSLcertificatesModel: Model<SSLcertificatesInterface> = mongoose.model<SSLcertificatesInterface>('SSLcertificates', SSLcertificatesSchema);
+const TLScertificatesModel: Model<TLScertificatesInterface> = mongoose.model<TLScertificatesInterface>('TLScertificates', TLScertificatesSchema);
 
-export default SSLcertificatesModel;
+export default TLScertificatesModel;

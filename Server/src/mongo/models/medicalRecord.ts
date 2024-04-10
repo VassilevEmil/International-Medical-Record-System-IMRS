@@ -1,48 +1,49 @@
 import mongoose, { Document, Schema, Model } from "mongoose";
+import { Institution } from "../../models/institution";
+import { InstitutionSchema } from "./institution";
+import { TypeOfRecord } from "../../enums";
+import { FileInfo } from "../../models/fileInfo";
+import { FileInfoSchema } from "./fileInfo";
 
 export interface MedicalRecordModelInterface extends Document {
-  doctorFirstName: string;
-  doctorLastName: string;
-  sendingInstitution: string;
-  diagnosisName: string;
-  contentText: string;
-  contentImage: string;
-  language: string;
+  id: string;
   patientId: string;
+  institution: Institution;
+  typeOfRecord: TypeOfRecord;
+  medicalRecordHash: string;
+  fileHash?: FileInfo[];
+  timeStamp: Date;
 }
 
 export const MedicalRecordSchema: Schema = new mongoose.Schema({
-  doctorFirstName: {
+  id: {
     type: String,
-    required: false,
-  },
-  doctorLastName: {
-    type: String,
-    required: false,
-  },
-  sendingInstitution: {
-    type: String,
-    required: false,
-  },
-  diagnosisName: {
-    type: String,
-    required: false,
-  },
-  contentText: {
-    type: String,
-    required: false,
-  },
-  contentImage: {
-    type: String,
-    required: false,
-  },
-  language: {
-    type: String,
-    required: false,
+    required: true,
   },
   patientId: {
     type: String,
+    required: true,
+  },
+  institution: {
+    type: InstitutionSchema,
+    required: true,
+  },
+  typeOfRecord: {
+    type: String,
+    enum: Object.values(TypeOfRecord),
     required: false,
+  },
+  medicalRecordHash: {
+    type: String,
+    required: true,
+  },
+  fileHash: [{
+    type: FileInfoSchema,
+    required: false,
+  }],
+  timeStamp: {
+    type: Date,
+    required: true,
   },
 });
 
