@@ -4,6 +4,8 @@ import { connectToDatabase } from './config/database';
 import { setupHttpsServer } from './config/httpsServer';
 import { corsMiddleware } from './middlewares/corsMiddleware';
 import medicalRecordRoutes from './routes/medicalRecords';
+import cors from 'cors'; // Import the cors middleware
+
 
 const app: Application = express();
 
@@ -12,7 +14,7 @@ connectToDatabase();
 
 // Middlewares
 app.use(express.json());
-app.use(corsMiddleware);
+app.use(cors());
 
 
 // Routes

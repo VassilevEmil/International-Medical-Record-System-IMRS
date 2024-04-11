@@ -13,6 +13,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import GetRecordsService from "../../services/GetRecordsService";
+import GetFileService from "../../services/GetFileService";
 
 const ViewRecordsScreen = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,7 +42,88 @@ const ViewRecordsScreen = () => {
     },
   ]);
 
+  interface FileContent {
+    url: string | undefined;
+    mimeType: string | undefined; // hould match the type expected in GetFileResponse
+  }
+
+  //GetFile LOCAL state hook
+  const [fileContent, setFileContent] = useState<FileContent>({
+    url: "",
+    mimeType: undefined,
+  });
+
   const navigate = useNavigate();
+
+  const fetchRecords = async () => {
+    try {
+      const response = await GetRecordsService.getRecords();
+      if (response.success) {
+        console.log(response.data);
+      } else {
+        console.log(response.message);
+      }
+    } catch (error) {
+      console.log(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+    }
+  };
+
+  const fetchFile = async (medicalRecordId: string, fileId: string) => {
+    try {
+      const response = await GetFileService.getFile(medicalRecordId, fileId);
+      if (response.success && response.data) {
+        const mimeType = response.mimeType
+          ? response.mimeType.split(";")[0]
+          : undefined;
+        setFileContent({
+          url: response.data,
+          mimeType: mimeType,
+        });
+      } else {
+        console.log("Server responded with an error status");
+      }
+    } catch (error) {
+      console.error(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+    }
+  };
+
+  React.useEffect(() => {
+    // consts hardcoded for black box testing purposes, will be changed later on
+    const medicalRecordId = "0eli3znphwo8";
+    const fileId = "8z61djvtm37";
+    fetchFile(medicalRecordId, fileId);
+    return () => {
+      if (fileContent.url) {
+        URL.revokeObjectURL(fileContent.url);
+      }
+    };
+  }, []);
+
+  function renderContent({ url, mimeType }: FileContent) {
+    if (!url) {
+      return <div>Loading...</div>;
+    }
+
+    if (mimeType && mimeType.startsWith("image/")) {
+      return <img src={url} alt="Fetched content" />;
+    } else if (mimeType === "application/pdf") {
+      return (
+        <iframe
+          src={url}
+          width="100%"
+          height="600px"
+          title="PDF content"
+          onError={() => console.error("Error loading PDF")}
+        ></iframe>
+      );
+    } else {
+      return <div>Unsupported content type: {mimeType}</div>;
+    }
+  }
 
   const handleItemClick = (recordId: any) => {
     navigate(`/record-detail/${recordId}`);
@@ -52,6 +135,9 @@ const ViewRecordsScreen = () => {
 
   return (
     <Container maxWidth="lg">
+      <div>
+        {fileContent.url ? renderContent(fileContent) : <div>Loading...</div>}
+      </div>
       <Typography variant="h4" component="h1" gutterBottom>
         Medical Records Dashboard
       </Typography>
