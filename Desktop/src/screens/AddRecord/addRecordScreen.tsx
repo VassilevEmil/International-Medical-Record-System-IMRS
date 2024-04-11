@@ -9,7 +9,7 @@ import {
   Box,
   Select,
 } from "@mui/material";
-import FileUpload from "../../components/FileUpload"; 
+import FileUpload from "../../components/FileUpload";
 import UploadRecordService from "../../services/UploadRecordService";
 
 const AddRecordScreen = () => {
@@ -34,7 +34,7 @@ const AddRecordScreen = () => {
       uploadedFiles.forEach((file) => {
         formData.append("fileInput", file);
       });
-      formData.append("typeOfRecord", recordType);
+      formData.append("typeOfRecord", "Other");
       formData.append("doctorId", "2d2423s");
       formData.append("doctorFirstName", "Simas");
       formData.append("doctorLastName", "Simukas");
@@ -42,13 +42,13 @@ const AddRecordScreen = () => {
 
       const response = await UploadRecordService.uploadRecord(formData);
 
-      if (response.success) {
+      if (response) {
         console.log(response.message, response.data);
         setUploadStatus("succeeded");
       } else {
-        console.error(response.message);
+        console.error(response);
         setUploadStatus("failed");
-        setErrorMessage(response.message);
+        setErrorMessage(response);
       }
     } catch (error) {
       setUploadStatus("failed");
@@ -59,7 +59,7 @@ const AddRecordScreen = () => {
   };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); 
+    event.preventDefault();
     handleUpload();
   };
 

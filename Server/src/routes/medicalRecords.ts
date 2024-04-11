@@ -11,6 +11,8 @@ import {
   uploadMedicalRecordToDb,
 } from "../mongo/controllers/medicalRecordController";
 import { FileInfo } from "../models/fileInfo";
+import axios from "axios";
+import { Readable } from "form-data";
 
 const router = express.Router();
 const encrypt = new Encrypt();
@@ -94,9 +96,9 @@ router.post(
   }
 );
 
-router.get("/getTenMedicalRecords", async (req: Request, res: Response) => {
+router.get("/getTenMedicalRecords/:patientId", async (req: Request, res: Response) => {
   try {
-    const { patientId } = req.body;
+    const { patientId } = req.params;
 
     if (typeof patientId !== 'string') {
       return res.status(400).send("patientId is required and must be a string.");
@@ -114,24 +116,52 @@ router.get("/getTenMedicalRecords", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/getFile", async (req: Request, res: Response) => {
-  try {
-    const { medicalRecordId, fileId } = req.body;
+// This route gets a file using its medical record ID and file ID.
 
-    if (typeof medicalRecordId !== 'string' || typeof fileId !== 'string') {
+router.get("/getFile/:medicalRecordId/:fileId", async (req: Request, res: Response) => {
+  try {
+
+    // Extract passed parameters from the request.
+    const { medicalRecordId, fileId } = req.params;
+
+    // Check if both IDs are provided and are strings. If not, send a 400 error.
+    if (!medicalRecordId || typeof medicalRecordId !== 'string' || !fileId || typeof fileId !== 'string') {
       return res.status(400).send("Both medicalRecordId and fileId are required and must be strings.");
     }
 
-    const fileData = await getFile(medicalRecordId, fileId);
+    // Get file information from the database  using the IDs.
+    const fileInfo = await getFile(medicalRecordId, fileId);
 
-    res.type(fileData.mimetype)
-    res.send(fileData.buffer);
+    // MISSING CODE:
+    // later on, Here should be the decryption logic, since getting file will result into encrypted hash 
+    // It should be connected to mongo CSFLE and use aes-256 as provided in security analysis
+
+    // Set the Content-Type header based on the file MIME type
+    // This tells the client what type of file it's receiving.
+    res.setHeader('Content-Type', fileInfo.mimetype);
+
+    // Fetch the file as a stream from IPFS
+    // Pass the actual IPFS access hash 
+    const ipfsStream = await fetchIpfsFile(fileInfo.fileHash);
+
+    // Pipe the IPFS file stream directly to a response (streaming data directly to the client)
+    // Pipe does not store entire file in server memory
+    // Especially good for large files or constant file acess
+    ipfsStream.pipe(res);
+
   } catch (error) {
+    console.error("Error getting file: ", error);
     res.status(500).send("Could not get the file");
   }
 });
 
-
+// Get file from ipfs
+export async function fetchIpfsFile(ipfsHash: string): Promise<Readable> {
+  const gatewayUrl = ipfsHash.replace('ipfs://', 'https://ipfs.io/ipfs/');
+  // Fetch file using Axios and return response as a stream
+  // When we get the file, just return the data part.
+  return axios.get(gatewayUrl, { responseType: 'stream' }).then(response => response.data); 
+}
 
 // Get all Medical Histories + pagination
 router.get("/allMedicalHistories", async (req: Request, res: Response) => {
