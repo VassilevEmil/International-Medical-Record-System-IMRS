@@ -13,6 +13,8 @@ export const connectToProductionDatabase = async () => {
   }
 };
 
+// will delete this instance at the end
+
 let mongod: MongoMemoryServer;
 
 export const connectToTestDatabase = async () => {
