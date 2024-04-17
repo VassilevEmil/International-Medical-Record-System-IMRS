@@ -12,6 +12,7 @@ import {
   Paper,
   Typography,
   Box,
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import GetRecordsService from "../../services/GetRecordsService";
@@ -58,6 +59,8 @@ const ViewRecordsScreen = () => {
   // although maybe store it within redux central state is not exactly necessary, need to figure out.
   // Caveat if store within redux is that it dumps this on client's ram. ~ this is how redux works.
   const [records, setRecords] = useState<Record[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   // Access searchTerm(Paient id) from store
   const searchTerm = useSelector(
     (state: RootState) => state.searchReducer.patientId
@@ -80,13 +83,18 @@ const ViewRecordsScreen = () => {
 
   const fetchRecords = async (patientId: string) => {
     try {
+      setIsLoading(true);
       const response = await GetRecordsService.getRecords(patientId);
       if (response.success) {
         setRecords(response.data);
+        console.log(response.data);
+        setIsLoading(false);
       } else {
+        setIsLoading(false);
         console.error(response.message);
       }
     } catch (error) {
+      setIsLoading(false);
       console.error(
         error instanceof Error ? error.message : "An unknown error occurred"
       );
@@ -94,6 +102,7 @@ const ViewRecordsScreen = () => {
   };
 
   const handleSearch = () => {
+    setIsLoading(true);
     if (localSearchTerm.trim()) {
       dispatch({
         type: SET_PATIENT_ID,
@@ -126,7 +135,7 @@ const ViewRecordsScreen = () => {
           sx={{ mt: 2, mb: 2 }}
         >
           <TextField
-            label={searchTerm ? "Patient id: " + searchTerm : "Patient id"}
+            label={searchTerm ? `Patient id: ${searchTerm}` : "Search patient"}
             variant="outlined"
             value={localSearchTerm}
             onChange={(e) => setLocalSearchTerm(e.target.value)}
@@ -142,35 +151,47 @@ const ViewRecordsScreen = () => {
             SEARCH
           </Button>
         </Box>
-        <TableContainer component={Paper}>
-          <Table aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Date of Visit</TableCell>
-                <TableCell align="right">Reason</TableCell>
-                <TableCell align="right">Record</TableCell>
-                <TableCell align="right">Language</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {records.map((record) => (
-                <TableRow
-                  key={record.id}
-                  hover
-                  onClick={() => handleItemClick(record.id)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <TableCell component="th" scope="row">
-                    {record.timestamp}
-                  </TableCell>
-                  <TableCell align="right">{record.title}</TableCell>
-                  <TableCell align="right">{record.typeOfRecord}</TableCell>
-                  <TableCell align="right">{record.language}</TableCell>
+        {isLoading ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table aria-label="simple table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Date of Visit</TableCell>
+                  <TableCell align="right">Reason</TableCell>
+                  <TableCell align="right">Record</TableCell>
+                  <TableCell align="right">Language</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {records.map((record) => (
+                  <TableRow
+                    key={record.id}
+                    hover
+                    onClick={() => handleItemClick(record.id)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <TableCell component="th" scope="row">
+                      {record.timestamp}
+                    </TableCell>
+                    <TableCell align="right">{record.title}</TableCell>
+                    <TableCell align="right">{record.typeOfRecord}</TableCell>
+                    <TableCell align="right">{record.language}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Container>
     </ThemeProvider>
   );
