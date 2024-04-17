@@ -6,6 +6,7 @@ import { uploadFilesToIpfs, uploadMedicalRecordToIpfs } from "../storage/ipfs";
 import {
   getAllMedicalHistoriesByPatientId,
   getFile,
+  getMedicalRecordById,
   getTenMedicalRecordByPatientId,
   getTenMostRecentMedicalHistoriesById,
   uploadMedicalRecordToDb,
@@ -95,6 +96,19 @@ router.post(
     }
   }
 );
+router.get('/:medicalRecordId', async (req, res) => {
+  try {
+    const { medicalRecordId } = req.params;
+    const medicalRecord = await getMedicalRecordById(medicalRecordId);
+    if (medicalRecord) {
+      res.json(medicalRecord);
+    } else {
+      res.status(404).send('Medical record not found');
+    }
+  } catch (error) {
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 router.get("/getTenMedicalRecords/:patientId", async (req: Request, res: Response) => {
   try {
