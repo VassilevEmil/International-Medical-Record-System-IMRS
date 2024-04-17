@@ -8,7 +8,7 @@ import MedicalHistoryModel, { MedicalRecordModel } from "../models/medicalRecord
 export async function uploadMedicalRecordToDb(medicalRecord: MedicalRecord, medicalRecordHash: string, fileHash?: FileInfo[]) {
   try {
     const newMedicalRecord = new MedicalRecordModel({
-      id: generateId(),
+      id: medicalRecord.id,
       patientId: medicalRecord.patientId,
       institution: medicalRecord.institution,
       typeOfRecord: medicalRecord.typeOfRecord,
@@ -65,6 +65,23 @@ export async function getFile(medicalRecordId: string, fileId: string): Promise<
 
   } catch (error) {
     console.error(`Failed to get file with ID: ${fileId} from medical record ID: ${medicalRecordId}`);
+    throw error;
+  }
+}
+
+export async function getMedicalRecordById(medicalRecordId: string) {
+  try {
+    // find record in mongo database, if there is one (fetch neccessary data, such as record hash)
+    const medicalRecord = await MedicalRecordModel.findOne({ id: medicalRecordId }).exec();
+    if (!medicalRecord) {
+      return undefined; 
+    }
+    // fetch record from ipfs using the previously fetched data/reference
+    const recordJson: MedicalRecord = await fetchIpfsRecordAsJson(medicalRecord.medicalRecordHash);
+    // return record data from the IPFS in json
+    return recordJson; 
+  } catch (error) {
+    console.error(`Error fetching medical record with ID: ${medicalRecordId}`, error);
     throw error;
   }
 }
@@ -169,6 +186,7 @@ async function fetchIpfsRecordAsJson(ipfsUrl: string): Promise<any> {
 
   try {
     const response = await axios.get(gatewayUrl);
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch from IPFS:", error);
