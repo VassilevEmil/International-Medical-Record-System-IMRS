@@ -12,6 +12,7 @@ import {
   ListItemIcon,
   ListItemText,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
@@ -66,8 +67,8 @@ const RecordDetailScreen = () => {
 
   useEffect(() => {
     const fetchRecord = async () => {
+      setIsLoading(true);
       if (id) {
-        setIsLoading(true);
         try {
           const response = await GetRecordsService.fetchRecord(id);
           if (response.success && response.data) {
@@ -86,10 +87,49 @@ const RecordDetailScreen = () => {
     fetchRecord();
   }, [id]);
 
-  if (!record) {
-    return <Typography variant="h6">Record not found</Typography>;
+  if (isLoading) {
+    return (
+      <ThemeProvider theme={darkTheme}>
+        <Container
+          maxWidth="sm"
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+          }}
+        >
+          <CircularProgress />
+        </Container>
+      </ThemeProvider>
+    );
   }
 
+  if (!record && !isLoading) {
+    return (
+      <ThemeProvider theme={darkTheme}>
+        <Container
+          maxWidth="sm"
+          sx={{
+            textAlign: "center",
+            height: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          <Typography variant="h6">Record not found</Typography>
+          <Button
+            variant="contained"
+            sx={{ mt: 4 }}
+            onClick={() => navigate(-1)}
+          >
+            Go Back
+          </Button>
+        </Container>
+      </ThemeProvider>
+    );
+  }
   return (
     <ThemeProvider theme={darkTheme}>
       <Container maxWidth="sm">
@@ -101,28 +141,28 @@ const RecordDetailScreen = () => {
             <Box display="flex" alignItems="center" marginBottom={2}>
               <PersonIcon color="action" />
               <Typography variant="subtitle1" marginLeft={1}>
-                Patient Name: {record.doctorFirstName}
+                Patient Name: {record?.doctorFirstName}
               </Typography>
             </Box>
             <Divider />
             <Box display="flex" alignItems="center" marginY={2}>
               <AccessTimeIcon color="action" />
               <Typography variant="subtitle1" marginLeft={1}>
-                Date of Visit: {record.doctorId}
+                Date of Visit: {record?.doctorId}
               </Typography>
             </Box>
             <Divider />
             <Box display="flex" alignItems="center" marginY={2}>
               <LocalHospitalIcon color="action" />
               <Typography variant="subtitle1" marginLeft={1}>
-                Diagnosis: {record.doctorLastName}
+                Diagnosis: {record?.doctorLastName}
               </Typography>
             </Box>
             <Divider />
             <Box display="flex" alignItems="center" marginY={2}>
               <HealingIcon color="action" />
               <Typography variant="subtitle1" marginLeft={1}>
-                Treatment: {record.title}
+                Treatment: {record?.title}
               </Typography>
             </Box>
 
@@ -131,7 +171,7 @@ const RecordDetailScreen = () => {
               <Typography variant="subtitle1" gutterBottom>
                 Attached Files:
               </Typography>
-              {record.files && record.files.length > 0 ? (
+              {record?.files && record.files.length > 0 ? (
                 <List>
                   {record.files.map((file, index) => (
                     <ListItem
