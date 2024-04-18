@@ -80,7 +80,6 @@ export async function getFile(
   }
 }
 
- writingTests
 // export async function getTenMedicalRecordByPatientId(
 //   patientId: string
 // ): Promise<MedicalRecord[]> {
@@ -88,22 +87,30 @@ export async function getFile(
 export async function getMedicalRecordById(medicalRecordId: string) {
   try {
     // find record in mongo database, if there is one (fetch neccessary data, such as record hash)
-    const medicalRecord = await MedicalRecordModel.findOne({ id: medicalRecordId }).exec();
+    const medicalRecord = await MedicalRecordModel.findOne({
+      id: medicalRecordId,
+    }).exec();
     if (!medicalRecord) {
-      return undefined; 
+      return undefined;
     }
     // fetch record from ipfs using the previously fetched data/reference
-    const recordJson: MedicalRecord = await fetchIpfsRecordAsJson(medicalRecord.medicalRecordHash);
+    const recordJson: MedicalRecord = await fetchIpfsRecordAsJson(
+      medicalRecord.medicalRecordHash
+    );
     // return record data from the IPFS in json
-    return recordJson; 
+    return recordJson;
   } catch (error) {
-    console.error(`Error fetching medical record with ID: ${medicalRecordId}`, error);
+    console.error(
+      `Error fetching medical record with ID: ${medicalRecordId}`,
+      error
+    );
     throw error;
   }
 }
 
-export async function getTenMedicalRecordByPatientId(patientId: string): Promise<MedicalRecord[]> {
- main
+export async function getTenMedicalRecordByPatientId(
+  patientId: string
+): Promise<MedicalRecord[]> {
   try {
     const medicalRecords = await MedicalRecordModel.find({ patientId })
       .sort({ timeStamp: -1 })
