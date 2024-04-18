@@ -26,13 +26,15 @@ export async function uploadMedicalRecordToIpfs(medicalRecord: MedicalRecord): P
   medicalRecord.files?.forEach(file => {
     file.fileHash = undefined;
   });
-
+  console.log("BEFORE SENDING TO IPFS: ", medicalRecord )
   const textResult = await pinJSONToIPFS(medicalRecord);
 
   // Restore the original fileHash values
   medicalRecord.files?.forEach((file, index) => {
     file.fileHash = fileHashes[index];
   });
+  console.log("EEEE ", textResult )
+
 
   return `ipfs://${textResult.IpfsHash}`;
 }
