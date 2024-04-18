@@ -12,8 +12,11 @@ import cors from "cors"; // Import the cors middleware
 const app: Application = express();
 
 // Connect to MongoDB
-connectToTestDatabase();
-// connectToProductionDatabase();
+if (process.env.NODE_ENV === "test") {
+  connectToTestDatabase();
+} else {
+  connectToProductionDatabase();
+}
 
 // Middlewares
 app.use(express.json());
