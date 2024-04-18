@@ -2,9 +2,10 @@ import { combineReducers } from "redux";
 import { configureStore } from "@reduxjs/toolkit";
 
 //reducer import below
+import searchReducer from "./SearchReducer";
 
 const rootReducer = combineReducers({
-  // add reducers here, when we have them
+  searchReducer,
 });
 
 const store = configureStore({
