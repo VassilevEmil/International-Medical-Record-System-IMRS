@@ -5,7 +5,7 @@ interface GetRecordResponse { // need to specify later on, exact data.
   }
   
   export default class GetRecordsService {
-    private static apiUrl = "https://localhost:3000/medicalRecords/getTenMedicalRecords/";
+    private static apiUrl = "https://localhost:3000/medicalRecords/getMedicalRecords/";
     private static apiUrl2 = "https://localhost:3000/medicalRecords/";
 
     static async getRecords(patientId: string): Promise<GetRecordResponse> {

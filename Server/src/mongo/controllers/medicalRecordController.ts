@@ -95,95 +95,35 @@ export async function getMedicalRecordById(medicalRecordId: string): Promise<Med
   }
 }
 
-// !! Change / remove after pagination
-export async function getTenMedicalRecordByPatientId(
-  patientId: string
+export async function getMedicalRecordsByPatientId(
+  patientId: string,
+  page: number = 1,
+  limit: number = 10,
+  filters?: any // This parameter can be extended later to handle various filters
 ): Promise<MedicalRecord[]> {
   try {
-    const medicalRecords = await MedicalRecordReferenceModel.find({ patientId })
+
+    const query = { patientId, ...filters };
+    const total = await MedicalRecordReferenceModel.countDocuments(query);
+
+    const medicalRecordReferences = await MedicalRecordReferenceModel.find(query)
       .sort({ timeStamp: -1 })
-      .limit(10)
+      .skip((page - 1) * limit)
+      .limit(limit)
       .select("medicalRecordHash")
       .exec();
 
     const fetchedRecords: MedicalRecord[] = await Promise.all(
-      medicalRecords.map(async (record) => {
-        const recordJson: MedicalRecord = await getMedicalRecordFromIpfs(
-          record.medicalRecordHash
-        );
-
-        return recordJson;
+      medicalRecordReferences.map(async (reference) => {
+        return getMedicalRecordFromIpfs(reference.medicalRecordHash);
       })
     );
 
     return fetchedRecords;
+
   } catch (error) {
     console.error(
       `Failed to get medical records by patientId: ${patientId}`,
-      error
-    );
-    throw error;
-  }
-}
-
-// !! Change / remove after pagination
-export async function getAllMedicalHistoriesByPatientId(
-  patientId: string,
-  page = 1,
-  limit = 5
-) {
-  try {
-    const medicalRecords = await MedicalHistoryModel.aggregate([
-      {
-        $match: { patientId: patientId },
-      },
-      {
-        $sort: { createdAt: -1 }, // Sort by createdAt in descending order
-      },
-      {
-        $skip: (page - 1) * limit,
-      },
-      {
-        $limit: limit,
-      },
-    ]);
-    // return { total: medicalRecords.length, data: medicalRecords };
-
-    if (medicalRecords.length === 0) {
-      console.log(`No medical history found for patientId: ${patientId}`);
-      return null;
-    }
-
-    console.log(`Found medical history for patientId: ${patientId}`);
-    return medicalRecords;
-  } catch (error) {
-    console.error(
-      `Error fetching medical history for patientId: ${patientId}`,
-      error
-    );
-    throw error;
-  }
-}
-
-export async function getTenMostRecentMedicalHistoriesById(patientId: string) {
-  try {
-    const recentMedicalHistories = await MedicalHistoryModel.find({
-      patientId: patientId,
-    })
-      .sort({ dateCreated: -1 })
-      .limit(10) // Limit to the 10 most recent documents
-      .exec();
-
-    if (recentMedicalHistories.length === 0) {
-      console.log(`No medical history found for patientId: ${patientId}`);
-      return null;
-    }
-
-    console.log(`Found recent medical history for patientId: ${patientId}`);
-    return recentMedicalHistories;
-  } catch (error) {
-    console.error(
-      `Error fetching recent medical history for patientId: ${patientId}`,
       error
     );
     throw error;

@@ -73,10 +73,7 @@ const ViewRecordsScreen = () => {
 
   // hook to fetch records when searchTerm changes
   useEffect(() => {
-    console.log("Helllaaaaa", searchTerm);
     if (searchTerm) {
-      console.log("Helllaaaaa2");
-
       fetchRecords(searchTerm);
     }
   }, [searchTerm]);
@@ -86,9 +83,9 @@ const ViewRecordsScreen = () => {
       setIsLoading(true);
       const response = await GetRecordsService.getRecords(patientId);
       if (response.success) {
+        setIsLoading(false);
         setRecords(response.data);
         console.log(response.data);
-        setIsLoading(false);
       } else {
         setIsLoading(false);
         console.error(response.message);
@@ -102,7 +99,6 @@ const ViewRecordsScreen = () => {
   };
 
   const handleSearch = () => {
-    setIsLoading(true);
     if (localSearchTerm.trim()) {
       dispatch({
         type: SET_PATIENT_ID,

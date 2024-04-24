@@ -13,8 +13,10 @@ const app: Application = express();
 
 // Connect to MongoDB
 if (process.env.NODE_ENV === "test") {
+  console.log("Connected to Test DBS");
   connectToTestDatabase();
 } else {
+  console.log("Connected to Prod DBS");
   connectToProductionDatabase();
 }
 

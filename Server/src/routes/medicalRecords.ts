@@ -4,11 +4,10 @@ import { createMedicalRecord, generateId } from "../factories/medicalRecordsFact
 import { Encrypt } from "../services/encrypt";
 import { getFileFromIpfs, addFilesToIpfs, addMedicalRecordToIpfs } from "../storage/ipfs";
 import {
-  getAllMedicalHistoriesByPatientId,
   getFileInfo,
   getMedicalRecordById,
-  getTenMedicalRecordByPatientId,
   addMedicalRecordToDb,
+  getMedicalRecordsByPatientId,
 } from "../mongo/controllers/medicalRecordController";
 import { FileInfo } from "../models/fileInfo";
 
@@ -107,7 +106,7 @@ router.get('/:medicalRecordId', async (req, res) => {
 });
 
 //!! Needs to be updates / changed after full pagination impl
-router.get("/getTenMedicalRecords/:patientId", async (req: Request, res: Response) => {
+router.get("/getMedicalRecords/:patientId", async (req: Request, res: Response) => {
   try {
     const { patientId } = req.params;
 
@@ -115,7 +114,7 @@ router.get("/getTenMedicalRecords/:patientId", async (req: Request, res: Respons
       return res.status(400).send("patientId is required and must be a string.");
     }
 
-    const medicalRecords = await getTenMedicalRecordByPatientId(patientId);
+    const medicalRecords = await getMedicalRecordsByPatientId(patientId, 1, 2);
     if (medicalRecords) {
       res.status(200).json(medicalRecords);
     } else {
@@ -126,6 +125,7 @@ router.get("/getTenMedicalRecords/:patientId", async (req: Request, res: Respons
     res.status(500).send("Internal Server Error");
   }
 });
+
 
 // This route gets a file using its medical record ID and file ID.
 router.get("/getFile/:medicalRecordId/:fileId", async (req: Request, res: Response) => {
@@ -162,38 +162,6 @@ router.get("/getFile/:medicalRecordId/:fileId", async (req: Request, res: Respon
   } catch (error) {
     console.error("Error getting file: ", error);
     res.status(500).send("Could not get the file");
-  }
-});
-
-// !! Update Emil and Marty Pagination
-// Get all Medical Histories + pagination
-router.get("/allMedicalHistories", async (req: Request, res: Response) => {
-  const { patientId, page, limit } = req.query;
-
-
-  if (!patientId || typeof patientId !== "string") {
-    return res.status(400).send("Patient ID is required and must be a string.");
-  }
-
-  const pageNumber = typeof page === "string" ? parseInt(page, 10) : undefined;
-  const limitNumber =
-    typeof limit === "string" ? parseInt(limit, 10) : undefined;
-
-  try {
-    const medicalRecords = await getAllMedicalHistoriesByPatientId(
-      patientId,
-      pageNumber,
-      limitNumber
-    );
-
-    if (medicalRecords && medicalRecords.length > 0) {
-      res.status(200).json(medicalRecords);
-    } else {
-      res.status(404).send("No medical histories found for this patient.");
-    }
-  } catch (error) {
-    console.error("Failed to retrieve medical histories:", error);
-    res.status(500).send("Internal Server Error");
   }
 });
 
