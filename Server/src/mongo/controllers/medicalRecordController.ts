@@ -1,6 +1,4 @@
 import axios from "axios";
-import { Readable } from "form-data";
-import { generateId } from "../../factories/medicalRecordsFactory";
 import { FileInfo } from "../../models/fileInfo";
 import { MedicalRecord } from "../../models/medicalRecord";
 import MedicalHistoryModel, {
@@ -12,6 +10,10 @@ export async function uploadMedicalRecordToDb(
   medicalRecordHash: string,
   fileHash?: FileInfo[]
 ) {
+  if(!medicalRecordHash){
+    throw Error("Medical record hash not provided");
+  }
+
   try {
     const newMedicalRecord = new MedicalRecordModel({
       id: medicalRecord.id,
@@ -27,6 +29,7 @@ export async function uploadMedicalRecordToDb(
     console.log("Uploaded medical record to database");
   } catch (error) {
     console.error("Failed to upload medical record to database", error);
+    throw new Error("Failed to upload medical record to database");
   }
 }
 
