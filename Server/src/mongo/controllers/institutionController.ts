@@ -1,4 +1,3 @@
-import { error } from "console";
 import { Institution } from "../../models/institution";
 import InstitutionModel from "../models/institution";
 import { Country } from "../../enums";
@@ -37,7 +36,6 @@ export async function getInstitutionById(institutionId: string): Promise<Institu
             
             return institution;
         }
-        console.log("Institution found:", institution);
 
         return institution; 
     } catch (error) {

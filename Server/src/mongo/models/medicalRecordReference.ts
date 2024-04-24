@@ -5,7 +5,7 @@ import { TypeOfRecord } from "../../enums";
 import { FileInfo } from "../../models/fileInfo";
 import { FileInfoSchema } from "./fileInfo";
 
-export interface MedicalRecordModelInterface extends Document {
+export interface MedicalRecordReferenceModelInterface extends Document {
   id: string;
   patientId: string;
   institution: Institution;
@@ -15,7 +15,7 @@ export interface MedicalRecordModelInterface extends Document {
   timeStamp: Date;
 }
 
-export const MedicalRecordSchema: Schema = new mongoose.Schema({
+export const MedicalRecordReferenceSchema: Schema = new mongoose.Schema({
   id: {
     type: String,
     required: true,
@@ -47,10 +47,10 @@ export const MedicalRecordSchema: Schema = new mongoose.Schema({
   },
 });
 
-export const MedicalRecordModel: Model<MedicalRecordModelInterface> =
-  mongoose.model<MedicalRecordModelInterface>(
-    "MedicalRecord",
-    MedicalRecordSchema
+export const MedicalRecordReferenceModel: Model<MedicalRecordReferenceModelInterface> =
+  mongoose.model<MedicalRecordReferenceModelInterface>(
+    "MedicalRecordReference",
+    MedicalRecordReferenceSchema
   );
 
-export default MedicalRecordModel;
+export default MedicalRecordReferenceModel;

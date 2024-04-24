@@ -3,7 +3,7 @@ import { Country, Language, TypeOfRecord } from "../enums";
 import { Institution } from "../models/institution";
 import { MedicalRecord } from "../models/medicalRecord";
 import { Patient } from "../models/patient";
-import { addTLSCertificate } from "../mongo/controllers/TLScertificatesController";
+import { addTLSCertificate } from "../mongo/controllers/tlsCertificatesController";
 import { addInstitution } from "../mongo/controllers/institutionController";
 import mongoose from 'mongoose';
 
