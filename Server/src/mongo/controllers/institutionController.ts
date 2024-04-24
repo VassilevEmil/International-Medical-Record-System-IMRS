@@ -1,7 +1,5 @@
-import { error } from "console";
 import { Institution } from "../../models/institution";
 import InstitutionModel from "../models/institution";
-import { Country } from "../../enums";
 
 export async function addInstitution(institutionData: Institution): Promise<void> {
     try {
@@ -15,33 +13,19 @@ export async function addInstitution(institutionData: Institution): Promise<void
 }
 
 export async function getInstitutionById(institutionId: string): Promise<Institution> {
+    let institution: Institution | null;
     try {
-        let institution: Institution | null = await InstitutionModel.findOne({ institutionId: institutionId });
-        if (!institution) {
-            institution = {
-                id: "123",
-                institutionId: institutionId,
-                name: "Test Hospital",
-                country: Country.Denmark,
-                address: "WhateverTown 101",
-              };
-
-            try {
-                // Attempt to add the institution
-                await addInstitution(institution);
-                console.log("Institution not found but created", institution);
-            } catch (error) {
-                console.error("Error adding the institution:", error);
-                // Log the error and continue without throwing it
-            }
-            
-            return institution;
-        }
-        console.log("Institution found:", institution);
-
-        return institution; 
+        institution = await InstitutionModel.findOne({ institutionId: institutionId }).exec();
     } catch (error) {
-        console.error("Error finding the institution:", error);
-        throw error;
+        console.error("Error during the database query:", error);
+        throw new Error(`Failed to retrieve institution with ID: ${institutionId}. Please try again later.`);
     }
+
+    if (!institution) {
+        console.error(`No institution found with ID: ${institutionId}`);
+        throw new Error(`No institution found with ID: ${institutionId}`);
+    }
+
+    console.log("Institution found:", institutionId);
+    return institution;
 }
