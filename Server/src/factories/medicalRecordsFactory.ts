@@ -1,11 +1,7 @@
-import { error } from "console";
-import { Country, Language, TypeOfRecord } from "../enums";
+import { Language, TypeOfRecord } from "../enums";
 import { Institution } from "../models/institution";
 import { MedicalRecord } from "../models/medicalRecord";
-import {
-  addInstitution,
-  getInstitutionById,
-} from "../mongo/controllers/institutionController";
+import { getInstitutionById } from "../mongo/controllers/institutionController";
 import { FileInfo } from "../models/fileInfo";
 
 export async function createMedicalRecord(

@@ -9,7 +9,6 @@ export async function addTLSCertificate(fingerPrintSHA256: string, institution: 
   
     try {
       const result = await tlsCertificate.save();
-      console.log(result);
     } catch (error) {
       console.error('Error creating TLS certificate:', error);
     }
