@@ -44,17 +44,16 @@ export async function addMedicalRecordToDb(
  *
  * @param {string} medicalRecordId - The unique ID of medical record.
  * @param {string} fileId - The unique ID of the file that is associated with specific medical record.
- * @returns {Promise<any>} -  A promise that resolves with a data object containing information and
+ * @returns {Promise<FileInfo>} -  A promise that resolves with a data object containing information and
  * data from the file, such as its hash.
  */
 
 // MARTY: PROMISE ANY IS BYPASS, IT WAS added solely for simulation purposes and quick checks.
 // SHOULD BE REMOVED LATER ON and should be passed a specific promise that results in a specific interface
-
-export async function getFileInfo(
+export async function getFileInfoFromDb(
   medicalRecordId: string,
   fileId: string
-): Promise<any> {
+): Promise<FileInfo> {
   try {
     const medicalRecordReference = await getMedicalRecordReferenceById(medicalRecordId);
 
@@ -70,10 +69,8 @@ export async function getFileInfo(
 
     return fileInfo;
   } catch (error) {
-    console.error(
-      `Failed to get file with ID: ${fileId} from medical record ID: ${medicalRecordId}`
-    );
-    throw error;
+    console.error(`Failed to get file with ID: ${fileId} from medical record ID: ${medicalRecordId}`);
+    throw new Error(`Failed to get file with ID: ${fileId} from medical record ID: ${medicalRecordId}`);
   }
 }
 

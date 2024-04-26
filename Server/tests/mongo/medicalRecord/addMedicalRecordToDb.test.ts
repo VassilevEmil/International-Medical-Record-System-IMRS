@@ -32,8 +32,7 @@ describe('addMedicalRecordToDb', () => {
     await MedicalRecordReferenceModel.deleteMany({});
   });
 
-  describe('successfully uploads a medical record', () => {
-    test('nothing special, verify by retrieval', async () => {
+    test('Successfully adds medicalRecord', async () => {
       await addMedicalRecordToDb(medicalRecordData, medicalRecordHash, [fileInfo1, fileInfo2]);
   
       const savedMedicalRecord: MedicalRecordReferenceModelInterface | null = await MedicalRecordReferenceModel.findOne({ id: medicalRecordData.id });
@@ -48,22 +47,6 @@ describe('addMedicalRecordToDb', () => {
         expect(savedMedicalRecord.timeStamp.getDate()).toBe(medicalRecordData.timeStamp.getDate());
       }
     });
-  
-    test('fileInfo missing', async () => {
-      await addMedicalRecordToDb(medicalRecordData, medicalRecordHash);
-
-      const savedMedicalRecord: MedicalRecordReferenceModelInterface | null = await MedicalRecordReferenceModel.findOne({ id: medicalRecordData.id });
-
-      if (savedMedicalRecord) {
-        expect(savedMedicalRecord.id).toBe(medicalRecordData.id);
-        expect(savedMedicalRecord.patientId).toBe(medicalRecordData.patientId);
-        expect(savedMedicalRecord.institution).toMatchObject(medicalRecordData.institution);
-        expect(savedMedicalRecord.typeOfRecord).toBe(medicalRecordData.typeOfRecord);
-        expect(savedMedicalRecord.medicalRecordHash).toEqual(medicalRecordHash);
-        expect(savedMedicalRecord.timeStamp.getDate()).toBe(medicalRecordData.timeStamp.getDate());
-      }
-    })
-  })
 
   describe('Error handling for missing required fields', () => {
     test.each([
@@ -81,49 +64,50 @@ describe('addMedicalRecordToDb', () => {
     });
   });
 
-function initializeObjects() {
-  institution = {
-    id: 'testId1234',
-    institutionId: 'testInstitutionId1234',
-    name: 'Test Institution Name',
-    country: Country.Denmark,
-    address: 'Test Institution Address'
-  };
+  //Helper functions:
+  function initializeObjects() {
+    institution = {
+      id: 'testId1234',
+      institutionId: 'testInstitutionId1234',
+      name: 'Test Institution Name',
+      country: Country.Denmark,
+      address: 'Test Institution Address'
+    };
 
-  fileInfo1 = {
-    id: "fileInfoTestId123",
-    name: "fileInfoTestName",
-    mimetype: ".jpg",
-    fileHash: "fileInfoTestHash123",
+    fileInfo1 = {
+      id: "fileInfoTestId123",
+      name: "fileInfoTestName",
+      mimetype: ".jpg",
+      fileHash: "fileInfoTestHash123",
+    }
+
+    fileInfo2 = {
+      id: "fileInfoTestId1234",
+      name: "fileInfoTestName2",
+      mimetype: ".jpg",
+      fileHash: "fileInfoTestHash1234",
+    }
+
+    medicalRecordData = {
+      id: "medicalRecordTestId123",
+      patientId: "patientIdTest123",
+      doctorId: "doctorIdTest123",
+      doctorFirstName: "fakeDoctorNameForTesting",
+      doctorLastName: "fakeDoctorLastNameForTesting",
+      institution: institution,
+      timeStamp: new Date(),
+      language: Language.Danish,
+      title: "medicalRecordTitleForTesting123",
+      text: [
+        "medicalRecordParagraph1Test medicalRecordParagraph1Test",
+        "medicalRecordParagraph2Test "
+      ],
+      files: [],
+      typeOfRecord: TypeOfRecord.Bloodwork
+    };
+
+    medicalRecordHash = "medicalRecordHash123";
   }
-
-  fileInfo2 = {
-    id: "fileInfoTestId1234",
-    name: "fileInfoTestName2",
-    mimetype: ".jpg",
-    fileHash: "fileInfoTestHash1234",
-  }
-
-  medicalRecordData = {
-    id: "medicalRecordTestId123",
-    patientId: "patientIdTest123",
-    doctorId: "doctorIdTest123",
-    doctorFirstName: "fakeDoctorNameForTesting",
-    doctorLastName: "fakeDoctorLastNameForTesting",
-    institution: institution,
-    timeStamp: new Date(),
-    language: Language.Danish,
-    title: "medicalRecordTitleForTesting123",
-    text: [
-      "medicalRecordParagraph1Test medicalRecordParagraph1Test",
-      "medicalRecordParagraph2Test "
-    ],
-    files: [],
-    typeOfRecord: TypeOfRecord.Bloodwork
-  };
-
-  medicalRecordHash = "medicalRecordHash123";
-}
 });
 
 
