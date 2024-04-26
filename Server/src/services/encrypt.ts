@@ -6,7 +6,6 @@ export class Encrypt {
     encrypt(medicalRecord: MedicalRecord): MedicalRecord{
         // Pretend encryption is happening lol
         // -.-
-        console.log("Medical record encrypted :)", medicalRecord.id)
 
         return medicalRecord;
     }

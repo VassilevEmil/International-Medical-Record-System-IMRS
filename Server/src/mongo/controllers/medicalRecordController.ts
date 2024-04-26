@@ -1,19 +1,18 @@
-import axios from "axios";
-import { Readable } from "form-data";
-import { generateId } from "../../factories/medicalRecordsFactory";
 import { FileInfo } from "../../models/fileInfo";
 import { MedicalRecord } from "../../models/medicalRecord";
 import MedicalHistoryModel, {
-  MedicalRecordModel,
-} from "../models/medicalRecord";
+  MedicalRecordReferenceModel,
+} from "../models/medicalRecordReference";
+import { getMedicalRecordFromIpfs } from "../../storage/ipfs";
+import { MedicalRecordReference } from "../../models/medicalRecordReference";
 
-export async function uploadMedicalRecordToDb(
+export async function addMedicalRecordToDb(
   medicalRecord: MedicalRecord,
   medicalRecordHash: string,
   fileHash?: FileInfo[]
 ) {
   try {
-    const newMedicalRecord = new MedicalRecordModel({
+    const newMedicalRecord = new MedicalRecordReferenceModel({
       id: medicalRecord.id,
       patientId: medicalRecord.patientId,
       institution: medicalRecord.institution,
@@ -47,30 +46,23 @@ export async function uploadMedicalRecordToDb(
 // MARTY: PROMISE ANY IS BYPASS, IT WAS added solely for simulation purposes and quick checks.
 // SHOULD BE REMOVED LATER ON and should be passed a specific promise that results in a specific interface
 
-export async function getFile(
+export async function getFileInfo(
   medicalRecordId: string,
   fileId: string
 ): Promise<any> {
   try {
-    // Try to find medical record in the database by med. record. ID
-    const medicalRecord = await MedicalRecordModel.findOne({
-      id: medicalRecordId,
-    }).exec();
+    const medicalRecordReference = await getMedicalRecordReferenceById(medicalRecordId);
 
-    // Check if medical record was found.
-    if (!medicalRecord) {
+    if (!medicalRecordReference) {
       throw new Error(`Medical record with ID ${medicalRecordId} not found`);
     }
 
-    // try to find the specific file's info within the medical record by file ID
-    const fileInfo = medicalRecord.fileHash?.find((file) => file.id === fileId);
+    const fileInfo = medicalRecordReference.fileHash?.find((file) => file.id === fileId);
 
-    // Check if the file info (including hash) was found
     if (!fileInfo || !fileInfo.fileHash) {
       throw new Error(`Image with ID ${fileId} not found in medical record`);
     }
 
-    // Return fileInfo
     return fileInfo;
   } catch (error) {
     console.error(
@@ -80,25 +72,20 @@ export async function getFile(
   }
 }
 
-// export async function getTenMedicalRecordByPatientId(
-//   patientId: string
-// ): Promise<MedicalRecord[]> {
-
-export async function getMedicalRecordById(medicalRecordId: string) {
+export async function getMedicalRecordById(medicalRecordId: string): Promise<MedicalRecord>{
   try {
     // find record in mongo database, if there is one (fetch neccessary data, such as record hash)
-    const medicalRecord = await MedicalRecordModel.findOne({
-      id: medicalRecordId,
-    }).exec();
-    if (!medicalRecord) {
-      return undefined;
+    const medicalRecordReference = await getMedicalRecordReferenceById(medicalRecordId);
+
+    if (!medicalRecordReference) {
+      throw Error();
     }
-    // fetch record from ipfs using the previously fetched data/reference
-    const recordJson: MedicalRecord = await fetchIpfsRecordAsJson(
-      medicalRecord.medicalRecordHash
+
+    const medicalRecord: MedicalRecord = await getMedicalRecordFromIpfs(
+      medicalRecordReference.medicalRecordHash
     );
-    // return record data from the IPFS in json
-    return recordJson;
+
+    return medicalRecord;
   } catch (error) {
     console.error(
       `Error fetching medical record with ID: ${medicalRecordId}`,
@@ -108,11 +95,12 @@ export async function getMedicalRecordById(medicalRecordId: string) {
   }
 }
 
+// !! Change / remove after pagination
 export async function getTenMedicalRecordByPatientId(
   patientId: string
 ): Promise<MedicalRecord[]> {
   try {
-    const medicalRecords = await MedicalRecordModel.find({ patientId })
+    const medicalRecords = await MedicalRecordReferenceModel.find({ patientId })
       .sort({ timeStamp: -1 })
       .limit(10)
       .select("medicalRecordHash")
@@ -120,7 +108,7 @@ export async function getTenMedicalRecordByPatientId(
 
     const fetchedRecords: MedicalRecord[] = await Promise.all(
       medicalRecords.map(async (record) => {
-        const recordJson: MedicalRecord = await fetchIpfsRecordAsJson(
+        const recordJson: MedicalRecord = await getMedicalRecordFromIpfs(
           record.medicalRecordHash
         );
 
@@ -138,19 +126,14 @@ export async function getTenMedicalRecordByPatientId(
   }
 }
 
+// !! Change / remove after pagination
 export async function getAllMedicalHistoriesByPatientId(
   patientId: string,
   page = 1,
   limit = 5
 ) {
   try {
-    // const medicalHistories = await MedicalHistoryModel.find({
-    //   patientId: patientId,
-    // })
-    //   .sort({ dateCreated: -1 }) // Sort by createdAt in descending order (newest first)
-    //   .exec();
-
-    const medicalHistories = await MedicalHistoryModel.aggregate([
+    const medicalRecords = await MedicalHistoryModel.aggregate([
       {
         $match: { patientId: patientId },
       },
@@ -164,17 +147,15 @@ export async function getAllMedicalHistoriesByPatientId(
         $limit: limit,
       },
     ]);
-    // return { total: medicalHistories.length, data: medicalHistories };
+    // return { total: medicalRecords.length, data: medicalRecords };
 
-    console.log("log from COntroller: ", medicalHistories);
-
-    if (medicalHistories.length === 0) {
+    if (medicalRecords.length === 0) {
       console.log(`No medical history found for patientId: ${patientId}`);
       return null;
     }
 
     console.log(`Found medical history for patientId: ${patientId}`);
-    return medicalHistories;
+    return medicalRecords;
   } catch (error) {
     console.error(
       `Error fetching medical history for patientId: ${patientId}`,
@@ -209,16 +190,19 @@ export async function getTenMostRecentMedicalHistoriesById(patientId: string) {
   }
 }
 
-async function fetchIpfsRecordAsJson(ipfsUrl: string): Promise<any> {
-  const ipfsHash = ipfsUrl.replace("ipfs://", "");
-  const gatewayUrl = `https://ipfs.io/ipfs/${ipfsHash}`;
-
+ async function getMedicalRecordReferenceById(medicalRecordId: string): Promise<MedicalRecordReference> {
   try {
-    const response = await axios.get(gatewayUrl);
-    console.log(response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch from IPFS:", error);
-    throw error;
+    const medicalRecordReference: MedicalRecordReference | null = await MedicalRecordReferenceModel.findOne({
+      id: medicalRecordId,
+    }).exec();
+
+    if(!medicalRecordReference){
+      throw Error();
+    }
+
+    return medicalRecordReference;
+  }
+  catch(error){
+    throw new Error(`Medical Record Reference not found with ID: ${medicalRecordId}`);
   }
 }
