@@ -1,8 +1,15 @@
 import multer from "multer";
 import express, { Request, Response } from "express";
-import { createMedicalRecord, generateId } from "../factories/medicalRecordsFactory";
+import {
+  createMedicalRecord,
+  generateId,
+} from "../factories/medicalRecordsFactory";
 import { Encrypt } from "../services/encrypt";
-import { getFileFromIpfs, addFilesToIpfs, addMedicalRecordToIpfs } from "../storage/ipfs";
+import {
+  getFileFromIpfs,
+  addFilesToIpfs,
+  addMedicalRecordToIpfs,
+} from "../storage/ipfs";
 import {
   getAllMedicalHistoriesByPatientId,
   getFileInfoFromDb,
@@ -38,12 +45,18 @@ router.post(
 
       const filesIncoming = req.files as Express.Multer.File[] | undefined;
 
+      if (!filesIncoming || filesIncoming.length === 0) {
+        return res
+          .status(400)
+          .send(
+            "No files provided. Cannot upload medical record without files."
+          );
+      }
+
       //File info that gets assigned to medicalHistory without the hashes
       let files: FileInfo[] = [];
 
-      //Check if files arrived with payload
-      //if so, upload them to ipfs
-      if (filesIncoming !== undefined) {
+      if (filesIncoming) {
         filesIncoming.forEach((file) => {
           const fileInfo: FileInfo = {
             id: generateId(),
@@ -57,9 +70,11 @@ router.post(
         //File uploading to IPFS
         const fileHashes = await addFilesToIpfs(filesIncoming);
 
-        files.forEach( (file, index) => {
+        files.forEach((file, index) => {
           file.fileHash = fileHashes[index];
-        })
+        });
+        // } else if (filesIncoming == undefined) {
+        //   console.log("No  Files in request");
       }
 
       const medicalRecord = await createMedicalRecord(
@@ -80,7 +95,9 @@ router.post(
       //!! Flow will be different, first upload to our system and then let it go to IPFS?
 
       //Medical record uploading to IPFS
-      const ipfsmedicalRecordHash = await addMedicalRecordToIpfs(encryptedMedicalRecord);
+      const ipfsmedicalRecordHash = await addMedicalRecordToIpfs(
+        encryptedMedicalRecord
+      );
 
       await addMedicalRecordToDb(medicalRecord, ipfsmedicalRecordHash, files);
 
@@ -92,47 +109,53 @@ router.post(
   }
 );
 
-router.get('/:medicalRecordId', async (req, res) => {
+router.get("/:medicalRecordId", async (req, res) => {
   try {
     const { medicalRecordId } = req.params;
     const medicalRecord = await getMedicalRecordById(medicalRecordId);
     if (medicalRecord) {
       res.json(medicalRecord);
     } else {
-      res.status(404).send('Medical record not found');
+      res.status(404).send("Medical record not found");
     }
   } catch (error) {
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-//!! Needs to be updates / changed after full pagination impl
-router.get("/getTenMedicalRecords/:patientId", async (req: Request, res: Response) => {
-  try {
-    const { patientId } = req.params;
-
-    if (typeof patientId !== 'string') {
-      return res.status(400).send("patientId is required and must be a string.");
-    }
-
-    const medicalRecords = await getTenMedicalRecordByPatientId(patientId);
-    if (medicalRecords) {
-      res.status(200).json(medicalRecords);
-    } else {
-      res.status(404).send("No medical records found.");
-    }
-  } catch (error) {
-    console.error("Error fetching medical records:", error);
     res.status(500).send("Internal Server Error");
   }
 });
 
-// This route gets a file using its medical record ID and file ID.
-router.get("/getFile/:medicalRecordId/:fileId", async (req: Request, res: Response) => {
-  try {
+//!! Needs to be updates / changed after full pagination impl
+router.get(
+  "/getTenMedicalRecords/:patientId",
+  async (req: Request, res: Response) => {
+    try {
+      const { patientId } = req.params;
 
-    // Extract passed parameters from the request.
-    const { medicalRecordId, fileId } = req.params;
+      if (typeof patientId !== "string") {
+        return res
+          .status(400)
+          .send("patientId is required and must be a string.");
+      }
+
+      const medicalRecords = await getTenMedicalRecordByPatientId(patientId);
+      if (medicalRecords) {
+        res.status(200).json(medicalRecords);
+      } else {
+        res.status(404).send("No medical records found.");
+      }
+    } catch (error) {
+      console.error("Error fetching medical records:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  }
+);
+
+// This route gets a file using its medical record ID and file ID.
+router.get(
+  "/getFile/:medicalRecordId/:fileId",
+  async (req: Request, res: Response) => {
+    try {
+      // Extract passed parameters from the request.
+      const { medicalRecordId, fileId } = req.params;
 
     if (!medicalRecordId || typeof medicalRecordId !== 'string' || !fileId || typeof fileId !== 'string') {
       return res.status(400).send("Both medicalRecordId and fileId are required and must be strings.");
@@ -140,9 +163,9 @@ router.get("/getFile/:medicalRecordId/:fileId", async (req: Request, res: Respon
 
     const fileInfo: FileInfo = await getFileInfoFromDb(medicalRecordId, fileId);
 
-    // MISSING CODE:
-    // later on, Here should be the decryption logic, since getting file will result into encrypted hash 
-    // It should be connected to mongo CSFLE and use aes-256 as provided in security analysis
+      // MISSING CODE:
+      // later on, Here should be the decryption logic, since getting file will result into encrypted hash
+      // It should be connected to mongo CSFLE and use aes-256 as provided in security analysis
 
     // This tells the client what type of file it's receiving.
     res.setHeader('Content-Type', fileInfo.mimetype);
@@ -167,7 +190,6 @@ router.get("/getFile/:medicalRecordId/:fileId", async (req: Request, res: Respon
 // Get all Medical Histories + pagination
 router.get("/allMedicalHistories", async (req: Request, res: Response) => {
   const { patientId, page, limit } = req.query;
-
 
   if (!patientId || typeof patientId !== "string") {
     return res.status(400).send("Patient ID is required and must be a string.");
