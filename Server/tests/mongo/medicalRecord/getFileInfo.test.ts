@@ -140,24 +140,24 @@ describe('getFileInfoFromDb', () => {
           };
     
         fileInfoCorrect = {
-            id: "fileInfo1TestId123",
-            name: "fileInfo1TestName",
+            id: "fileInfoTestId123",
+            name: "fileInfoTestName",
             mimetype: "fileInfoTestMimeType",
             fileHash: "fileInfoTestHash123",
         };
 
         fileInfoFake1 = {
-            id: "fileInfo2TestId123",
-            name: "fileInfo2TestName",
-            mimetype: "fileInfoTestMimeType",
-            fileHash: "fileInfoTestHash123",
+            id: "fileInfo1TestId123",
+            name: "fileInfo1TestName",
+            mimetype: "fileInfo1TestMimeType",
+            fileHash: "fileInfo1TestHash123",
         };
 
         fileInfoFake2 = {
-            id: "fileInfo3TestId123",
-            name: "fileInfo3TestName",
-            mimetype: "fileInfo3TestMimeType",
-            fileHash: "fileInfo3TestHash123",
+            id: "fileInfo2TestId123",
+            name: "fileInfo2TestName",
+            mimetype: "fileInfo2TestMimeType",
+            fileHash: "fileInfo2TestHash123",
         };
     
         medicalRecordReference = {

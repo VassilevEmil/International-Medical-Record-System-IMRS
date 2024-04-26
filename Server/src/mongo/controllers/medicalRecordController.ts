@@ -89,11 +89,8 @@ export async function getMedicalRecordById(medicalRecordId: string): Promise<Med
 
     return medicalRecord;
   } catch (error) {
-    console.error(
-      `Error fetching medical record with ID: ${medicalRecordId}`,
-      error
-    );
-    throw error;
+    console.error(`Error fetching medical record with ID: ${medicalRecordId}`,error);
+    throw new Error(`Error fetching medical record with ID: ${medicalRecordId}`);
   }
 }
 
