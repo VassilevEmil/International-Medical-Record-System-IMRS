@@ -18,3 +18,8 @@ export enum Country {
     Lithuania = "LITHUANIA",
     Bulgaria = "BULGARIA",
 }
+
+export enum TypoeOfTreament {
+    Medicament = "MEDICAMENT",
+    Other = "OTHER",
+}
