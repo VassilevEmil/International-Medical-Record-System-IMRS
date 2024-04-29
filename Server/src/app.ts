@@ -28,6 +28,7 @@ app.use(cors());
 // Routes
 app.use("/medicalRecords", medicalRecordRoutes);
 app.use("/treatmentPlans", treatmentPlanRoutes);
+// app.use("/getAllTreatmentPlans/:patientId", treatmentPlanRoutes);
 
 // Route using TLS/mTLS
 //app.use('/medicalRecords', validateClientCertificate, medicalRecordRoutes);
