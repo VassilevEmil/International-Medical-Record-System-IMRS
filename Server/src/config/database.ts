@@ -26,3 +26,5 @@ export const connectToTestDatabase = async () => {
     process.exit(1);
   }
 };
+
+export { mongod };
