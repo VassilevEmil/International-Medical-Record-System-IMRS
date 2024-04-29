@@ -110,13 +110,19 @@ router.get("/getMedicalRecords/:patientId", async (req: Request, res: Response) 
   try {
     const { patientId } = req.params;
 
+    const defaultPage = 1;
+    const defaultRecordLimit = 10;
+
+    const page = parseInt(req.query.page as string) || defaultPage;
+    const recordLimit = parseInt(req.query.recordLimit as string) || defaultRecordLimit;
+
     if (typeof patientId !== 'string') {
       return res.status(400).send("patientId is required and must be a string.");
     }
 
-    const medicalRecords = await getMedicalRecordsByPatientId(patientId, 1, 2);
+    const { medicalRecords, total } = await getMedicalRecordsByPatientId(patientId, page, recordLimit);
     if (medicalRecords) {
-      res.status(200).json(medicalRecords);
+      res.status(200).json({medicalRecords, total});
     } else {
       res.status(404).send("No medical records found.");
     }

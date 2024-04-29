@@ -1,4 +1,4 @@
-import { Language, TypeOfRecord } from "../enums"
+import { Language, TypeOfRecord } from "../../enums"
 import { FileInfo } from "./fileInfo"
 import { Institution } from "./institution"
 

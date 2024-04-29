@@ -1,5 +1,5 @@
 import { FileInfo } from "../../models/fileInfo";
-import { MedicalRecord } from "../../models/medicalRecord";
+import { MedicalRecord, MedicalRecordsResponse } from "../../models/medicalRecord";
 import MedicalHistoryModel, {
   MedicalRecordReferenceModel,
 } from "../models/medicalRecordReference";
@@ -97,10 +97,10 @@ export async function getMedicalRecordById(medicalRecordId: string): Promise<Med
 
 export async function getMedicalRecordsByPatientId(
   patientId: string,
-  page: number = 1,
-  limit: number = 10,
+  page: number,
+  limit: number,
   filters?: any // This parameter can be extended later to handle various filters
-): Promise<MedicalRecord[]> {
+): Promise<MedicalRecordsResponse> {
   try {
 
     const query = { patientId, ...filters };
@@ -108,18 +108,18 @@ export async function getMedicalRecordsByPatientId(
 
     const medicalRecordReferences = await MedicalRecordReferenceModel.find(query)
       .sort({ timeStamp: -1 })
-      .skip((page - 1) * limit)
       .limit(limit)
+      .skip((page - 1) * limit)
       .select("medicalRecordHash")
       .exec();
 
-    const fetchedRecords: MedicalRecord[] = await Promise.all(
+    const medicalRecords: MedicalRecord[] = await Promise.all(
       medicalRecordReferences.map(async (reference) => {
         return getMedicalRecordFromIpfs(reference.medicalRecordHash);
       })
     );
 
-    return fetchedRecords;
+    return { medicalRecords, total };
 
   } catch (error) {
     console.error(

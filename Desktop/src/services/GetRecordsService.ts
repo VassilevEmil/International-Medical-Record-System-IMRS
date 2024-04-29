@@ -1,19 +1,27 @@
+import { MedicalRecordsResponse } from "../models/medicalRecord";
+
 interface GetRecordResponse { // need to specify later on, exact data.
     success: boolean;
     message: string;
-    data?: any;
+    data?: MedicalRecordsResponse
   }
   
   export default class GetRecordsService {
     private static apiUrl = "https://localhost:3000/medicalRecords/getMedicalRecords/";
     private static apiUrl2 = "https://localhost:3000/medicalRecords/";
 
-    static async getRecords(patientId: string): Promise<GetRecordResponse> {
-      const urlWithPatientId = this.apiUrl + encodeURIComponent(patientId); // Append the patientId to the apiUrl
+    static async getRecords(patientId: string, page: number, recordLimit: number): Promise<GetRecordResponse> {
+      
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        recordLimit: recordLimit.toString(),
+      });
+
+      const urlWithPatientIdAndParams = `${this.apiUrl}${encodeURIComponent(patientId)}?${queryParams.toString()}`;
+
       try {
-        const response = await fetch(urlWithPatientId, { // Use the complete URL with patientId
+        const response = await fetch(urlWithPatientIdAndParams, { 
           method: "GET",
-          // Headers will be set here, if needed
         });
   
         if (response.ok) {
