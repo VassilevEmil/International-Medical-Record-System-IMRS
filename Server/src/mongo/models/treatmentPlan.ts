@@ -1,8 +1,8 @@
-import mongoose, { Document, Schema, Model } from "mongoose";
-import { TypoeOfTreament } from "../../enums";
+import mongoose, { Schema, model, Document } from 'mongoose';
+import { TypoeOfTreament } from '../../enums';
 
 interface TreatmentPlan extends Document {
-    id: string,
+    id: string;
     patientId: string;
     name: string;
     type: TypoeOfTreament;
@@ -24,31 +24,29 @@ interface TreatmentOther extends TreatmentPlan {
     comment: string;
 }
 
-const TreatmentMedicamentSchema: Schema<TreatmentMedicament> = new Schema({
+const TreatmentPlanSchema: Schema<TreatmentPlan> = new Schema({
+    id: { type: String, required: true},
     patientId: { type: String, required: true },
     name: { type: String, required: true },
     type: { type: String, enum: Object.values(TypoeOfTreament), required: true },
     startTreatmentDate: { type: Date, required: true },
     endTreatmentDate: { type: Date, required: true },
     isActive: { type: Boolean, required: true },
-    timeStamp: { type: Date, required: true },
+    timeStamp: { type: Date, required: true }
+}, { discriminatorKey: 'type' });
+
+const TreatmentPlanModel = model<TreatmentPlan>('TreatmentPlan', TreatmentPlanSchema);
+
+const TreatmentMedicamentModel = TreatmentPlanModel.discriminator<TreatmentMedicament>(TypoeOfTreament.Medicament, new Schema({
     dosage: { type: String, required: true },
     duration: { type: Date, required: true },
     timesToTake: { type: String, required: true },
     comment: { type: String, required: true }
-});
+}));
 
-const TreatmentOtherSchema: Schema<TreatmentOther> = new Schema({
-    patientId: { type: String, required: true },
-    name: { type: String, required: true },
-    type: { type: String, enum: Object.values(TypoeOfTreament), required: true },
-    startTreatmentDate: { type: Date, required: true },
-    endTreatmentDate: { type: Date, required: true },
-    isActive: { type: Boolean, required: true },
-    timeStamp: { type: Date, required: true },
+const TreatmentOtherModel = TreatmentPlanModel.discriminator<TreatmentOther>(TypoeOfTreament.Other, new Schema({
     somethingElse: { type: String, required: true },
     comment: { type: String, required: true }
-});
+}));
 
-export const TreatmentMedicamentModel: Model<TreatmentMedicament> = mongoose.model<TreatmentMedicament>('TreatmentMedicament', TreatmentMedicamentSchema);
-export const TreatmentOtherModel: Model<TreatmentOther> = mongoose.model<TreatmentOther>('TreatmentOther', TreatmentOtherSchema);
+export { TreatmentPlanModel, TreatmentMedicamentModel, TreatmentOtherModel };

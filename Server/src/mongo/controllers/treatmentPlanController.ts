@@ -1,6 +1,7 @@
+import mongoose from "mongoose";
 import { TypoeOfTreament } from "../../enums";
 import { TreatmentMedicament, TreatmentOther } from "../../models/treatmentPlan";
-import { TreatmentMedicamentModel, TreatmentOtherModel } from "../models/treatmentPlan";
+import { TreatmentMedicamentModel, TreatmentOtherModel, TreatmentPlanModel } from "../models/treatmentPlan";
 
 export async function addTreatmentPlanToDb(treatmentPlan: TreatmentMedicament | TreatmentOther): Promise<void> {
     switch (treatmentPlan.type) {
@@ -28,43 +29,36 @@ export async function updateTreatmentPlanIsActiveInDb(treatmentPlan: TreatmentMe
     }
 }
 
-export async function getTreatmentPlanById(type: TypoeOfTreament, treatmentPlanId: string): Promise<TreatmentMedicament | TreatmentOther> {
-    switch (type) {
-        case TypoeOfTreament.Medicament:
-            return await handleGetMedicamentTreatmentById(treatmentPlanId);
-        case TypoeOfTreament.Other:
-            return await handleGetOtherTreatmentById(treatmentPlanId);
-        default:
-            throw new Error('Unknown treatment plan type');
-    }
-}
-
-async function handleGetMedicamentTreatmentById(treatmentPlanId: string): Promise<TreatmentMedicament> {
+export async function getTreatmentPlanById(treatmentPlanId: string): Promise<(TreatmentMedicament | TreatmentOther) | null> {
     try {
-        const treatment: TreatmentMedicament = await findMedicamentTreatmentById(treatmentPlanId);
-        if (!treatment) {
-            console.log('No Medicament treatment found with the given ID');
-            throw Error();
-        }
-        return treatment;
-    } catch (error) {
-        console.error("Error retrieving Medicament treatment", error);
-        throw new Error("Error retrieving Medicament treatment");
-    }
-}
-
-async function handleGetOtherTreatmentById(treatmentPlanId: string): Promise<TreatmentOther> {
-    try {
-        const treatment = await findOtherTreatmentById(treatmentPlanId)
-        if (!treatment) {
+        if (!treatmentPlanId) {
+            console.error('Invalid or empty ID provided');
             throw new Error();
         }
-        return treatment;
+
+        const treatmentPlan = await TreatmentPlanModel.findOne({ id: treatmentPlanId }).exec() as (TreatmentMedicament | TreatmentOther) | null;
+
+        if (!treatmentPlan) {
+            console.error('No treatment plan found with the given ID');
+            throw new Error();
+        }
+
+        return treatmentPlan;
     } catch (error) {
-        console.error("Error retrieving Other treatment", error);
-        throw new Error("Error retrieving Other treatment");
+        console.error('Error fetching treatment plan by custom ID:', error);
+        throw new Error('Error finding treatment plan by id');
     }
 }
+
+// export async function getTreatmentPlansFromDb(patientId: string, page: number, limit: number) {
+//     const skip = (page - 1) * limit;
+//     const treatmentPlans = await TreatmentPlanModel.find({ patientId })
+//         .skip(skip)
+//         .limit(limit)
+//         .exec();
+
+//     const totalCount = await TreatmentPlanModel.countDocuments({ patientId });
+// }
 
 async function handleMedicamentTreatmentUpdatingIsActiveInDb(treatmentPlan: TreatmentMedicament): Promise<void> {
     try {
@@ -108,38 +102,4 @@ async function handleOtherTreatmentStoringToDb(treatmentPlan: TreatmentOther): P
         console.error("Error saving treatmentPlan 'Other'", error);
         throw new Error("Error saving treatmentPlan 'Other'");
     }
-}
-
-async function findMedicamentTreatmentById(treatmentPlanId: string){
-    try {
-        const treatmentPlan: TreatmentMedicament | null = await TreatmentMedicamentModel.findOne({
-          id: treatmentPlanId,
-        }).exec();
-    
-        if(!treatmentPlan){
-          throw Error();
-        }
-    
-        return treatmentPlan;
-      }
-      catch(error){
-        throw new Error(`Treatment Plan not found with ID: ${treatmentPlanId}`);
-      }
-}
-
-async function findOtherTreatmentById(treatmentPlanId: string){
-    try {
-        const treatmentPlan: TreatmentOther | null = await TreatmentOtherModel.findOne({
-          id: treatmentPlanId,
-        }).exec();
-    
-        if(!treatmentPlan){
-          throw Error();
-        }
-    
-        return treatmentPlan;
-      }
-      catch(error){
-        throw new Error(`Treatment Plan not found with ID: ${treatmentPlanId}`);
-      }
 }

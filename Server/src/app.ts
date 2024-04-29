@@ -7,6 +7,7 @@ import {
 import { setupHttpsServer } from "./config/httpsServer";
 import { corsMiddleware } from "./middlewares/corsMiddleware";
 import medicalRecordRoutes from "./routes/medicalRecords";
+import treatmentPlanRoutes from "./routes/treatmentPlan";
 import cors from "cors"; // Import the cors middleware
 
 const app: Application = express();
@@ -26,6 +27,7 @@ app.use(cors());
 
 // Routes
 app.use("/medicalRecords", medicalRecordRoutes);
+app.use("/treatmentPlans", treatmentPlanRoutes);
 
 // Route using TLS/mTLS
 //app.use('/medicalRecords', validateClientCertificate, medicalRecordRoutes);
