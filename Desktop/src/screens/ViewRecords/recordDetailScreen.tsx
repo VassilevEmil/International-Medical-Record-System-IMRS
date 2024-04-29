@@ -72,6 +72,7 @@ const RecordDetailScreen = () => {
         try {
           const response = await GetRecordsService.fetchRecord(id);
           if (response.success && response.data) {
+            setIsLoading(false);
             setRecord(response.data);
           } else {
             console.error("Failed to fetch record:", response.message);

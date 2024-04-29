@@ -13,6 +13,7 @@ import {
   Typography,
   Box,
   CircularProgress,
+  useMediaQuery,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import GetRecordsService from "../../services/GetRecordsService";
@@ -20,37 +21,30 @@ import { useDispatch, useSelector } from "react-redux";
 import { SET_PATIENT_ID } from "../../constants/constants";
 import { RootState } from "../../redux/store";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { MedicalRecord } from "../../models/medicalRecord";
+
+const lightTheme = createTheme({
+  palette: {
+    mode: "light",
+  },
+});
 
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
+    primary: {
+      main: "#90caf9",
+    },
+    background: {
+      default: "#121212",
+      paper: "#1e1e1e",
+    },
+    text: {
+      primary: "#ffffff",
+      secondary: "rgba(255, 255, 255, 0.7)",
+    },
   },
 });
-interface File {
-  id: string;
-  mimetype: string;
-  name: string;
-}
-
-interface Institution {
-  _id: string;
-  institutionId: string;
-}
-
-interface Record {
-  id: string;
-  doctorFirstName: string;
-  doctorLastName: string;
-  patientId: string;
-  doctorId: string;
-  files: File[];
-  institution: Institution;
-  language: string;
-  text: string;
-  timestamp: string;
-  title: string;
-  typeOfRecord: string;
-}
 
 const ViewRecordsScreen = () => {
   // local state to store records | well might need to put it within redux as well,
@@ -58,8 +52,19 @@ const ViewRecordsScreen = () => {
   // since there could be back and forth navigation
   // although maybe store it within redux central state is not exactly necessary, need to figure out.
   // Caveat if store within redux is that it dumps this on client's ram. ~ this is how redux works.
-  const [records, setRecords] = useState<Record[]>([]);
+  const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(() => {
+    const savedPage = sessionStorage.getItem("currentPage");
+    return savedPage ? parseInt(savedPage, 10) : 1;
+  });
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [recordLimit, setRecordLimit] = useState(5);
+
+  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+  const theme = React.useMemo(() => {
+    return prefersDarkMode ? darkTheme : lightTheme;
+  }, [prefersDarkMode]);
 
   // Access searchTerm(Paient id) from store
   const searchTerm = useSelector(
@@ -71,27 +76,29 @@ const ViewRecordsScreen = () => {
 
   const [localSearchTerm, setLocalSearchTerm] = useState("");
 
-  // hook to fetch records when searchTerm changes
   useEffect(() => {
-    console.log("Helllaaaaa", searchTerm);
-    if (searchTerm) {
-      console.log("Helllaaaaa2");
+    fetchRecords(searchTerm, page, recordLimit);
+  }, [searchTerm, page, recordLimit]);
 
-      fetchRecords(searchTerm);
-    }
-  }, [searchTerm]);
-
-  const fetchRecords = async (patientId: string) => {
+  const fetchRecords = async (
+    patientId: string,
+    page: number,
+    recordLimit: number
+  ) => {
     try {
       setIsLoading(true);
-      const response = await GetRecordsService.getRecords(patientId);
-      if (response.success) {
-        setRecords(response.data);
-        console.log(response.data);
+      const response = await GetRecordsService.getRecords(
+        patientId,
+        page,
+        recordLimit
+      );
+      if (response.success && response.data) {
         setIsLoading(false);
+        console.log("hey friend: ", response.data.medicalRecords);
+        setRecords(response.data.medicalRecords);
+        setTotalRecords(response.data.total);
       } else {
         setIsLoading(false);
-        console.error(response.message);
       }
     } catch (error) {
       setIsLoading(false);
@@ -102,7 +109,7 @@ const ViewRecordsScreen = () => {
   };
 
   const handleSearch = () => {
-    setIsLoading(true);
+    setPage(1);
     if (localSearchTerm.trim()) {
       dispatch({
         type: SET_PATIENT_ID,
@@ -119,11 +126,28 @@ const ViewRecordsScreen = () => {
 
   // Function to handle item click
   const handleItemClick = (recordId: string) => {
+    sessionStorage.setItem("currentPage", page.toString());
     navigate(`/record-detail/${recordId}`);
   };
 
+  const handlePreviousClick = () => {
+    if (page > 1) setPage(page - 1);
+  };
+
+  const handleNextClick = () => {
+    if (page < Math.ceil(totalRecords / recordLimit)) setPage(page + 1);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = parseInt(event.target.value, 10);
+    setRecordLimit(value);
+    setPage(1);
+  };
+
   return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={theme}>
       <Container maxWidth="lg">
         <Typography variant="h4" component="h1" gutterBottom>
           Medical Records Dashboard
@@ -162,35 +186,102 @@ const ViewRecordsScreen = () => {
             <CircularProgress />
           </Box>
         ) : (
-          <TableContainer component={Paper}>
-            <Table aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Date of Visit</TableCell>
-                  <TableCell align="right">Reason</TableCell>
-                  <TableCell align="right">Record</TableCell>
-                  <TableCell align="right">Language</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {records.map((record) => (
-                  <TableRow
-                    key={record.id}
-                    hover
-                    onClick={() => handleItemClick(record.id)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <TableCell component="th" scope="row">
-                      {record.timestamp}
-                    </TableCell>
-                    <TableCell align="right">{record.title}</TableCell>
-                    <TableCell align="right">{record.typeOfRecord}</TableCell>
-                    <TableCell align="right">{record.language}</TableCell>
+          <>
+            <TableContainer component={Paper}>
+              <Table aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Record Id</TableCell>
+                    <TableCell align="left">Date</TableCell>
+                    <TableCell align="left">Time</TableCell>
+                    <TableCell align="left">Type</TableCell>
+                    <TableCell align="left">Title</TableCell>
+                    <TableCell align="left">Doctor</TableCell>
+                    <TableCell align="left">Language</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {records.map((record) => (
+                    <TableRow
+                      key={record.id}
+                      hover
+                      onClick={() => handleItemClick(record.id)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <TableCell component="th" scope="row">
+                        {record.id}
+                      </TableCell>
+                      <TableCell align="left">
+                        {new Date(record.timeStamp).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell align="left">
+                        {new Date(record.timeStamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </TableCell>
+                      <TableCell align="left">{record.typeOfRecord}</TableCell>
+                      <TableCell align="left">{record.title}</TableCell>
+                      <TableCell align="left">
+                        {record.doctorFirstName + " " + record.doctorLastName}
+                      </TableCell>
+
+                      <TableCell align="left">{record.language}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                margin: "20px 0",
+              }}
+            >
+              <button
+                onClick={handlePreviousClick}
+                disabled={page === 1}
+                style={{
+                  padding: "6px 12px",
+                  cursor: page === 1 ? "not-allowed" : "pointer",
+                }}
+              >
+                {"<"}
+              </button>
+              <div>
+                Rows per page:
+                <select
+                  value={recordLimit}
+                  onChange={handleChangeRowsPerPage}
+                  style={{ margin: "0 10px" }}
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                </select>
+                {`${(page - 1) * recordLimit + 1}-${Math.min(
+                  page * recordLimit,
+                  totalRecords
+                )} of ${totalRecords}`}
+              </div>
+              <button
+                onClick={handleNextClick}
+                disabled={page >= Math.ceil(totalRecords / recordLimit)}
+                style={{
+                  padding: "6px 12px",
+                  cursor:
+                    page >= Math.ceil(totalRecords / recordLimit)
+                      ? "not-allowed"
+                      : "pointer",
+                }}
+              >
+                {">"}
+              </button>
+            </div>
+          </>
         )}
       </Container>
     </ThemeProvider>
