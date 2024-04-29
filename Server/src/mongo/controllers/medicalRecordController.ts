@@ -11,6 +11,10 @@ export async function addMedicalRecordToDb(
   medicalRecordHash: string,
   fileHash?: FileInfo[]
 ) {
+  if(!medicalRecordHash){
+    throw Error("Medical record hash not provided");
+  }
+
   try {
     const newMedicalRecord = new MedicalRecordReferenceModel({
       id: medicalRecord.id,
@@ -26,6 +30,7 @@ export async function addMedicalRecordToDb(
     console.log("Uploaded medical record to database");
   } catch (error) {
     console.error("Failed to upload medical record to database", error);
+    throw new Error("Failed to upload medical record to database");
   }
 }
 
@@ -39,17 +44,16 @@ export async function addMedicalRecordToDb(
  *
  * @param {string} medicalRecordId - The unique ID of medical record.
  * @param {string} fileId - The unique ID of the file that is associated with specific medical record.
- * @returns {Promise<any>} -  A promise that resolves with a data object containing information and
+ * @returns {Promise<FileInfo>} -  A promise that resolves with a data object containing information and
  * data from the file, such as its hash.
  */
 
 // MARTY: PROMISE ANY IS BYPASS, IT WAS added solely for simulation purposes and quick checks.
 // SHOULD BE REMOVED LATER ON and should be passed a specific promise that results in a specific interface
-
-export async function getFileInfo(
+export async function getFileInfoFromDb(
   medicalRecordId: string,
   fileId: string
-): Promise<any> {
+): Promise<FileInfo> {
   try {
     const medicalRecordReference = await getMedicalRecordReferenceById(medicalRecordId);
 
@@ -65,10 +69,8 @@ export async function getFileInfo(
 
     return fileInfo;
   } catch (error) {
-    console.error(
-      `Failed to get file with ID: ${fileId} from medical record ID: ${medicalRecordId}`
-    );
-    throw error;
+    console.error(`Failed to get file with ID: ${fileId} from medical record ID: ${medicalRecordId}`);
+    throw new Error(`Failed to get file with ID: ${fileId} from medical record ID: ${medicalRecordId}`);
   }
 }
 
@@ -87,11 +89,8 @@ export async function getMedicalRecordById(medicalRecordId: string): Promise<Med
 
     return medicalRecord;
   } catch (error) {
-    console.error(
-      `Error fetching medical record with ID: ${medicalRecordId}`,
-      error
-    );
-    throw error;
+    console.error(`Error fetching medical record with ID: ${medicalRecordId}`,error);
+    throw new Error(`Error fetching medical record with ID: ${medicalRecordId}`);
   }
 }
 

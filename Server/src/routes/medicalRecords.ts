@@ -4,7 +4,7 @@ import { createMedicalRecord, generateId } from "../factories/medicalRecordsFact
 import { Encrypt } from "../services/encrypt";
 import { getFileFromIpfs, addFilesToIpfs, addMedicalRecordToIpfs } from "../storage/ipfs";
 import {
-  getFileInfo,
+  getFileInfoFromDb,
   getMedicalRecordById,
   addMedicalRecordToDb,
   getMedicalRecordsByPatientId,
@@ -140,35 +140,32 @@ router.get("/getFile/:medicalRecordId/:fileId", async (req: Request, res: Respon
     // Extract passed parameters from the request.
     const { medicalRecordId, fileId } = req.params;
 
-    // Check if both IDs are provided and are strings. If not, send a 400 error.
     if (!medicalRecordId || typeof medicalRecordId !== 'string' || !fileId || typeof fileId !== 'string') {
       return res.status(400).send("Both medicalRecordId and fileId are required and must be strings.");
     }
 
-    // Get file information from the database  using the IDs.
-    const fileInfo = await getFileInfo(medicalRecordId, fileId);
+    const fileInfo: FileInfo = await getFileInfoFromDb(medicalRecordId, fileId);
 
     // MISSING CODE:
     // later on, Here should be the decryption logic, since getting file will result into encrypted hash 
     // It should be connected to mongo CSFLE and use aes-256 as provided in security analysis
 
-    // Set the Content-Type header based on the file MIME type
     // This tells the client what type of file it's receiving.
     res.setHeader('Content-Type', fileInfo.mimetype);
 
     // Fetch the file as a stream from IPFS
     // Pass the actual IPFS access hash 
-    const ipfsStream = await getFileFromIpfs(fileInfo.fileHash);
+    if(fileInfo.fileHash){
+      const ipfsStream = await getFileFromIpfs(fileInfo.fileHash);
 
-    // Pipe the IPFS file stream directly to a response (streaming data directly to the client)
-    // Pipe does not store entire file in server memory
-    // Especially good for large files or constant file acess
-    ipfsStream.pipe(res);
-
+      // Pipe the IPFS file stream directly to a response (streaming data directly to the client)
+      // Pipe does not store entire file in server memory
+      // Especially good for large files or constant file acess
+      ipfsStream.pipe(res);
+    }
   } catch (error) {
     console.error("Error getting file: ", error);
     res.status(500).send("Could not get the file");
   }
 });
-
 export default router;
