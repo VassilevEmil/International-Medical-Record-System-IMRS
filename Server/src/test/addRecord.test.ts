@@ -9,7 +9,21 @@ afterAll(async () => {
   await mongoose.disconnect();
 });
 
-// test for adding a record successfully
+/**
+ * This test case checks if a record can be successfully added to the database.
+ *
+ * It sends a POST request to the /medicalRecords endpoint with valid data, including
+ * institutionId, patientId, title, textInput, typeOfRecord, doctorId, doctorFirstName,
+ * doctorLastName, and language. It also attaches two files to the request.
+ *
+ * Upon successful addition of the record, it expects the response status to be 201.
+ *
+ * @param {Object} requestBody - The request body containing data for creating the medical record.
+ * @param {Buffer} file1 - The first file to be attached to the request.
+ * @param {Buffer} file2 - The second file to be attached to the request.
+ * @returns {Promise<void>} - A promise that resolves when the test completes.
+ *
+ */
 
 describe("add record", () => {
   describe("get document route", () => {
@@ -51,7 +65,19 @@ describe("add record", () => {
   });
 });
 
-// test for unsuccessfull  additions of records
+/**
+ * This test case checks if a record addition fails when invalid data is provided.
+ *
+ * It sends a POST request to the /medicalRecords endpoint with incomplete or invalid data,
+ * such as missing document fields or incorrect data types.
+ *
+ * Upon receiving invalid data, it expects the response status to be 400, indicating a bad request.
+ *
+ * @param {Object} requestBody - The request body containing incomplete or invalid data for creating the medical record.
+ * @returns {Promise<void>} - A promise that resolves when the test completes.
+ *
+ */
+
 describe("add record  with invalid data", () => {
   describe("POST /medicalRecords", () => {
     it("should return a 400 if document is not provided", async () => {
