@@ -33,7 +33,6 @@ async function dataPopulationForTesting(){
     // TLS certificates
     await addTLSCertificate(process.env.TEST_FINGERPRINT_TLS as string, institution);
 
-
     // Patients
     const patient1: Patient = {
         id: "100",
