@@ -1,21 +1,20 @@
 import express, { Request, Response } from "express";
 import {
-  addTreatmentPlanToDb,
-  getTreatmentPlanById,
-  getAllTreatmentPlans,
-} from "../mongo/controllers/treatmentPlanController";
+  getAllDrugRecords,
+  addDrugRecordToDb,
+} from "../mongo/controllers/drugRecordController";
 
 const router = express.Router();
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const { treatmentPlan } = req.body;
+    const { drugRecord } = req.body;
 
-    if (!treatmentPlan) {
+    if (!drugRecord) {
       return res.status(400).send("No treatment plan provided");
     }
 
-    await addTreatmentPlanToDb(treatmentPlan);
+    await addDrugRecordToDb(drugRecord);
 
     res.status(201).send("Treatment plan added successfully");
   } catch (error) {
@@ -25,7 +24,7 @@ router.post("/", async (req: Request, res: Response) => {
 });
 
 router.get(
-  "/getAllTreatmentPlans/:patientId",
+  "/getAllDrugRecords/:patientId",
   async (req: Request, res: Response) => {
     try {
       const { patientId } = req.params;
@@ -33,8 +32,8 @@ router.get(
       if (!patientId) {
         throw new Error("Patient ID is missing");
       }
-      const treatmentPlans = await getAllTreatmentPlans(patientId);
-      res.json(treatmentPlans);
+      const drugRecords = await getAllDrugRecords(patientId);
+      res.json(drugRecords);
     } catch (error) {
       console.error("Failed to fetch treatment plans:", error);
       res.status(500).send("Failed to fetch treatment plans");
@@ -42,22 +41,22 @@ router.get(
   }
 );
 
-router.get("/:treatmentPlanId", async (req: Request, res: Response) => {
-  try {
-    const { treatmentPlanId } = req.params;
+// router.get("/:treatmentPlanId", async (req: Request, res: Response) => {
+//   try {
+//     const { treatmentPlanId } = req.params;
 
-    if (!treatmentPlanId) {
-      return res.status(400).send("No treatment plan id provided");
-    }
+//     if (!treatmentPlanId) {
+//       return res.status(400).send("No treatment plan id provided");
+//     }
 
-    const treatmentPlan = await getTreatmentPlanById(treatmentPlanId);
+//     const treatmentPlan = await getTreatmentPlanById(treatmentPlanId);
 
-    res.json(treatmentPlan);
-  } catch (error) {
-    console.error("Failed to add treatment plan:", error);
-    res.status(500).send("Failed to add treatment plan");
-  }
-});
+//     res.json(treatmentPlan);
+//   } catch (error) {
+//     console.error("Failed to add treatment plan:", error);
+//     res.status(500).send("Failed to add treatment plan");
+//   }
+// });
 
 // router.get("/getTreatmentPlans/:patientId", async (req, res) => {
 //     const patientId = req.params.patientId;
