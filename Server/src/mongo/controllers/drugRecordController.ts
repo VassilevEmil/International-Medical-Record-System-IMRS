@@ -47,20 +47,20 @@ export async function getAllDrugRecords(
       throw new Error();
     }
 
-    const treatmentPlan = await DrugRecordModel.find({
+    const drugRecords = await DrugRecordModel.find({
       patientId: patientId,
     }).exec();
 
-    console.log("plaaaaaaaaaaans: ", treatmentPlan);
+    console.log("records: ", drugRecords);
 
-    if (!treatmentPlan) {
-      console.error("No treatment plan for this user");
+    if (!drugRecords) {
+      console.error("No drug records for this user");
       throw new Error();
     }
 
-    return treatmentPlan;
+    return drugRecords;
   } catch (error) {
-    console.error("Error fetching treatment plan by custom ID:", error);
-    throw new Error("Error finding treatment plan by id");
+    console.error("Error drug records by custom ID:", error);
+    throw new Error("Error finding drug records by id");
   }
 }
