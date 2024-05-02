@@ -8,6 +8,7 @@ import { setupHttpsServer } from "./config/httpsServer";
 import { corsMiddleware } from "./middlewares/corsMiddleware";
 import medicalRecordRoutes from "./routes/medicalRecords";
 import cors from "cors"; // Import the cors middleware
+import { ipFilterMiddleware } from "./middlewares/ipFilterMiddleware";
 
 const app: Application = express();
 
@@ -21,6 +22,7 @@ if (process.env.NODE_ENV === "test") {
 // Middlewares
 app.use(express.json());
 app.use(cors());
+app.use(ipFilterMiddleware);
 
 // Routes
 app.use("/medicalRecords", medicalRecordRoutes);
