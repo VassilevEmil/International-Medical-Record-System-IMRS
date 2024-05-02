@@ -12,6 +12,9 @@ export default class UploadRecordService {
     try {
       console.log("SENT DATA: ", formData);
       const response = await fetch(this.apiUrl, {
+        headers: {
+          'x-api-key': import.meta.env.VITE_API_KEY || '',
+        },
         method: "POST",
         body: formData,
         //'Content-Type' will be set automatically when using FormData

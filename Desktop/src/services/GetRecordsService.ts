@@ -21,6 +21,9 @@ interface GetRecordResponse { // need to specify later on, exact data.
 
       try {
         const response = await fetch(urlWithPatientIdAndParams, { 
+          headers: {
+            'x-api-key': import.meta.env.VITE_API_KEY || '',
+          },
           method: "GET",
         });
   
@@ -53,6 +56,9 @@ interface GetRecordResponse { // need to specify later on, exact data.
       const urlWithRecordId = this.apiUrl2 + encodeURIComponent(recordId);
       try {
         const response = await fetch(urlWithRecordId, { 
+          headers: {
+            'x-api-key': import.meta.env.VITE_API_KEY || '',
+          },
           method: "GET",
         });
   

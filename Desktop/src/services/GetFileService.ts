@@ -29,6 +29,9 @@ export default class GetFileService {
     
     try {
       const response = await fetch(url, {
+        headers: {
+          'x-api-key': import.meta.env.VITE_API_KEY || '',
+        },
         method: "GET",
       });
 
