@@ -5,6 +5,7 @@
         <domain-config cleartextTrafficPermitted="true">
             <domain includeSubdomains="false">127.0.0.1</domain>
             <domain includeSubdomains="false">10.0.0.1</domain>
+           
             <domain includeSubdomains="false">localhost</domain>
             <base-config cleartextTrafficPermitted="true"/>
         </domain-config>

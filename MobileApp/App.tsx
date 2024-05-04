@@ -12,10 +12,12 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 // Screens
 import MedicalRecordsScreen from "./screens/MedicalRecordsScreen";
 import HomeScreen from "./screens/HomeScreen";
+import MedicalPlanScreen from './screens/MedicalPlanScreen'
 
 // Redux configuration imports
 import store from "./redux/store";
 import { Provider } from "react-redux";
+import { UseSelector } from "react-redux";
 
 const Tab = createBottomTabNavigator();
 
@@ -26,15 +28,17 @@ function App() {
         <Tab.Navigator
           screenOptions={({ route }) => ({
             tabBarIcon: ({ focused, color, size }) => {
-              let iconName;
+              let iconName = "home"; // Default icon name
 
               if (route.name === "Home") {
                 iconName = focused ? "home" : "home-outline";
               } else if (route.name === "MedicalRecords") {
-                iconName = focused ? "list" : "list"; // change later, cant find normal one
+                iconName = focused ? "list" : "list";
+              } else if (route.name === "MedicalPlan") {
+                iconName = focused ? "medkit" : "medkit-outline"; 
               }
-
-              // You can return any component that you like here!
+              
+              // Return the Ionicons component with the determined icon name
               return <Ionicons name={iconName} size={size} color={color} />;
             },
             tabBarActiveTintColor: "blue",
@@ -45,12 +49,17 @@ function App() {
           <Tab.Screen
             name="Home"
             component={HomeScreen}
-            options={{ tabBarLabel: "Home" }}
+            options={{ tabBarLabel: "Home1" }}
           />
           <Tab.Screen
             name="MedicalRecords"
             component={MedicalRecordsScreen}
-            options={{ tabBarLabel: "Records" }}
+            options={{ tabBarLabel: "Records1" }}
+          />
+         <Tab.Screen
+            name="MedicalPlan"
+            component={() => <MedicalPlanScreen patientId={"123"} />}
+            options={{ tabBarLabel: "MedPlan" }}
           />
           {/* ... add other tabs/screens as needed ... */}
         </Tab.Navigator>

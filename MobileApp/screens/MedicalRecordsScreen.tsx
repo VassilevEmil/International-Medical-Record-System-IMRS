@@ -36,22 +36,7 @@ const MedicalRecordsScreen = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.yearSection}>
-        <Text style={styles.yearText}>2023</Text>
-      </View>
-      <TouchableOpacity style={styles.recordItem}>
-        <Icon name="flask-outline" size={24} color="black" />
-        <View style={styles.recordContent}>
-          <Text style={styles.recordTitle}>Test - Blood test</Text>
-          <Text style={styles.recordSubtitle}>
-            Highland creek Hospital, Schkeuditz
-          </Text>
-          <Text style={styles.recordAction}>Test results</Text>
-        </View>
-        <MaterialIcon name="navigate-next" size={24} color="black" />
-      </TouchableOpacity>
-    </ScrollView>
+    <></>
   );
 };
 

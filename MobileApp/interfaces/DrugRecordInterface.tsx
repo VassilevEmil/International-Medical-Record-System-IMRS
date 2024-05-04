@@ -1,0 +1,3 @@
+interface DrugRecordsScreenProps {
+    patientId: string;
+  }
