@@ -41,17 +41,6 @@ interface GetRecordResponse {
           };
         }
       } catch (error) {
-        console.error('2Network error:', error);
-        console.error('2Error status:', error.status);
-        console.error('2Error headers:', error.headers);
-    
-        // Attempt to read more details from the error object
-        if (error instanceof Error) {
-          console.error('Error message:', error.message);
-        } else if (typeof error === 'object') {
-          console.error('Error details:', JSON.stringify(error));
-        }
-    
         return {
           success: false,
           message: `Record fetch failed: ${error instanceof Error ? error.message : 'A network error occurred'}`,
