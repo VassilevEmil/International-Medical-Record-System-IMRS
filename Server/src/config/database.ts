@@ -6,7 +6,7 @@ export const connectToProductionDatabase = async () => {
   try {
     const mongoDBUri: string = process.env.MONGODB_URI as string;
     await mongoose.connect(mongoDBUri, {});
-    console.log("Successfully connected to MongoDB.");
+    console.log("Successfully connected to MongoDB from PROD.");
   } catch (err) {
     console.error("MongoDB connection error:", err);
     process.exit(1);
