@@ -13,6 +13,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import MedicalRecordsScreen from "./screens/MedicalRecordsScreen";
 import HomeScreen from "./screens/HomeScreen";
 import MedicalPlanScreen from './screens/MedicalPlanScreen'
+// import MedPlanDetailsScreen from './screens/MedPlanDetailsScreen'
 
 // Redux configuration imports
 import store from "./redux/store";
@@ -49,12 +50,12 @@ function App() {
           <Tab.Screen
             name="Home"
             component={HomeScreen}
-            options={{ tabBarLabel: "Home1" }}
+            options={{ tabBarLabel: "Home" }}
           />
           <Tab.Screen
             name="MedicalRecords"
             component={MedicalRecordsScreen}
-            options={{ tabBarLabel: "Records1" }}
+            options={{ tabBarLabel: "Records" }}
           />
          <Tab.Screen
             name="MedicalPlan"
