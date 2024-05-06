@@ -1,6 +1,6 @@
 import { MedicalRecordsResponse } from "../models/medicalRecord";
 
-interface GetRecordResponse { // need to specify later on, exact data.
+interface GetRecordResponse { 
     success: boolean;
     message: string;
     data?: MedicalRecordsResponse
@@ -26,6 +26,7 @@ interface GetRecordResponse { // need to specify later on, exact data.
   
         if (response.ok) {
           const data = await response.json();
+          console.log(data);
           return {
             success: true,
             message: "Records fetched successfully",
@@ -40,10 +41,9 @@ interface GetRecordResponse { // need to specify later on, exact data.
           };
         }
       } catch (error) {
-        // network errors
         return {
           success: false,
-          message: `Record fetch failed: ${error instanceof Error ? error.message : error}`,
+          message: `Record fetch failed: ${error instanceof Error ? error.message : 'A network error occurred'}`,
         };
       }
     }
