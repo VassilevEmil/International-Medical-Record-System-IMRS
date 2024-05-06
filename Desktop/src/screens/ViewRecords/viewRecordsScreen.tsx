@@ -94,7 +94,6 @@ const ViewRecordsScreen = () => {
       );
       if (response.success && response.data) {
         setIsLoading(false);
-        console.log("hey friend: ", response.data.medicalRecords);
         setRecords(response.data.medicalRecords);
         setTotalRecords(response.data.total);
       } else {
