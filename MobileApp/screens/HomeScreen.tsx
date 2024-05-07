@@ -10,7 +10,7 @@ import {
 function HomeScreen() {
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>Home Screenfsdfsdfsdfsdfsedfsdfsd</Text>
+      <Text>Home Screen</Text>
     </View>
   );
 }
