@@ -30,8 +30,8 @@ const MedicalRecordsScreen = () => {
       const response = await GetRecordsService.getRecords(233, 1, 10); // Hardcoded for now // until reg and login is implemented
 
       if (response.success && response.data) {
-        // const grouped = groupRecordsByYear(response.data.medicalRecords);
-        setGroupedRecords(response);
+        const grouped = groupRecordsByYear(response.data.medicalRecords);
+        setGroupedRecords(grouped);
       }
     } catch (error) {
       console.error(
