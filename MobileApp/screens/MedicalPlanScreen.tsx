@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity, Button } from "react-native";
 import GetDrugsService from "../services/GetDrugRecordsService";
-// import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/Ionicons";
+// import { Ionicons } from "react-native-vector-icons/Ionicon";
+
 
 const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
  
   const [drugRecords, setDrugRecords] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  // const navigation = useNavigation();
+  const [expandedRecordIndex, setExpandedRecordIndex] = useState<number | null>(
+    null);
+  const navigation = useNavigation();
 
   
   useEffect(() => {
@@ -21,7 +26,7 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
           10
         );
         if (response.success && response.data) {
-          console.log("nigaaaaaaaaaaaaaa", response.data);
+          console.log("nigaaaaaaaaaaaaa", response.data);
           
           setDrugRecords(response.data);
           setIsLoading(false);
@@ -40,36 +45,57 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
     fetchDrugRecords();
   }, [patientId]);
 
-  // will do lateer
-  // Function to handle press on a record
-  // const handleRecordPress = (record) => {
-  //   navigation.navigate("RecordDetails", { record }); 
+  // will do lateer - actually might not need it 
+  //  // Function to handle press on a record
+  //  const handleRecordPress = (record) => {
+  //   navigation.navigate("MedPlanDetailsScreen", { record: record }); 
   // };
+  
+  const toggleRecordExpansion = (index: number) => {
+    setExpandedRecordIndex((prevIndex) =>
+      prevIndex === index ? null : index
+    );
+  };
 
   return (
     <View style={styles.container}>
-      {isLoading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : error ? (
-        <Text>{error}</Text>
-      ) : drugRecords.length === 0 ? (
-        <Text>No drug records available</Text>
-      ) : (
-        drugRecords.map((record, index) => (
-         // <TouchableOpacity key={index} onPress={() => handleRecordPress(record)}>
-            <View style={styles.recordItem}>
+      {drugRecords.map((record, index) => (
+        <TouchableOpacity
+          key={index}
+          activeOpacity={0.9}
+          onPress={() => toggleRecordExpansion(index)}
+        >
+          <View style={styles.recordItem}>
+            <View style={styles.recordHeader}>
               <Text style={styles.recordTitle}>{record.nameOfDrug}</Text>
-              <Text style={styles.recordSubtitle}>
-                Start Date: {record.startTreatmentDate}
-              </Text>
-              <Text style={styles.recordSubtitle}>
-                Duration: {record.duration} {record.durationType}
-              </Text>
-              <Text style={styles.recordSubtitle}>Comment: {record.comment}</Text>
+              <TouchableOpacity onPress={() => toggleRecordExpansion(index)}>
+                <Icon
+                  name={
+                    expandedRecordIndex === index
+                      ? "caret-down-outline"
+                      : "caret-forward-outline"
+                  }
+                  size={24}
+                  color="black"
+                />
+              </TouchableOpacity>
             </View>
-         // </TouchableOpacity>
-        ))
-      )}
+            {expandedRecordIndex === index && (
+              <View style={styles.expandedContent}>
+                <Text style={styles.recordSubtitle}>
+                  Start Date: {record.startTreatmentDate}
+                </Text>
+                <Text style={styles.recordSubtitle}>
+                  Duration: {record.duration} {record.durationType}
+                </Text>
+                <Text style={styles.recordSubtitle}>
+                  Comment: {record.comment}
+                </Text>
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
+      ))}
     </View>
   );
 };
@@ -87,6 +113,11 @@ const styles = StyleSheet.create({
     margin: 10,
     elevation: 1,
   },
+  recordHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   recordTitle: {
     color: "#000000",
     fontWeight: "bold",
@@ -97,6 +128,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#838383",
     marginBottom: 5,
+  },
+  expandedContent: {
+    marginTop: 10,
   },
 });
 export default MedicalPlanScreen;

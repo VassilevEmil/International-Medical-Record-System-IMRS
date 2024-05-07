@@ -1,26 +1,17 @@
-// Default react imports
 import * as React from "react";
-import { View, Text } from "react-native";
-
-// Navigation
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-
-// Icon
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Ionicons from "react-native-vector-icons/Ionicons";
-
-// Screens
-import MedicalRecordsScreen from "./screens/MedicalRecordsScreen";
-import HomeScreen from "./screens/HomeScreen";
 import MedicalPlanScreen from './screens/MedicalPlanScreen'
-// import MedPlanDetailsScreen from './screens/MedPlanDetailsScreen'
 
-// Redux configuration imports
-import store from "./redux/store";
+import HomeScreen from "./screens/HomeScreen";
+import MedicalRecordsScreen from "./screens/MedicalRecordsScreen";
 import { Provider } from "react-redux";
-import { UseSelector } from "react-redux";
+import store from "./redux/store";
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 function App() {
   return (
@@ -29,8 +20,7 @@ function App() {
         <Tab.Navigator
           screenOptions={({ route }) => ({
             tabBarIcon: ({ focused, color, size }) => {
-              let iconName = "home"; // Default icon name
-
+              let iconName = "home";
               if (route.name === "Home") {
                 iconName = focused ? "home" : "home-outline";
               } else if (route.name === "MedicalRecords") {
@@ -38,15 +28,12 @@ function App() {
               } else if (route.name === "MedicalPlan") {
                 iconName = focused ? "medkit" : "medkit-outline"; 
               }
-              
-              // Return the Ionicons component with the determined icon name
               return <Ionicons name={iconName} size={size} color={color} />;
             },
             tabBarActiveTintColor: "blue",
             tabBarInactiveTintColor: "gray",
           })}
         >
-          {/* ... START OF THE TAB COMPONENTS ... */}
           <Tab.Screen
             name="Home"
             component={HomeScreen}
@@ -57,16 +44,35 @@ function App() {
             component={MedicalRecordsScreen}
             options={{ tabBarLabel: "Records" }}
           />
-         <Tab.Screen
+            <Tab.Screen
             name="MedicalPlan"
-            component={() => <MedicalPlanScreen patientId={"123"} />}
             options={{ tabBarLabel: "MedPlan" }}
-          />
-          {/* ... add other tabs/screens as needed ... */}
+          >
+            {() => <MedicalPlanScreen patientId={"123"} />}
+          </Tab.Screen>
         </Tab.Navigator>
       </NavigationContainer>
     </Provider>
   );
 }
 
+// no need for this for now, wont remove it for now
+
+// function MedicalPlanStack() {
+//   const patientId = "123"; 
+//   return (
+//     <Stack.Navigator>
+     
+//       <Stack.Screen
+//         name="MedPlanDetailsScreen"
+//         component={MedPlanDetailsScreen}
+//       />
+//        <Stack.Screen
+//         name="MedicalPlan11"
+//         component={() => <MedicalPlanScreen patientId={patientId} />} 
+//         options={{ headerShown: false }}
+//       />
+//     </Stack.Navigator>
+//   );
+// }
 export default App;
