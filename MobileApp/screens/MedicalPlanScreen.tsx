@@ -3,8 +3,8 @@ import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity, Button } f
 import GetDrugsService from "../services/GetDrugRecordsService";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
-// import { Ionicons } from "react-native-vector-icons/Ionicon";
-
+import IconFace from "react-native-vector-icons/FontAwesome";
+import { ScrollView } from 'react-native';
 
 const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
  
@@ -58,6 +58,7 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
   };
 
   return (
+    <ScrollView>
     <View style={styles.container}>
       {drugRecords.map((record, index) => (
         <TouchableOpacity
@@ -65,9 +66,19 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
           activeOpacity={0.9}
           onPress={() => toggleRecordExpansion(index)}
         >
-          <View style={styles.recordItem}>
+          <View
+            style={[
+              styles.recordItem,
+              expandedRecordIndex === index && styles.selectedRecord,
+            ]}
+          >
             <View style={styles.recordHeader}>
-              <Text style={styles.recordTitle}>{record.nameOfDrug}</Text>
+              <View>
+                <Text style={styles.recordTitle}>{record.nameOfDrug}  </Text>
+                <Text style={styles.recordSubtitle}>
+                  {record.duration} {record.durationType}
+                </Text>
+              </View>
               <TouchableOpacity onPress={() => toggleRecordExpansion(index)}>
                 <Icon
                   name={
@@ -81,22 +92,42 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
               </TouchableOpacity>
             </View>
             {expandedRecordIndex === index && (
-              <View style={styles.expandedContent}>
-                <Text style={styles.recordSubtitle}>
-                  Start Date: {record.startTreatmentDate}
+               <View  style={styles.expandedContent}>
+               <Text style={styles.recordSubtitle}>
+                <Text style={styles.boldText}>Start Date:</Text>{" "}
+                  {record.startTreatmentDate} {"                                                         "} {}
+                    <Text style={styles.boldText}>Duration:</Text>{" "}
+                      {record.duration} {record.durationType} {"\n"}
                 </Text>
                 <Text style={styles.recordSubtitle}>
-                  Duration: {record.duration} {record.durationType}
-                </Text>
-                <Text style={styles.recordSubtitle}>
-                  Comment: {record.comment}
-                </Text>
+                  <Text style={styles.boldText}>Comment:</Text>{"\n \n"} {}
+                   <Text>{record.comment}</Text> {"\n"}
+                    </Text>
+                    <View style={styles.progressContainer}>
+                      <Text>Progress</Text>
+              {/* Progress Bar */}
+              {/* Logic for the progress bar will be implemented later */}
+              <View style={styles.progressBar}></View>
+            </View>
+            <Text style={styles.reminderText}>Reminder: {record.reminder} {"      "} {"plain text for now"} {"\n"}</Text>
+           
+                {/* <Text>
+                  <Text style={styles.boldText}>Prescribed by:</Text>{" "}
+                  {record.prescribedBy} on {record.timeStamp}
+                </Text> */}
+
+            <Text style={styles.recordSubtitle}>
+            <IconFace name="user-md" size={20} color="blue" />{"   "}
+ 
+              {record.prescribedBy} on {record.timeStamp}
+              </Text>
               </View>
             )}
           </View>
         </TouchableOpacity>
       ))}
     </View>
+    </ScrollView>
   );
 };
 
@@ -105,13 +136,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f1f1f1",
+    paddingHorizontal: 10,
   },
   recordItem: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "white",
     borderRadius: 18,
-    padding: 10,
-    margin: 10,
+    padding: 15,
+    marginVertical: 10,
     elevation: 1,
+  },
+
+  // dont like it how it is, will just 
+
+  selectedRecord: {
+    backgroundColor: "",
   },
   recordHeader: {
     flexDirection: "row",
@@ -119,7 +157,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   recordTitle: {
-    color: "#000000",
     fontWeight: "bold",
     fontSize: 18,
     marginBottom: 5,
@@ -132,5 +169,27 @@ const styles = StyleSheet.create({
   expandedContent: {
     marginTop: 10,
   },
+  boldText: {
+    fontWeight: "bold",
+  },
+  progressContainer: {
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  progressBar: {
+    width: "100%",
+    height: 10,
+    backgroundColor: "lightblue",
+    borderRadius: 5,
+    // Add more styles as needed
+  },
+  reminderText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "blue",
+    // Add more styles as needed
+  },
 });
 export default MedicalPlanScreen;
+
