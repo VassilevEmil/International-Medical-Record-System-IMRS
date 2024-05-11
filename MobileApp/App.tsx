@@ -9,11 +9,13 @@ import HomeScreen from "./screens/HomeScreen";
 import MedicalRecordsScreen from "./screens/MedicalRecordsScreen";
 import { Provider } from "react-redux";
 import store from "./redux/store";
+import { useEffect } from "react";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function App() {
+
   return (
     <Provider store={store}>
       <NavigationContainer>
@@ -56,23 +58,5 @@ function App() {
   );
 }
 
-// no need for this for now, wont remove it for now
 
-// function MedicalPlanStack() {
-//   const patientId = "123"; 
-//   return (
-//     <Stack.Navigator>
-     
-//       <Stack.Screen
-//         name="MedPlanDetailsScreen"
-//         component={MedPlanDetailsScreen}
-//       />
-//        <Stack.Screen
-//         name="MedicalPlan11"
-//         component={() => <MedicalPlanScreen patientId={patientId} />} 
-//         options={{ headerShown: false }}
-//       />
-//     </Stack.Navigator>
-//   );
-// }
 export default App;

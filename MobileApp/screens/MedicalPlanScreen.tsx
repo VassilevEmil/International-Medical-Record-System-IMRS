@@ -6,8 +6,9 @@ import Icon from "react-native-vector-icons/Ionicons";
 import IconFace from "react-native-vector-icons/FontAwesome";
 import { ScrollView } from 'react-native';
 import ProgressContainer from "../Components/ProgressContainer";
-
-
+import PushNotification from 'react-native-push-notification';
+import Reminder from "../Components/Reminder";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
@@ -19,53 +20,74 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
 
   useEffect(() => {
     const fetchDrugRecords = async () => {
-      setIsLoading(true);
       try {
         const response = await GetDrugsService.fetchDrugRecordsByPatientId("123", 1, 10);
         if (response.success && response.data) {
           setDrugRecords(response.data);
-          setIsLoading(false);
-
-          // response.data.forEach((record, index) => {
-          //   const durationInMilliseconds = calculateDurationInMilliseconds(record);
-          //   const notificationTime = new Date(Date.now() + durationInMilliseconds);
-          //   const notificationMessage = `Time to take ${record.nameOfDrug}`;
-
-          //  // PushNotification.localNotificationSchedule({
-          //     message: notificationMessage,
-          //     date: notificationTime,
-          //   });
-          // });
-
-        } else {
-          setError(response.message);
-          setIsLoading(false);
+          
         }
       } catch (error) {
-        console.error(error instanceof Error ? error.message : "An unknown error occurred");
-        setError("An error occurred while fetching records");
-        setIsLoading(false);
+        console.error("An error occurred while fetching records", error);
       }
+
+      
     };
     fetchDrugRecords();
+    
+    
+    
+   
   }, [patientId]);
 
-  // const calculateDurationInMilliseconds = (record) => {
-  //   let durationInMilliseconds = 0;
-  //   switch (record.durationType) {
-  //     case 'minutes':
-  //       durationInMilliseconds = record.duration * 60 * 1000;
-  //       break;
-  //     case 'hours':
-  //       durationInMilliseconds = record.duration * 60 * 60 * 1000;
-  //       break;
-  //     case 'days':
-  //       durationInMilliseconds = record.duration * 24 * 60 * 60 * 1000;
-  //       break;
-     
-  //   }
-  //   return durationInMilliseconds;
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // this is moved to another component
+  // WILL NOT DELETE IT FOR NOW!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // WILL DELETE IT AT THE END OF THE PROJECT WHEN IM SURE ITS TESTED MANY TIMES AND WORKs
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  // const scheduleReminderNotifications = async (records: any[]) => {
+  //   records.forEach(async (record, index) => {
+  //     const durationInMilliseconds = calculateDurationInMilliseconds(record);
+  //     const notificationTime = new Date(Date.parse(record.startTreatmentDate) + durationInMilliseconds);
+  //     const notificationMessage = `Time to take ${record.nameOfDrug}`;
+      
+  //     try {
+        
+  //       const reminderData = {
+  //         record,
+  //         selectedDate: notificationTime,
+  //         selectedTime: notificationTime,
+  //       };
+  //       await AsyncStorage.setItem('reminder', JSON.stringify(reminderData));
+  
+  //       // Schedule the push notification for the specified date and time
+  //       PushNotification.localNotificationSchedule({
+  //         message: notificationMessage,
+  //         date: notificationTime,
+  //       });
+  //       console.log('Reminder has been set for:', notificationTime);
+  //     } catch (error) {
+  //       console.error('Error setting reminder:', error);
+  //     }
+  //   });
   // };
+
+  const calculateDurationInMilliseconds = (record) => {
+    let durationInMilliseconds = 0;
+    switch (record.durationType) {
+      case 'minutes':
+        durationInMilliseconds = record.duration * 60 * 1000;
+        break;
+      case 'hours':
+        durationInMilliseconds = record.duration * 60 * 60 * 1000;
+        break;
+      case 'days':
+        durationInMilliseconds = record.duration * 24 * 60 * 60 * 1000;
+        break;
+     
+    }
+    return durationInMilliseconds;
+  };
   
 
   const toggleRecordExpansion = (index: number) => {
@@ -86,6 +108,15 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
     const formattedDate = `${date.getDate()} ${date.toLocaleString('en-US', { month: 'long' })} ${date.getFullYear()}`;
     const formattedTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     return `${formattedDate} at ${formattedTime}`;
+  };
+
+  const handleReminderSet = (record, selectedDate, selectedTime) => {
+
+    const notificationDateTime = new Date(selectedDate);
+    notificationDateTime.setHours(selectedTime.getHours());
+    notificationDateTime.setMinutes(selectedTime.getMinutes());
+  
+
   };
 
   return (
@@ -137,9 +168,12 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
                     {isExpanded && (
                       <ProgressContainer progress={calculateProgress(record)} />
                     )}
-                    <Text style={styles.reminderText}>
-                      Reminder: {record.reminder} {"      "} {"plain text for now"} {"\n"}
-                    </Text>
+                  
+                    <Reminder
+                       onPress={(selectedDate, selectedTime) => handleReminderSet(record, selectedDate, selectedTime)}
+                       drugName={record.nameOfDrug}
+                       
+/>
                     <Text style={styles.prescribedText}>
                       <IconFace name="calendar" size={20} color="blue" /> Prescribed on {formatDate(record.timeStamp)}
                     </Text>
