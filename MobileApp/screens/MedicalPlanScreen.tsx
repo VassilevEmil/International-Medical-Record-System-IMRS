@@ -1,22 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import GetDrugsService from "../services/GetDrugRecordsService";
-import { useNavigation } from "@react-navigation/native";
+
 import Icon from "react-native-vector-icons/Ionicons";
 import IconFace from "react-native-vector-icons/FontAwesome";
-import { ScrollView } from 'react-native';
 import ProgressContainer from "../Components/ProgressContainer";
-import PushNotification from 'react-native-push-notification';
+
 import Reminder from "../Components/Reminder";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
   const [drugRecords, setDrugRecords] = useState<any[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [reminderInfo, setReminderInfo] = useState("No Reminders");
+  
   const [expandedRecordIndex, setExpandedRecordIndex] = useState<number | null>(null);
-  const navigation = useNavigation();
+
 
   useEffect(() => {
     const fetchDrugRecords = async () => {
@@ -24,71 +22,21 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
         const response = await GetDrugsService.fetchDrugRecordsByPatientId("123", 1, 10);
         if (response.success && response.data) {
           setDrugRecords(response.data);
-          
         }
       } catch (error) {
         console.error("An error occurred while fetching records", error);
       }
-
-      
     };
     fetchDrugRecords();
+
     
-    
-    
-   
+
+    AsyncStorage.getItem('reminderInfo').then((storedReminderInfo) => {
+      if (storedReminderInfo) {
+        setReminderInfo(storedReminderInfo);
+      }
+    });
   }, [patientId]);
-
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // this is moved to another component
-  // WILL NOT DELETE IT FOR NOW!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // WILL DELETE IT AT THE END OF THE PROJECT WHEN IM SURE ITS TESTED MANY TIMES AND WORKs
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  // const scheduleReminderNotifications = async (records: any[]) => {
-  //   records.forEach(async (record, index) => {
-  //     const durationInMilliseconds = calculateDurationInMilliseconds(record);
-  //     const notificationTime = new Date(Date.parse(record.startTreatmentDate) + durationInMilliseconds);
-  //     const notificationMessage = `Time to take ${record.nameOfDrug}`;
-      
-  //     try {
-        
-  //       const reminderData = {
-  //         record,
-  //         selectedDate: notificationTime,
-  //         selectedTime: notificationTime,
-  //       };
-  //       await AsyncStorage.setItem('reminder', JSON.stringify(reminderData));
-  
-  //       // Schedule the push notification for the specified date and time
-  //       PushNotification.localNotificationSchedule({
-  //         message: notificationMessage,
-  //         date: notificationTime,
-  //       });
-  //       console.log('Reminder has been set for:', notificationTime);
-  //     } catch (error) {
-  //       console.error('Error setting reminder:', error);
-  //     }
-  //   });
-  // };
-
-  const calculateDurationInMilliseconds = (record) => {
-    let durationInMilliseconds = 0;
-    switch (record.durationType) {
-      case 'minutes':
-        durationInMilliseconds = record.duration * 60 * 1000;
-        break;
-      case 'hours':
-        durationInMilliseconds = record.duration * 60 * 60 * 1000;
-        break;
-      case 'days':
-        durationInMilliseconds = record.duration * 24 * 60 * 60 * 1000;
-        break;
-     
-    }
-    return durationInMilliseconds;
-  };
-  
 
   const toggleRecordExpansion = (index: number) => {
     setExpandedRecordIndex((prevIndex) => prevIndex === index ? null : index);
@@ -111,12 +59,16 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
   };
 
   const handleReminderSet = (record, selectedDate, selectedTime) => {
-
     const notificationDateTime = new Date(selectedDate);
     notificationDateTime.setHours(selectedTime.getHours());
     notificationDateTime.setMinutes(selectedTime.getMinutes());
-  
 
+    // this is saving the info to the local storage 
+
+    AsyncStorage.setItem('reminderInfo', reminderInfo);
+
+    
+    setReminderInfo(reminderInfo);
   };
 
   return (
@@ -124,7 +76,6 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
       <View style={styles.container}>
         {drugRecords.map((record, index) => {
           const isExpanded = expandedRecordIndex === index;
-          
           return (
             <TouchableOpacity
               key={index}
@@ -133,18 +84,17 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
             >
               <View style={[styles.recordItem, isExpanded && styles.selectedRecord]}>
                 <View style={styles.recordHeader}>
-                <View style={styles.titleContainer}>
+                <View style={[styles.titleContainer, isExpanded && styles.expandedTitleContainer]}>
   <Text style={styles.recordTitle}>{record.nameOfDrug}</Text>
   {!isExpanded && (
     <Text style={styles.recordSubtitle}>
       {record.duration} {record.durationType}
     </Text>
   )}
-  {(!isExpanded) && (
+  {!isExpanded && (
     <ProgressContainer progress={calculateProgress(record)} />
   )}
 </View>
-
                   <TouchableOpacity onPress={() => toggleRecordExpansion(index)}>
                     <Icon
                       name={isExpanded ? "caret-down-outline" : "caret-forward-outline"}
@@ -156,10 +106,17 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
                 {isExpanded && (
                   <View style={styles.expandedContent}>
                     <Text style={styles.recordSubtitle}>
-                      <Text style={styles.boldText}>Start Date:</Text>{" "}
-                      {record.startTreatmentDate} {" "}
-                      <Text style={styles.boldText}>Duration:</Text>{" "}
-                      {record.duration} {record.durationType} {"\n"}
+                    <View style={styles.subtitleRow}>
+    <Text style={styles.boldText}>Duration: </Text>
+    <Text>{record.duration} {record.durationType}</Text>
+ 
+                      
+    <View style = {styles.startDate}>               
+    <Text style={styles.boldText}>Start Date:</Text>
+    <Text>{formatDate(record.startTreatmentDate)}</Text>
+    </View>
+  </View>
+                      
                     </Text>
                     <Text style={styles.recordSubtitle}>
                       <Text style={styles.boldText}>Comment:</Text>{"\n \n"} {}
@@ -168,18 +125,29 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
                     {isExpanded && (
                       <ProgressContainer progress={calculateProgress(record)} />
                     )}
-                  
                     <Reminder
-                       onPress={(selectedDate, selectedTime) => handleReminderSet(record, selectedDate, selectedTime)}
-                       drugName={record.nameOfDrug}
-                       
-/>
-                    <Text style={styles.prescribedText}>
-                      <IconFace name="calendar" size={20} color="blue" /> Prescribed on {formatDate(record.timeStamp)}
-                    </Text>
-                    <Text style={styles.prescribedText}>
-                      <IconFace name="user-md" size={20} color="blue" /> {record.prescribedBy}
-                    </Text>
+                      onPress={(selectedDate, selectedTime) => handleReminderSet(record, selectedDate, selectedTime)}
+                      drugName={record.nameOfDrug}
+                      onUpdateReminderInfo={setReminderInfo}
+                    />
+                    <View style={styles.prescribedTextContainer}>
+  <View style={styles.iconContainer}>
+    <IconFace name="calendar" size={20} color="blue" />
+  </View>
+  <Text style={styles.labelText}>Prescribed on</Text>
+  <Text style={styles.prescribedText}>
+    {formatDate(record.timeStamp)}
+  </Text>
+</View>
+<View style={styles.prescribedByContainer}>
+  <View style={styles.iconContainer}>
+    <IconFace name="user-md" size={20} color="blue" />
+  </View>
+  <Text style={styles.prescribedByText}>
+    {record.prescribedBy}
+  </Text>
+</View>
+                    
                   </View>
                 )}
               </View>
@@ -207,12 +175,16 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     elevation: 1,
   },
-  selectedRecord: {
-    
-  },
+  selectedRecord: {},
   prescribedText: {
     fontSize: 16,
     color: "#838383",
+  },
+  prescribedBy: {
+    fontSize: 16,
+    color: "#838383",
+    paddingTop: 15,
+    marginLeft: 5,
   },
   recordHeader: {
     flexDirection: "row",
@@ -235,20 +207,45 @@ const styles = StyleSheet.create({
   boldText: {
     fontWeight: "bold",
   },
-  reminderText: {
-    marginTop: 10,
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "blue",
+  subtitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', 
+    marginBottom: 5,
   },
-  arrowContainer: {
-    marginLeft: 10,
-    zIndex: 1, 
+  startDate: {
+    marginLeft: 300
   },
-  progressAndArrowContainer: {
+  expandedTitleContainer: {
+    borderBottomWidth: 1, 
+    borderBottomColor: "#ccc", 
+    paddingBottom: 5, 
+  },
+  prescribedTextContainer: {
     flexDirection: "row",
     alignItems: "center",
-  }
+    marginTop: 10,
+  },
+  iconContainer: {
+    marginRight: 5,
+  },
+  labelText: {
+    fontSize: 16,
+    color: "#838383",
+  },
+  prescribedByContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 5,
+  },
+
+
+  
+  prescribedByText: {
+    fontSize: 16,
+    color: "#838383",
+    marginLeft: 5, 
+  },
+ 
 });
 
 export default MedicalPlanScreen;
