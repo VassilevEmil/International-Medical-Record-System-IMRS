@@ -47,7 +47,7 @@ function App() {
             options={{ tabBarLabel: "Records" }}
           />
             <Tab.Screen
-            name="MedicalPlan"
+            name="Medical Plan"
             options={{ tabBarLabel: "MedPlan" }}
           >
             {() => <MedicalPlanScreen patientId={"123"} />}
