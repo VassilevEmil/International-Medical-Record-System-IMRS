@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import GetDrugsService from "../services/GetDrugRecordsService";
-
 import Icon from "react-native-vector-icons/Ionicons";
 import IconFace from "react-native-vector-icons/FontAwesome";
 import ProgressContainer from "../Components/ProgressContainer";
-
 import Reminder from "../Components/Reminder";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
