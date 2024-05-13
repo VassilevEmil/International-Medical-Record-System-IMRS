@@ -9,9 +9,12 @@ import HomeScreen from "./screens/HomeScreen";
 import MedicalRecordsScreen from "./screens/MedicalRecordsScreen";
 import { Provider } from "react-redux";
 import store from "./redux/store";
+import SettingsScreen from "./screens/SettingsScreen";
+import ManagePermissionsScreen from "./screens/ManagePermissionsScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+const SettingsStack = createNativeStackNavigator();
 
 function App() {
   return (
@@ -27,6 +30,8 @@ function App() {
                 iconName = focused ? "list" : "list";
               } else if (route.name === "MedicalPlan") {
                 iconName = focused ? "medkit" : "medkit-outline"; 
+              } else if (route.name === "Settings") {
+                iconName = focused ? "settings" : "settings-outline";
               }
               return <Ionicons name={iconName} size={size} color={color} />;
             },
@@ -44,15 +49,36 @@ function App() {
             component={MedicalRecordsScreen}
             options={{ tabBarLabel: "Records" }}
           />
-            <Tab.Screen
+          <Tab.Screen
             name="MedicalPlan"
+            component={() => <MedicalPlanScreen patientId={"123"} />}
             options={{ tabBarLabel: "MedPlan" }}
-          >
-            {() => <MedicalPlanScreen patientId={"123"} />}
-          </Tab.Screen>
+          />
+          <Tab.Screen
+            name="Settings"
+            component={SettingsStackNavigator}
+            options={{ tabBarLabel: "Settings" }}
+          />
         </Tab.Navigator>
       </NavigationContainer>
     </Provider>
+  );
+}
+
+function SettingsStackNavigator() {
+  return (
+    <SettingsStack.Navigator>
+      <SettingsStack.Screen
+        name="SettingsMain"
+        component={SettingsScreen}
+        options={{ headerShown: false }}
+      />
+      <SettingsStack.Screen
+        name="ManagePermissions"
+        component={ManagePermissionsScreen}
+        options={{ title: 'Manage Permissions' }}
+      />
+    </SettingsStack.Navigator>
   );
 }
 
