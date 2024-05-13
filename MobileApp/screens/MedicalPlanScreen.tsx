@@ -179,6 +179,8 @@ const styles = StyleSheet.create({
   prescribedText: {
     fontSize: 16,
     color: "#838383",
+    marginRight: 5,
+    marginLeft: 5,
   },
   prescribedBy: {
     fontSize: 16,
