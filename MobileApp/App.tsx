@@ -3,13 +3,14 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import MedicalPlanScreen from "./screens/MedicalPlanScreen";
 
 import HomeScreen from "./screens/HomeScreen";
+import MedicalRecordsScreen from "./screens/MedicalRecordsScreen";
 import { Provider } from "react-redux";
 import store from "./redux/store";
 import SettingsScreen from "./screens/SettingsScreen";
 import ManagePermissionsScreen from "./screens/ManagePermissionsScreen";
-import MedicalRecordsScreen from "./screens/MedicalRecordsScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -44,8 +45,13 @@ function App() {
             options={{ tabBarLabel: "Home" }}
           />
           <Tab.Screen
-            name="Medical Plan"
+            name="MedicalRecords"
             component={MedicalRecordsScreen}
+            options={{ tabBarLabel: "Records" }}
+          />
+          <Tab.Screen
+            name="MedicalPlan"
+            component={() => <MedicalPlanScreen patientId={"123"} />}
             options={{ tabBarLabel: "MedPlan" }}
           />
           <Tab.Screen
