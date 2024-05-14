@@ -15,5 +15,6 @@ interface DrugRecord extends Document {
 
 export interface DrugRecordResponse {
   drugRecords: DrugRecord[];
+  nameOfDrug: string;
   total: number;
 }

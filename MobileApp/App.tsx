@@ -3,14 +3,13 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import MedicalPlanScreen from './screens/MedicalPlanScreen'
 
 import HomeScreen from "./screens/HomeScreen";
-import MedicalRecordsScreen from "./screens/MedicalRecordsScreen";
 import { Provider } from "react-redux";
 import store from "./redux/store";
 import SettingsScreen from "./screens/SettingsScreen";
 import ManagePermissionsScreen from "./screens/ManagePermissionsScreen";
+import MedicalRecordsScreen from "./screens/MedicalRecordsScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -29,7 +28,7 @@ function App() {
               } else if (route.name === "MedicalRecords") {
                 iconName = focused ? "list" : "list";
               } else if (route.name === "MedicalPlan") {
-                iconName = focused ? "medkit" : "medkit-outline"; 
+                iconName = focused ? "medkit" : "medkit-outline";
               } else if (route.name === "Settings") {
                 iconName = focused ? "settings" : "settings-outline";
               }
@@ -45,13 +44,8 @@ function App() {
             options={{ tabBarLabel: "Home" }}
           />
           <Tab.Screen
-            name="MedicalRecords"
+            name="Medical Plan"
             component={MedicalRecordsScreen}
-            options={{ tabBarLabel: "Records" }}
-          />
-          <Tab.Screen
-            name="MedicalPlan"
-            component={() => <MedicalPlanScreen patientId={"123"} />}
             options={{ tabBarLabel: "MedPlan" }}
           />
           <Tab.Screen
@@ -76,29 +70,10 @@ function SettingsStackNavigator() {
       <SettingsStack.Screen
         name="ManagePermissions"
         component={ManagePermissionsScreen}
-        options={{ title: 'Manage Permissions' }}
+        options={{ title: "Manage Permissions" }}
       />
     </SettingsStack.Navigator>
   );
 }
 
-// no need for this for now, wont remove it for now
-
-// function MedicalPlanStack() {
-//   const patientId = "123"; 
-//   return (
-//     <Stack.Navigator>
-     
-//       <Stack.Screen
-//         name="MedPlanDetailsScreen"
-//         component={MedPlanDetailsScreen}
-//       />
-//        <Stack.Screen
-//         name="MedicalPlan11"
-//         component={() => <MedicalPlanScreen patientId={patientId} />} 
-//         options={{ headerShown: false }}
-//       />
-//     </Stack.Navigator>
-//   );
-// }
 export default App;
