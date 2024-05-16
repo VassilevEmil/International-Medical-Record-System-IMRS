@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native';
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
+import { useNavigation } from "@react-navigation/native";
+import { useAuth } from "../context/AuthContext";
 
 type SettingsScreenNavigationProp = {
   navigate: (screen: string) => void;
@@ -9,9 +10,14 @@ type SettingsScreenNavigationProp = {
 
 const SettingsScreen: React.FC = () => {
   const navigation = useNavigation<SettingsScreenNavigationProp>();
+  const { logout } = useAuth();
 
   const handleOptionPress = (screen: string) => {
-    navigation.navigate(screen);
+    if (screen === "Logout") {
+      logout();
+    } else {
+      navigation.navigate(screen);
+    }
   };
 
   return (
@@ -19,15 +25,17 @@ const SettingsScreen: React.FC = () => {
       {/* Top Options */}
       <TouchableOpacity
         style={styles.option}
-        onPress={() => handleOptionPress('ManagePermissions')}>
-        <Icon name="shield-outline" style={styles.iconsPictures}  />
+        onPress={() => handleOptionPress("ManagePermissions")}
+      >
+        <Icon name="shield-outline" style={styles.iconsPictures} />
         <Text style={styles.text}>Manage Permissions</Text>
-        <Icon name="chevron-forward-outline" style={styles.iconsArrows}  />
+        <Icon name="chevron-forward-outline" style={styles.iconsArrows} />
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.option}
-        onPress={() => handleOptionPress('HelpSupport')}>
-        <Icon name="headset-outline" style={styles.iconsPictures}  />
+        onPress={() => handleOptionPress("HelpSupport")}
+      >
+        <Icon name="headset-outline" style={styles.iconsPictures} />
         <Text style={styles.text}>Help & Support</Text>
         <Icon name="chevron-forward-outline" style={styles.iconsArrows} />
       </TouchableOpacity>
@@ -36,7 +44,8 @@ const SettingsScreen: React.FC = () => {
 
       <TouchableOpacity
         style={styles.logoutButton}
-        onPress={() => handleOptionPress('Logout')}>
+        onPress={() => handleOptionPress("Logout")}
+      >
         <Text style={styles.logoutText}>Log out</Text>
       </TouchableOpacity>
     </View>
@@ -47,20 +56,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     margin: 10,
-    backgroundColor: '#f1f1f1',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    backgroundColor: "#f1f1f1",
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
   option: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     paddingVertical: 15,
     paddingHorizontal: 10,
     borderBottomWidth: 1,
-    borderColor: '#d1d1d1',
+    borderColor: "#d1d1d1",
     marginVertical: 5,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     borderRadius: 15,
   },
   text: {
@@ -78,17 +87,17 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   logoutButton: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     padding: 15,
-    width: '40%',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: "40%",
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 20,
     marginBottom: 20,
   },
   logoutText: {
     fontSize: 18,
-    color: '#000000',
+    color: "#000000",
   },
 });
 

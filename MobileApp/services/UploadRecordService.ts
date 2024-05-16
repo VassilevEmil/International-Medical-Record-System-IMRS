@@ -6,7 +6,7 @@ interface UploadResponse {
 }
 
 export default class UploadRecordService {
-  private static apiUrl = "https://localhost:3000/medicalRecords/";
+  private static apiUrl = "https://imrs-server-12m3e12kdk1k12mek.tech/medicalRecords/";
 
   static async uploadRecord(formData: FormData): Promise<UploadResponse> {
     try {
@@ -25,15 +25,13 @@ export default class UploadRecordService {
           data: data,
         };
       } else {
-        // HTTP errors
-        const text = await response.text(); // Ensure you await the text
+        const text = await response.text(); 
         return {
           success: false,
           message: `Server responded with status: ${response.status}: '${text}'`,
         };
       }
     } catch (error) {
-      // network errors
       return {
         success: false,
         message: `File upload failed: ${error}`,
