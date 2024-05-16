@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  SafeAreaView,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
@@ -80,50 +81,77 @@ const MedicalRecordsScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.timeline} />
-      <ScrollView style={styles.ScrollView}>
-        {groupedRecords.map((yearGroup, yearIndex) => (
-          <View key={yearIndex}>
-            {yearIndex === 0 ||
-            recordsData[yearIndex - 1].year !== yearGroup.year ? (
-              <View style={styles.yearLabel}>
-                <Text style={styles.yearText}>{yearGroup.year}</Text>
-              </View>
-            ) : null}
-            {yearGroup.dates.map((dateGroup, dateIndex) => (
-              <View key={dateIndex}>
-                <Text style={styles.dateText}>{dateGroup.date}</Text>
-                {dateGroup.records.map((record, recordIndex) => (
-                  <TouchableOpacity key={recordIndex} style={styles.recordItem}>
-                    <Icon name={record.iconName} size={24} color="#666" />
-                    <View style={styles.recordContent}>
-                      <Text style={styles.recordTitle}>{record.type}</Text>
-                      <Text style={styles.recordSubtitle}>
-                        {record.location}
-                      </Text>
-                      <Icon style={styles.recordActionContainer}>
-                        <Text style={styles.recordActionText}>
-                          {record.action}
-                        </Text>
-                      </Icon>
-                    </View>
-                    <MaterialIcon name="chevron-right" size={24} color="#666" />
-                  </TouchableOpacity>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.innerContainer}>
+          <View style={styles.timeline} />
+          <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            {groupedRecords.map((yearGroup, yearIndex) => (
+              <View key={yearIndex}>
+                {yearIndex === 0 ||
+                groupedRecords[yearIndex - 1].year !== yearGroup.year ? (
+                  <View style={styles.yearLabel}>
+                    <Text style={styles.yearText}>{yearGroup.year}</Text>
+                  </View>
+                ) : null}
+                {yearGroup.dates.map((dateGroup, dateIndex) => (
+                  <View key={dateIndex}>
+                    <Text style={styles.dateText}>{dateGroup.date}</Text>
+                    {dateGroup.records.map((record, recordIndex) => (
+                      <TouchableOpacity
+                        key={recordIndex}
+                        style={styles.recordItem}
+                      >
+                        <Icon name={record.iconName} size={24} color="#666" />
+                        <View style={styles.recordContent}>
+                          <Text style={styles.recordTitle}>{record.type}</Text>
+                          <Text style={styles.recordSubtitle}>
+                            {record.location}
+                          </Text>
+                          <View style={styles.recordActionContainer}>
+                            <Text style={styles.recordActionText}>
+                              {record.action}
+                            </Text>
+                          </View>
+                        </View>
+                        <MaterialIcon
+                          name="chevron-right"
+                          size={24}
+                          color="#666"
+                        />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 ))}
               </View>
             ))}
-          </View>
-        ))}
-      </ScrollView>
-    </View>
+          </ScrollView>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f1f1f1",
+  },
   container: {
     flex: 1,
     backgroundColor: "#f1f1f1",
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    // so that components not visible on the bottom gap between navigation bar and screen end, when scrolling
+    paddingBottom: 35,
+  },
+  innerContainer: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    // Scroll view padding!!!
+    // This is to control the padding of scrollable components
+    paddingBottom: 55,
   },
   timeline: {
     position: "absolute",
