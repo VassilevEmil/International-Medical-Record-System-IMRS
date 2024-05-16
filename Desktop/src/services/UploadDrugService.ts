@@ -1,5 +1,3 @@
-import { MedicalRecord } from "../models/medicalRecord";
-
 interface UploadResponse {
   success: boolean;
   message: string;
@@ -8,9 +6,8 @@ interface UploadResponse {
 }
 
 export default class UploadRecordService {
-  private static apiUrl = "http://localhost:8080/prescription";
-
-  // "https://imrs-server-12m3e12kdk1k12mek.tech/prescription";
+  private static apiUrl =
+    "https://imrs-server-12m3e12kdk1k12mek.tech/prescription";
 
   static async uploadPrescription(formData: FormData): Promise<UploadResponse> {
     try {
@@ -19,9 +16,6 @@ export default class UploadRecordService {
       for (const pair of formData.entries()) {
         console.log(pair[0] + ": " + pair[1]);
       }
-
-      console.log("DAmn ", formData);
-      console.log("DAmn2 ", formData.entries());
 
       const response = await fetch(this.apiUrl, {
         method: "POST",
