@@ -10,10 +10,14 @@ type SettingsScreenNavigationProp = {
 
 const SettingsScreen: React.FC = () => {
   const navigation = useNavigation<SettingsScreenNavigationProp>();
-  const { logout } = useAuth(); 
+  const { logout } = useAuth();
 
   const handleOptionPress = (screen: string) => {
-    logout();
+    if (screen === "Logout") {
+      logout();
+    } else {
+      navigation.navigate(screen);
+    }
   };
 
   return (

@@ -6,11 +6,14 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { useAuth } from "../context/AuthContext";
 
 function HomeScreen() {
+  const { token } = useAuth();
+
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>Home Screen</Text>
+      <Text>`${token}`</Text>
     </View>
   );
 }
