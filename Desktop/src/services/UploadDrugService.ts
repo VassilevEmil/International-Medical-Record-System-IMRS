@@ -7,16 +7,10 @@ interface UploadResponse {
 
 export default class UploadRecordService {
   private static apiUrl =
-    "https://imrs-server-12m3e12kdk1k12mek.tech/prescription";
+       "https://imrs-server-12m3e12kdk1k12mek.tech/prescription";
 
-  static async uploadPrescription(formData: FormData): Promise<UploadResponse> {
+  static async uploadDrugRecord(formData: FormData): Promise<UploadResponse> {
     try {
-      console.log("SENT DATA: ", formData);
-
-      for (const pair of formData.entries()) {
-        console.log(pair[0] + ": " + pair[1]);
-      }
-
       const response = await fetch(this.apiUrl, {
         method: "POST",
         body: formData,
@@ -32,7 +26,6 @@ export default class UploadRecordService {
             data: data,
           };
         } else {
-          // Handle plain text response
           return {
             success: true,
             message: "Drug uploaded successfully",
@@ -40,7 +33,7 @@ export default class UploadRecordService {
           };
         }
       } else {
-        const text = await response.text(); // Ensure you await the text
+        const text = await response.text();
         return {
           success: false,
           message: `Server responded with status: ${response.status}: '${text}'`,

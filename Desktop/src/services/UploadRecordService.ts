@@ -11,7 +11,6 @@ export default class UploadRecordService {
 
   static async uploadRecord(formData: FormData): Promise<UploadResponse> {
     try {
-      console.log("SENT DATA: ", formData);
       const response = await fetch(this.apiUrl, {
         method: "POST",
         body: formData,
