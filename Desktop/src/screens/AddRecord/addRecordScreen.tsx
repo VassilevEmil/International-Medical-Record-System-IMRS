@@ -11,75 +11,70 @@ import {
 } from "@mui/material";
 import FileUpload from "../../components/FileUpload";
 import UploadRecordService from "../../services/UploadRecordService";
-import StartTreatmentDate from '../../components/startTreatmentDate'
+import StartTreatmentDate from "../../components/startTreatmentDate";
 import UploadDrugService from "../../services/UploadDrugService";
+import {
+  DurationType,
+  Language,
+  TypeOfRecord,
+  formatEnumValue,
+} from "../../../enums";
 
 const AddRecordScreen = () => {
   const [recordType, setRecordType] = useState("");
+  const [languageType, setLanguageType] = useState("");
   const [title, setTitle] = useState("");
   const [comment, setComment] = useState("");
-  const [language, setLanguage] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [uploadStatus, setUploadStatus] = useState("idle");
   const [errorMessage, setErrorMessage] = useState("");
-  const [isPrescription, setIsPrescription] = useState(false);
   const [nameOfDrug, setNameOfDrug] = useState("");
-  const [medicineComment, setMedicineComment] = useState("");
   const [durationNumber, setDurationNumber] = useState(0);
   const [startTreatmentDate, setStartTreatmentDate] = useState(new Date());
+  const [selectedRecord, setSelectedRecord] = useState("");
+  const [durationType, setDurationType] = useState("");
 
   const handleUpload = async () => {
     setUploadStatus("pending");
     setErrorMessage("");
-    
+
     try {
       const formData = new FormData();
 
-      const medicalRecord = {
-        id: "2",
-        patientId: "123",
-        title: title,
-        textInput: comment,
-        typeOfRecord: isPrescription ? "PRESCRIPTION" : "Medical",
-        institution: {
-          id: "223",
-          institutionId: "223",
-          name: "Institution Name",
-          country: "DENMARK",
-          address: "Institution Address"
-        },
-        doctorId: "456",
-        timeStamp: new Date().toISOString(),
-        doctorFirstName: "Doctor",
-        doctorLastName: "Smith",
-        language: language,
-      };
+      formData.append("institutionId", "#4r4523ed");
+      formData.append("patientId", "7a234ba1-9b07-4a36-96b5-7c20a754f3c0");
+      formData.append("title", title);
+      formData.append("textInput", comment);
+      formData.append("typeOfRecord", recordType);
+      formData.append("doctorId", "456");
+      formData.append("doctorFirstName", "William");
+      formData.append("doctorLastName", "McLovin");
+      formData.append("language", languageType);
 
-      if (isPrescription) {
-        const drugRecord = {
-          id: "1",
-          patientId: "123",
-          nameOfDrug: nameOfDrug,
-          startTreatmentDate: new Date(startTreatmentDate).toISOString(),
-          durationType: "DAYS",
-          duration: durationNumber,
-          isActive: true,
-          timeStamp: new Date().toISOString(),
-          comment: medicineComment,
-          prescribedBy: "Doctor Smith"
-        };
-        formData.append("drugRecord", JSON.stringify(drugRecord));
+      if (recordType == TypeOfRecord.Prescription) {
+        formData.append("nameOfDrug", nameOfDrug);
+        formData.append(
+          "startTreatmentDate",
+          new Date(startTreatmentDate).toISOString()
+        );
+        formData.append("durationType", durationType);
+        formData.append("duration", durationNumber.toString());
+        formData.append("comment", comment);
       }
-      
-      formData.append("medicalRecord", JSON.stringify(medicalRecord));
       uploadedFiles.forEach((file) => {
         formData.append("fileInput", file);
       });
 
-      const prescriptionResponse = await UploadDrugService.uploadPrescription(formData);
-      if (!prescriptionResponse.success) {
-        setUploadStatus("failed");
-        setErrorMessage(prescriptionResponse.message);
+      if (recordType == TypeOfRecord.Prescription) {
+        const addRecordResponse = await UploadDrugService.uploadDrugRecord(
+          formData
+        );
+
+        if (!addRecordResponse.success) {
+          setUploadStatus("failed");
+          setErrorMessage(addRecordResponse.message);
+        }
+
         return;
       }
 
@@ -92,8 +87,26 @@ const AddRecordScreen = () => {
       }
     } catch (error) {
       setUploadStatus("failed");
-      setErrorMessage(error instanceof Error ? error.message : "An unknown error occurred");
+      setErrorMessage(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
     }
+  };
+
+  const handleChangeRecordType = (event: any) => {
+    const newRecordType = event.target.value;
+    setRecordType(newRecordType);
+    setSelectedRecord(newRecordType);
+  };
+
+  const handleChangeLanguage = (event: any) => {
+    const newLanguage = event.target.value;
+    setLanguageType(newLanguage);
+  };
+
+  const handleChangeDurationType = (event: any) => {
+    const newDurationType = event.target.value;
+    setDurationType(newDurationType);
   };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -102,28 +115,41 @@ const AddRecordScreen = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom component="div" sx={{ mt: 4, mb: 4 }}>
+    <Container
+      maxWidth="sm"
+      sx={{ minHeight: "calc(100vh - 64px)", mt: 4, mb: 4 }}
+    >
+      <Typography
+        variant="h4"
+        gutterBottom
+        component="div"
+        sx={{ mt: 4, mb: 4 }}
+      >
         Add Record
       </Typography>
-      <Box component="form" noValidate autoComplete="off" onSubmit={handleFormSubmit}>
+      <Box
+        component="form"
+        noValidate
+        autoComplete="off"
+        onSubmit={handleFormSubmit}
+      >
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Select
               fullWidth
-              value={recordType}
-              onChange={(e) => {
-                setRecordType(e.target.value);
-                setIsPrescription(e.target.value === "Prescription");
-              }}
+              value={selectedRecord}
+              onChange={handleChangeRecordType}
               displayEmpty
               inputProps={{ "aria-label": "Without label" }}
             >
-              <MenuItem value="" disabled>Type of Record</MenuItem>
-              <MenuItem value="Medical">Medical</MenuItem>
-              <MenuItem value="Invoice">Invoice</MenuItem>
-              <MenuItem value="Prescription">Prescription</MenuItem>
-              <MenuItem value="Other">Other</MenuItem>
+              <MenuItem value="">
+                <em>Record Type</em>
+              </MenuItem>
+              {Object.values(TypeOfRecord).map((type) => (
+                <MenuItem key={type} value={type}>
+                  {formatEnumValue(type)}
+                </MenuItem>
+              ))}
             </Select>
           </Grid>
           <Grid item xs={12}>
@@ -154,19 +180,22 @@ const AddRecordScreen = () => {
           <Grid item xs={12}>
             <Select
               fullWidth
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
+              value={languageType}
+              onChange={handleChangeLanguage}
               displayEmpty
               inputProps={{ "aria-label": "Without label" }}
             >
-              <MenuItem value="" disabled>Language</MenuItem>
-              <MenuItem value="English">English</MenuItem>
-              <MenuItem value="Spanish">Spanish</MenuItem>
-              <MenuItem value="French">French</MenuItem>
-              <MenuItem value="German">German</MenuItem>
+              <MenuItem value="">
+                <em>Language</em>
+              </MenuItem>
+              {Object.values(Language).map((type) => (
+                <MenuItem key={type} value={type}>
+                  {formatEnumValue(type)}
+                </MenuItem>
+              ))}
             </Select>
           </Grid>
-          {isPrescription && (
+          {recordType == TypeOfRecord.Prescription && (
             <>
               <Grid item xs={12}>
                 <TextField
@@ -176,32 +205,47 @@ const AddRecordScreen = () => {
                   onChange={(e) => setNameOfDrug(e.target.value)}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Comment on Medicine"
-                  value={medicineComment}
-                  onChange={(e) => setMedicineComment(e.target.value)}
-                />
+              <Grid
+                item
+                xs={12}
+                container
+                spacing={2}
+                marginBottom={-2}
+                marginTop={3}
+              >
+                <Grid marginLeft={1}>
+                  <MenuItem value="" disabled>
+                    <em>Duration Type:</em>
+                  </MenuItem>
+                </Grid>
+                {Object.values(DurationType).map((type) => (
+                  <Grid key={type}>
+                    <MenuItem
+                      onClick={() =>
+                        handleChangeDurationType({ target: { value: type } })
+                      }
+                      value={type}
+                      selected={durationType === type}
+                    >
+                      {formatEnumValue(type)}
+                    </MenuItem>
+                  </Grid>
+                ))}
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Days"
+                  label="Duration"
                   value={durationNumber}
                   onChange={(e) => setDurationNumber(parseInt(e.target.value))}
                 />
               </Grid>
-              <MenuItem value="" disabled>Duration Type</MenuItem>
-              <MenuItem value="DAYS">Days</MenuItem>
-              <MenuItem value="WEEKS">Weeks</MenuItem>
-              <MenuItem value="MONTHS">Months</MenuItem>
-              <MenuItem value="YEARS">Years</MenuItem>
-              <MenuItem value="INDEFINETELY">Indefinitely</MenuItem>
-              <StartTreatmentDate
-                startTreatmentDate={startTreatmentDate}
-                setStartTreatmentDate={setStartTreatmentDate}
-              />
+              <Grid item xs={12}>
+                <StartTreatmentDate
+                  startTreatmentDate={startTreatmentDate}
+                  setStartTreatmentDate={setStartTreatmentDate}
+                />
+              </Grid>
             </>
           )}
           <Grid item xs={12}>

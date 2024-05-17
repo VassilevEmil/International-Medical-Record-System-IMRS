@@ -10,6 +10,7 @@ export enum TypeOfRecord {
   GeneralVisit = "GENERAL_VISIT",
   Bloodwork = "BLOODWORK",
   MedicalImaging = "MEDICAL_IMAGING",
+  Prescription = "PRESCRIPTION",
   Other = "Other",
 }
 
@@ -25,4 +26,37 @@ export enum DurationType {
   Months = "MONTHS",
   Years = "YEARS",
   Indefinetely = "INDEFINETELY",
+}
+
+interface PrettyPrintMap {
+  [key: string]: string;
+}
+// Used for printing nice in the front end. 
+// Otherwise we would pring things like "GENERAL_VISIT"
+const prettyPrint: PrettyPrintMap = {
+  EN: "English",
+  DK: "Danish",
+  LT: "Lithuanian",
+  BG: "Bulgarian",
+  DIAGNOSIS: "Diagnosis",
+  GENERAL_VISIT: "General Visit",
+  BLOODWORK: "Bloodwork",
+  MEDICAL_IMAGING: "Medical Imaging",
+  PRESCRIPTION: "Prescription",
+  Other: "Other",
+  DENMARK: "Denmark",
+  LITHUANIA: "Lithuania",
+  BULGARIA: "Bulgaria",
+  DAYS: "Days",
+  WEEKS: "Weeks",
+  MONTHS: "Months",
+  YEARS: "Years",
+  INDEFINETELY: "Indefinitely",
+};
+
+type EnumValues = Language | TypeOfRecord | Country | DurationType;
+
+export function formatEnumValue(value: EnumValues): string {
+  const key = String(value);
+  return prettyPrint[key] || key;
 }
