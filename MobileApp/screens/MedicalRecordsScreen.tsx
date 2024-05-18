@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigation } from "@react-navigation/native";
+
 import {
   ScrollView,
   View,
@@ -13,11 +15,11 @@ import GetRecordsService from "../services/GetRecordsService";
 
 const MedicalRecordsScreen = () => {
   const [groupedRecords, setGroupedRecords] = useState([]);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const initializeRecords = async () => {
       const medicalRecords = await fetchRecords();
-      console.log(medicalRecords);
       if (medicalRecords) {
         const grouped = groupRecordsByYear(medicalRecords);
         setGroupedRecords(grouped);
@@ -62,9 +64,11 @@ const MedicalRecordsScreen = () => {
       }
 
       grouped[year][formattedDate].push({
+        id: record.id,
         type: record.typeOfRecord,
         location: record.institution?.id || "N/A",
-        action: record.title,
+        title: record.title,
+        files: record.files,
         iconName: "flask-outline",
       });
     });
@@ -101,17 +105,36 @@ const MedicalRecordsScreen = () => {
                       <TouchableOpacity
                         key={recordIndex}
                         style={styles.recordItem}
+                        onPress={() => {
+                          navigation.navigate("RecordDetail", {
+                            recordId: record.id,
+                          });
+                        }}
                       >
                         <Icon name={record.iconName} size={24} color="#666" />
                         <View style={styles.recordContent}>
-                          <Text style={styles.recordTitle}>{record.type}</Text>
+                          <Text style={styles.recordTitle}>{record.title}</Text>
                           <Text style={styles.recordSubtitle}>
                             {record.location}
                           </Text>
-                          <View style={styles.recordActionContainer}>
-                            <Text style={styles.recordActionText}>
-                              {record.action}
-                            </Text>
+                          <View
+                            style={[
+                              styles.actionContainer,
+                              { flexDirection: "row", alignItems: "center" },
+                            ]}
+                          >
+                            <View style={styles.typeActionContainer}>
+                              <Text style={styles.typeActionText}>
+                                Type: {record.type}
+                              </Text>
+                            </View>
+                            {record.files && record.files.length > 0 && (
+                              <View style={styles.filesActionContainer}>
+                                <Text style={styles.filesActionText}>
+                                  Files
+                                </Text>
+                              </View>
+                            )}
                           </View>
                         </View>
                         <MaterialIcon
@@ -193,17 +216,32 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     elevation: 1,
   },
-  recordActionContainer: {
+  actionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: "auto",
+  },
+  typeActionContainer: {
     backgroundColor: "#e6eeff",
     borderRadius: 8,
     paddingHorizontal: 5,
-    paddingBottom: 6,
     paddingVertical: 3,
-    marginRight: "auto",
+    marginRight: 10,
   },
-  recordActionText: {
+  typeActionText: {
     fontSize: 13,
     color: "#002a7b",
+    fontWeight: "bold",
+  },
+  filesActionContainer: {
+    backgroundColor: "#0340b6",
+    borderRadius: 8,
+    paddingHorizontal: 5,
+    paddingVertical: 3,
+  },
+  filesActionText: {
+    fontSize: 13,
+    color: "#e6eeff",
     fontWeight: "bold",
   },
   recordContent: {

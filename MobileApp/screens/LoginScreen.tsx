@@ -8,8 +8,10 @@ import {
   Alert,
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
+import { useNavigation } from "@react-navigation/native";
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = () => {
+  const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useAuth();
@@ -17,9 +19,7 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       await login(email, password);
-      Alert.alert("Success", "Logged in successfully");
-      navigation.navigate("MedicalRecords");
-    } catch (error) {
+    } catch (error: any) {
       Alert.alert("Error", error.message || "An error occurred");
     }
   };
