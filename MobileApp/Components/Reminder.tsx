@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Switch } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Switch, Modal } from 'react-native';
 import IconFace from 'react-native-vector-icons/FontAwesome';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
 import PushNotification from 'react-native-push-notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import DayPicker from './DayPicker';
 
 const Reminder = ({ onReminderSet, drugName, record }) => {
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedTime, setSelectedTime] = useState(new Date());
-  const [repeatDaily, setRepeatDaily] = useState(false);
-  const [reminderInfo, setReminderInfo] = useState("No Reminders");
+  const [selectedDays, setSelectedDays] = useState([]);
+  const [selectedTimes, setSelectedTimes] = useState({});
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [currentDay, setCurrentDay] = useState(null);
+  const [showRepeatOptions, setShowRepeatOptions] = useState(false);
+  const [repeatOption, setRepeatOption] = useState('Never');
+  const [reminderInfo, setReminderInfo] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
   useEffect(() => {
-
-    // for the reminder, after the screen is re-expanded
-    
     AsyncStorage.getItem(`reminderInfo_${drugName}`).then((storedReminderInfo) => {
       if (storedReminderInfo) {
         setReminderInfo(storedReminderInfo);
@@ -23,47 +26,100 @@ const Reminder = ({ onReminderSet, drugName, record }) => {
     });
   }, [drugName]);
 
-  const handleConfirm = (date) => {
-    setShowDatePicker(false);
-    if (date) {
-      setSelectedDate(date);
-      handleSaveReminder(record, date, selectedTime);
+  const handleSelectDay = (day) => {
+    setCurrentDay(day);
+    setShowTimePicker(true);
+  };
+
+  const handleConfirmTime = (time) => {
+    setShowTimePicker(false);
+    setSelectedTimes((prevSelectedTimes) => ({
+      ...prevSelectedTimes,
+      [currentDay]: time,
+    }));
+    setSelectedDays((prevSelectedDays) =>
+      prevSelectedDays.includes(currentDay)
+        ? prevSelectedDays
+        : [...prevSelectedDays, currentDay]
+    );
+  };
+
+  const handleSaveReminder = () => {
+    const reminderInfo = `Reminder set for ${selectedDays.join(', ')} at ${Object.values(selectedTimes).map(time => time.toLocaleTimeString()).join(', ')} with repeat option: ${repeatOption}`;
+    AsyncStorage.setItem(`reminderInfo_${drugName}`, reminderInfo);
+    setReminderInfo(reminderInfo);
+
+    selectedDays.forEach((day) => {
+      scheduleNotification(day, selectedTimes[day]);
+    });
+
+    setIsEditing(false);
+  };
+
+  const scheduleNotification = (day, time) => {
+    const notificationTime = getNextDayOfWeek(day, time);
+    let repeatType;
+
+    switch (repeatOption) {
+      case 'Daily':
+        repeatType = 'day';
+        break;
+      case 'Every Other Day':
+        repeatType = 'day';
+        break;
+      case 'Forever':
+        repeatType = 'week';
+        break;
+      case 'Twice a Day':
+        scheduleMultipleNotifications(day, time, 2);
+        return;
+      case 'Three Times a Day':
+        scheduleMultipleNotifications(day, time, 3);
+        return;
+      default:
+        repeatType = undefined;
+    }
+
+    PushNotification.localNotificationSchedule({
+      message: `Time to take ${drugName}`,
+      date: notificationTime,
+      repeatType: repeatType,
+      repeatTime: repeatOption === 'Every Other Day' ? 2 : undefined,
+      userInfo: {
+        drugName: drugName,
+        notificationTime: time,
+      },
+    });
+  };
+
+  const scheduleMultipleNotifications = (day, time, timesPerDay) => {
+    for (let i = 0; i < timesPerDay; i++) {
+      
+      const notificationTime = getNextDayOfWeek(day, time, i, timesPerDay);
+      PushNotification.localNotificationSchedule({
+        message: `Time to take ${drugName}`,
+        date: notificationTime,
+        repeatType: 'day',
+        userInfo: {
+          drugName: drugName,
+          notificationTime: time,
+        },
+      });
     }
   };
 
-  const showDatePickerModal = () => {
-    setShowDatePicker(true);
+  const getNextDayOfWeek = (day, time, index = 0, timesPerDay = 1) => {
+    const dayIndex = daysOfWeek.indexOf(day);
+    const now = new Date();
+    now.setDate(now.getDate() + ((dayIndex - now.getDay() + 7) % 7));
+    now.setHours(time.getHours(), time.getMinutes(), 0, 0);
+    now.setHours(now.getHours() + (index * 24 / timesPerDay));
+    return now;
   };
 
-  const hideDatePickerModal = () => {
-    setShowDatePicker(false);
-  };
-
-  const handleSaveReminder = (record: any, selectedDate: Date, selectedTime: Date) => {
-
-    // Schedule the push notification for the specified date and time
-    PushNotification.localNotificationSchedule({
-      message: `Time to take ${drugName}`,
-      date: selectedDate,
-      repeatType: repeatDaily ? 'day' : undefined,
-      userInfo: {
-        drugName: drugName,
-        notificationTime: selectedTime,
-      },
-    });
-
-    const reminderDateTime = selectedDate.toLocaleString('default', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' });
-    const reminderInfo = repeatDaily ? `Reminder set for daily at ${selectedTime.toLocaleTimeString('default', { hour: 'numeric', minute: 'numeric' })}` : `Reminder set for ${reminderDateTime}`;
-  
-    AsyncStorage.setItem(`reminderInfo_${drugName}`, reminderInfo);
-  
-    setReminderInfo(reminderInfo);
-  };
-
-  const handleRepeatDailyToggle = () => {
-    setRepeatDaily(!repeatDaily);
-    const newReminderInfo = repeatDaily ? "No Reminders" : "Reminder set for daily";
-    setReminderInfo(newReminderInfo);
+  const handleRepeatOptionSelect = (option) => {
+    setRepeatOption(option);
+    setShowRepeatOptions(false);
   };
 
   return (
@@ -71,29 +127,60 @@ const Reminder = ({ onReminderSet, drugName, record }) => {
       <View style={styles.leftContent}>
         <IconFace name="bell" size={15} color="grey" />
         <Text> Remind me: </Text>
-        <View style={styles.reminderInfoContainer}>
-          <Text style={styles.reminderInfoText}>{reminderInfo}</Text>
-        </View>
-        <DateTimePickerModal
-          isVisible={showDatePicker}
-          mode="datetime"
-          date={selectedDate}
-          onConfirm={handleConfirm}
-          onCancel={hideDatePickerModal}
-        />
-        <View style={styles.repeatDailyContainer}>
-          <Text>Repeat Daily</Text>
-          <Switch
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={repeatDaily ? "#f5dd4b" : "#f4f3f4"}
-            ios_backgroundColor="#3e3e3e"
-            onValueChange={handleRepeatDailyToggle}
-            value={repeatDaily}
-          />
-        </View>
+        {!isEditing && reminderInfo ? (
+          <View style={styles.reminderInfoContainer}>
+            <Text style={styles.reminderInfoText}>{reminderInfo}</Text>
+          </View>
+        ) : null}
+        {isEditing && (
+          <>
+          
+          
+            <DayPicker
+              selectedDays={selectedDays}
+              onSelectDay={handleSelectDay}
+            />
+            <DateTimePickerModal
+              isVisible={showTimePicker}
+              mode="time"
+              date={selectedTimes[currentDay] || new Date()}
+              onConfirm={handleConfirmTime}
+              onCancel={() => setShowTimePicker(false)}
+            />
+            <View style={styles.repeatDailyContainer}>
+              <TouchableOpacity onPress={() => setShowRepeatOptions(true)} style={styles.setRepeatButton}>
+                <Text style={styles.setRepeatText}>Repeat: {repeatOption}</Text>
+              </TouchableOpacity>
+            </View>
+            <Modal visible={showRepeatOptions} transparent={true} animationType="slide">
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>Repeat Options</Text>
+                  {['Never', 'Daily', 'Every Other Day', 'Forever', 'Twice a Day', 'Three Times a Day'].map((option) => (
+                    <TouchableOpacity key={option} onPress={() => handleRepeatOptionSelect(option)} style={styles.optionButton}>
+                      <Text style={styles.optionText}>{option}</Text>
+                    </TouchableOpacity>
+                  ))}
+                  <TouchableOpacity onPress={() => setShowRepeatOptions(false)} style={styles.cancelButton}>
+                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+          </>
+        )}
         <View style={styles.rightContent}>
-          <TouchableOpacity onPress={showDatePickerModal} style={styles.setReminderButton}>
-            <Text style={styles.setReminderText}>Edit</Text>
+          <TouchableOpacity
+            onPress={() => {
+              if (isEditing) {
+                handleSaveReminder();
+              } else {
+                setIsEditing(true);
+              }
+            }}
+            style={styles.setReminderButton}
+          >
+            <Text style={styles.setReminderText}>{isEditing ? "Save" : "Edit"}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -111,7 +198,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-    
   },
   leftContent: {
     flexDirection: 'row',
@@ -122,12 +208,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   setReminderButton: {
-    backgroundColor: 'blue',
+    backgroundColor: '#2196F3',
     paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 5,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginHorizontal: 5,
   },
   setReminderText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  setRepeatButton: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginHorizontal: 5,
+  },
+  setRepeatText: {
     color: 'white',
     fontWeight: 'bold',
   },
@@ -143,6 +241,44 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginLeft: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  optionButton: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    width: '100%',
+    alignItems: 'center',
+  },
+  optionText: {
+    fontSize: 16,
+  },
+  cancelButton: {
+    padding: 10,
+    backgroundColor: '#f44336',
+    borderRadius: 5,
+    alignItems: 'center',
+    width: '100%',
+  },
+  cancelButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

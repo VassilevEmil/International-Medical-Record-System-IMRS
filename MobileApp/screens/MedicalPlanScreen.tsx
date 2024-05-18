@@ -13,26 +13,40 @@ import IconFace from "react-native-vector-icons/FontAwesome";
 import ProgressContainer from "../Components/ProgressContainer";
 import Reminder from "../Components/Reminder";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "../context/AuthContext";
 
-const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
+
+
+
+const MedicalPlanScreen = () => {
   const [drugRecords, setDrugRecords] = useState<any[]>([]);
   const [reminderInfo, setReminderInfo] = useState("No Reminders");
-
+  const {patientId} = useAuth();
   const [expandedRecordIndex, setExpandedRecordIndex] = useState<number | null>(
     null
   );
 
+
+  
+
   useEffect(() => {
     const fetchDrugRecords = async () => {
       try {
+        if(patientId){
+        
+          
         const response = await GetDrugsService.fetchDrugRecordsByPatientId(
-          "123",
+
+          patientId,
           1,
           10
         );
         if (response.success && response.data) {
           setDrugRecords(response.data);
         }
+      } else {
+        "PatientId is null "
+      }
       } catch (error) {
         console.error("An error occurred while fetching records", error);
       }
