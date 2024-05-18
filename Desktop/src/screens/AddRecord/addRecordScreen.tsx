@@ -8,18 +8,39 @@ import {
   Grid,
   Box,
   Select,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import FileUpload from "../../components/FileUpload";
 import UploadRecordService from "../../services/UploadRecordService";
+import StartTreatmentDate from "../../components/startTreatmentDate";
+import UploadDrugService from "../../services/UploadDrugService";
+import {
+  DurationType,
+  Language,
+  TypeOfRecord,
+  formatEnumValue,
+} from "../../../enums";
 
 const AddRecordScreen = () => {
   const [recordType, setRecordType] = useState("");
+  const [languageType, setLanguageType] = useState("");
   const [title, setTitle] = useState("");
   const [comment, setComment] = useState("");
-  const [language, setLanguage] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [uploadStatus, setUploadStatus] = useState("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [nameOfDrug, setNameOfDrug] = useState("");
+  const [durationNumber, setDurationNumber] = useState(0);
+  const [startTreatmentDate, setStartTreatmentDate] = useState(new Date());
+  const [selectedRecord, setSelectedRecord] = useState("");
+  const [durationType, setDurationType] = useState("");
+
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success"
+  );
 
   const handleUpload = async () => {
     setUploadStatus("pending");
@@ -27,35 +48,92 @@ const AddRecordScreen = () => {
 
     try {
       const formData = new FormData();
+
       formData.append("institutionId", "#4r4523ed");
-      formData.append("patientId", "233");
+      formData.append("patientId", "7a234ba1-9b07-4a36-96b5-7c20a754f3c0");
       formData.append("title", title);
       formData.append("textInput", comment);
+      formData.append("typeOfRecord", recordType);
+      formData.append("doctorId", "456");
+      formData.append("doctorFirstName", "William");
+      formData.append("doctorLastName", "McLovin");
+      formData.append("language", languageType);
+
+      if (recordType == TypeOfRecord.Prescription) {
+        formData.append("nameOfDrug", nameOfDrug);
+        formData.append(
+          "startTreatmentDate",
+          new Date(startTreatmentDate).toISOString()
+        );
+        formData.append("durationType", durationType);
+        formData.append("duration", durationNumber.toString());
+        formData.append("comment", comment);
+      }
       uploadedFiles.forEach((file) => {
         formData.append("fileInput", file);
       });
-      formData.append("typeOfRecord", "Other");
-      formData.append("doctorId", "2d2423s");
-      formData.append("doctorFirstName", "Simas");
-      formData.append("doctorLastName", "Simukas");
-      formData.append("language", language);
+
+      if (recordType == TypeOfRecord.Prescription) {
+        const addRecordResponse = await UploadDrugService.uploadDrugRecord(
+          formData
+        );
+
+        if (!addRecordResponse.success) {
+          setUploadStatus("failed");
+          setErrorMessage(addRecordResponse.message);
+          setSnackbarMessage(addRecordResponse.message);
+          setSnackbarSeverity("error");
+          setOpenSnackbar(true);
+          return;
+        }
+
+        setUploadStatus("succeeded");
+        setSnackbarMessage("Record added successfully!");
+        setSnackbarSeverity("success");
+        setOpenSnackbar(true);
+        return;
+      }
 
       const response = await UploadRecordService.uploadRecord(formData);
-
-      if (response) {
-        console.log(response.message, response.data);
+      if (response.success) {
         setUploadStatus("succeeded");
+        setSnackbarMessage("Record added successfully!");
+        setSnackbarSeverity("success");
+        setOpenSnackbar(true);
       } else {
-        console.error(response);
         setUploadStatus("failed");
-        setErrorMessage(response);
+        setErrorMessage(response.message);
+        setSnackbarMessage(response.message);
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
       }
     } catch (error) {
       setUploadStatus("failed");
       setErrorMessage(
         error instanceof Error ? error.message : "An unknown error occurred"
       );
+      setSnackbarMessage(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
     }
+  };
+
+  const handleChangeRecordType = (event: any) => {
+    const newRecordType = event.target.value;
+    setRecordType(newRecordType);
+    setSelectedRecord(newRecordType);
+  };
+
+  const handleChangeLanguage = (event: any) => {
+    const newLanguage = event.target.value;
+    setLanguageType(newLanguage);
+  };
+
+  const handleChangeDurationType = (event: any) => {
+    const newDurationType = event.target.value;
+    setDurationType(newDurationType);
   };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -64,7 +142,10 @@ const AddRecordScreen = () => {
   };
 
   return (
-    <Container maxWidth="sm">
+    <Container
+      maxWidth="sm"
+      sx={{ minHeight: "calc(100vh - 64px)", mt: 4, mb: 4 }}
+    >
       <Typography
         variant="h4"
         gutterBottom
@@ -83,18 +164,19 @@ const AddRecordScreen = () => {
           <Grid item xs={12}>
             <Select
               fullWidth
-              value={recordType}
-              onChange={(e) => setRecordType(e.target.value)}
+              value={selectedRecord}
+              onChange={handleChangeRecordType}
               displayEmpty
               inputProps={{ "aria-label": "Without label" }}
             >
-              <MenuItem value="" disabled>
-                Type of Record
+              <MenuItem value="">
+                <em>Record Type</em>
               </MenuItem>
-              <MenuItem value="Medical">Medical</MenuItem>
-              <MenuItem value="Invoice">Invoice</MenuItem>
-              <MenuItem value="Prescription">Prescription</MenuItem>
-              <MenuItem value="Other">Other</MenuItem>
+              {Object.values(TypeOfRecord).map((type) => (
+                <MenuItem key={type} value={type}>
+                  {formatEnumValue(type)}
+                </MenuItem>
+              ))}
             </Select>
           </Grid>
           <Grid item xs={12}>
@@ -125,20 +207,74 @@ const AddRecordScreen = () => {
           <Grid item xs={12}>
             <Select
               fullWidth
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
+              value={languageType}
+              onChange={handleChangeLanguage}
               displayEmpty
               inputProps={{ "aria-label": "Without label" }}
             >
-              <MenuItem value="" disabled>
-                Language
+              <MenuItem value="">
+                <em>Language</em>
               </MenuItem>
-              <MenuItem value="English">English</MenuItem>
-              <MenuItem value="Spanish">Spanish</MenuItem>
-              <MenuItem value="French">French</MenuItem>
-              <MenuItem value="German">German</MenuItem>
+              {Object.values(Language).map((type) => (
+                <MenuItem key={type} value={type}>
+                  {formatEnumValue(type)}
+                </MenuItem>
+              ))}
             </Select>
           </Grid>
+          {recordType == TypeOfRecord.Prescription && (
+            <>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Name of Drug"
+                  value={nameOfDrug}
+                  onChange={(e) => setNameOfDrug(e.target.value)}
+                />
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                container
+                spacing={2}
+                marginBottom={-2}
+                marginTop={3}
+              >
+                <Grid marginLeft={1}>
+                  <MenuItem value="" disabled>
+                    <em>Duration Type:</em>
+                  </MenuItem>
+                </Grid>
+                {Object.values(DurationType).map((type) => (
+                  <Grid key={type}>
+                    <MenuItem
+                      onClick={() =>
+                        handleChangeDurationType({ target: { value: type } })
+                      }
+                      value={type}
+                      selected={durationType === type}
+                    >
+                      {formatEnumValue(type)}
+                    </MenuItem>
+                  </Grid>
+                ))}
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Duration"
+                  value={durationNumber}
+                  onChange={(e) => setDurationNumber(parseInt(e.target.value))}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <StartTreatmentDate
+                  startTreatmentDate={startTreatmentDate}
+                  setStartTreatmentDate={setStartTreatmentDate}
+                />
+              </Grid>
+            </>
+          )}
           <Grid item xs={12}>
             <Button variant="contained" fullWidth type="submit">
               Add Record
@@ -146,11 +282,20 @@ const AddRecordScreen = () => {
           </Grid>
         </Grid>
       </Box>
-      {errorMessage && (
-        <Typography color="error" sx={{ mt: 2 }}>
-          Error: {errorMessage}
-        </Typography>
-      )}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

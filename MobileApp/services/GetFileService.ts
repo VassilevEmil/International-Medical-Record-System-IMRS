@@ -35,16 +35,12 @@ export default class GetFileService {
       if (response.ok) {
         // Extract the MIME type from the response headers
         const mimeType = response.headers.get("Content-Type") || "application/octet-stream";
-        // Get the response as a Blob
-        const blob = await response.blob(); 
-        // Create a blob URL from the Blob
-        const blobUrl = URL.createObjectURL(blob);
-
+        
         // Return object defined by the GetFileResponse interface.
         return {
           success: true,
           message: "File fetched successfully",
-          data: blobUrl,
+          data: response.url,
           mimeType: mimeType,
         };
 
