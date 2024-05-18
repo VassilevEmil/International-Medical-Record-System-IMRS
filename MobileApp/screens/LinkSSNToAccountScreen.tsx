@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,35 +10,65 @@ import {
   Alert,
   Modal,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/AntDesign";
 import profilePlaceholder from "../images/profile_placeholder.jpg";
+import { getSSNList } from "../services/GetSSNList";
 import { Country } from "../enums";
+import { addSSN } from "../services/AddSSN";
+import { deleteSSN } from "../services/RemoveSSN";
+import { useAuth } from "../context/AuthContext";
 
 const LinkSSNToAccountScreen = () => {
   const [ssnList, setSsnList] = useState<
     Array<{ country: Country; ssn: string }>
-  >([
-    { country: Country.Denmark, ssn: "12431234" },
-    { country: Country.Lithuania, ssn: "2134124" },
-    { country: Country.Bulgaria, ssn: "43563456" },
-  ]);
+  >([]);
   const [country, setCountry] = useState<Country | "">("");
   const [ssn, setSsn] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [contentHeight, setContentHeight] = useState(0);
-  const [viewHeight, setViewHeight] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const { patientId } = useAuth();
+
+  useEffect(() => {
+    const fetchSSNList = async () => {
+      try {
+        if (!patientId) {
+          console.log("Not authenticated");
+          return;
+        }
+        const data = await getSSNList(patientId);
+        setSsnList(data);
+      } catch (error) {
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSSNList();
+  }, [patientId]);
 
   const filteredCountries = Object.keys(Country)
     .filter((key) => key.toLowerCase().includes(searchTerm.toLowerCase()))
     .map((key) => Country[key as keyof typeof Country]);
 
-  const handleAddSsn = () => {
+  const handleAddSsn = async () => {
     if (country && ssn && /^\d+$/.test(ssn)) {
-      setSsnList([...ssnList, { country, ssn }]);
-      setCountry("");
-      setSsn("");
+      try {
+        if (!patientId) {
+          Alert.alert("Not authenticated");
+          return;
+        }
+        await addSSN(patientId, ssn, country);
+        setSsnList([...ssnList, { country, ssn }]);
+        setCountry("");
+        setSsn("");
+        Alert.alert("Success", "SSN added successfully");
+      } catch (error) {
+        Alert.alert("Error", "Failed to add SSN");
+      }
     } else {
       Alert.alert(
         "Error",
@@ -47,53 +77,74 @@ const LinkSSNToAccountScreen = () => {
     }
   };
 
+  const handleDeleteSsn = async (
+    ssnToDelete: string,
+    countryToDelete: Country
+  ) => {
+    try {
+      if (!patientId) {
+        console.log("Not authenticated");
+        return;
+      }
+      await deleteSSN(patientId, ssnToDelete);
+      setSsnList(
+        ssnList.filter(
+          (item) => item.ssn !== ssnToDelete || item.country !== countryToDelete
+        )
+      );
+      Alert.alert("Success", "SSN deleted successfully");
+    } catch (error) {
+      Alert.alert("Error", "Failed to delete SSN");
+    }
+  };
   return (
     <View style={styles.container}>
-      <ScrollView
-        style={styles.scrollContainer}
-        onLayout={(event) => setViewHeight(event.nativeEvent.layout.height)}
-        onContentSizeChange={(contentWidth, contentHeight) =>
-          setContentHeight(contentHeight)
-        }
-      >
-        <View style={styles.profileContainer}>
-          <Image source={profilePlaceholder} style={styles.profileImage} />
-          <Text style={styles.profileName}>Tomas Anonymous</Text>
-        </View>
-        <View style={styles.inputContainer}>
-          <TouchableOpacity
-            onPress={() => setModalVisible(true)}
-            style={styles.pickerContainer}
-          >
-            <Text style={styles.pickerText}>{country || "Select Country"}</Text>
-          </TouchableOpacity>
-          <TextInput
-            placeholder="Social Security Number"
-            style={styles.input}
-            value={ssn}
-            keyboardType="numeric"
-            onChangeText={(text) => setSsn(text.replace(/[^0-9]/g, ""))}
-          />
-          <TouchableOpacity onPress={handleAddSsn} style={styles.addButton}>
-            <Text style={styles.addButtonText}>Add SSN</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.accessContainer}>
-          {ssnList.map((item, index) => (
-            <View key={index} style={styles.accessItem}>
-              <Icon name="idcard" style={styles.iconPlus} />
-              <View style={styles.textContainer}>
-                <Text style={styles.ssnText}>Country: {item.country}</Text>
-                <Text style={styles.ssnText}>SSN: {item.ssn}</Text>
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <ScrollView style={styles.scrollContainer}>
+          <View style={styles.profileContainer}>
+            <Image source={profilePlaceholder} style={styles.profileImage} />
+            <Text style={styles.profileName}>Tomas Anonymous</Text>
+          </View>
+          <View style={styles.inputContainer}>
+            <TouchableOpacity
+              onPress={() => setModalVisible(true)}
+              style={styles.pickerContainer}
+            >
+              <Text style={styles.pickerText}>
+                {country || "Select Country"}
+              </Text>
+            </TouchableOpacity>
+            <TextInput
+              placeholder="Social Security Number"
+              style={styles.input}
+              value={ssn}
+              keyboardType="numeric"
+              onChangeText={(text) => setSsn(text.replace(/[^0-9]/g, ""))}
+            />
+            <TouchableOpacity onPress={handleAddSsn} style={styles.addButton}>
+              <Text style={styles.addButtonText}>Add SSN</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.accessContainer}>
+            {ssnList.map((item, index) => (
+              <View key={index} style={styles.accessItem}>
+                <Icon name="idcard" style={styles.iconPlus} />
+                <View style={styles.textContainer}>
+                  <Text style={styles.ssnText}>Country: {item.country}</Text>
+                  <Text style={styles.ssnText}>SSN: {item.ssn}</Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => handleDeleteSsn(item.ssn, item.country)}
+                  style={styles.removeButton}
+                >
+                  <Text style={styles.removeButtonText}>Remove</Text>
+                </TouchableOpacity>
               </View>
-            </View>
-          ))}
-        </View>
-      </ScrollView>
-      {contentHeight > viewHeight && (
-        <View style={styles.scrollArrowContainer}>
-          <Icon name="down" style={styles.scrollArrow} />
-        </View>
+            ))}
+          </View>
+        </ScrollView>
       )}
       <Modal
         animationType="slide"
@@ -110,8 +161,6 @@ const LinkSSNToAccountScreen = () => {
               onChangeText={setSearchTerm}
               value={searchTerm}
             />
-            <View style={styles.scrollArrowContainer}></View>
-            <Icon name="up" style={styles.scrollArrow} />
             <FlatList
               data={filteredCountries}
               keyExtractor={(item) => item}
@@ -128,9 +177,6 @@ const LinkSSNToAccountScreen = () => {
                 </TouchableOpacity>
               )}
             />
-            <View style={styles.scrollArrowContainer}>
-              <Icon name="down" style={styles.scrollArrow} />
-            </View>
           </View>
         </View>
       </Modal>
@@ -149,6 +195,8 @@ const styles = StyleSheet.create({
     padding: 5,
     backgroundColor: "#ffffff",
     borderRadius: 100,
+    borderBottomWidth: 1,
+    borderColor: "#d1d1d1",
     alignSelf: "center",
     margin: 30,
   },
@@ -192,6 +240,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontSize: 16,
   },
+  removeButton: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "red",
+    backgroundColor: "transparent",
+    borderRadius: 5,
+    width: 70,
+    alignItems: "center",
+  },
+  removeButtonText: {
+    fontSize: 12,
+    color: "red",
+    fontWeight: "bold",
+  },
   addButton: {
     padding: 10,
     borderWidth: 1,
@@ -207,6 +269,7 @@ const styles = StyleSheet.create({
   },
   accessContainer: {
     paddingHorizontal: 20,
+    marginBottom: 80,
   },
   accessItem: {
     backgroundColor: "#ffffff",
@@ -224,6 +287,10 @@ const styles = StyleSheet.create({
     marginRight: 10,
     fontSize: 25,
     color: "#383838",
+  },
+  iconDelete: {
+    fontSize: 25,
+    color: "red",
   },
   textContainer: {
     flex: 1,
@@ -280,17 +347,13 @@ const styles = StyleSheet.create({
   countryText: {
     fontSize: 18,
   },
-  scrollArrowContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1,
-  },
-  scrollArrow: {
-    fontSize: 24,
-    color: "grey",
-  },
   scrollContainer: {
     flexGrow: 1,
+  },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 
