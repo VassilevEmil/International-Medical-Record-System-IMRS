@@ -22,7 +22,6 @@ const SettingsScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Top Options */}
       <TouchableOpacity
         style={styles.option}
         onPress={() => handleOptionPress("ManagePermissions")}
@@ -96,10 +95,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 20,
     marginBottom: 20,
+    borderColor: "#d1d1d1",
+    borderBottomWidth: 1,
   },
   logoutText: {
     fontSize: 18,
-    color: "#000000",
+    color: "#000",
   },
 });
 
