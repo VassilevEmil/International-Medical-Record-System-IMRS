@@ -1,0 +1,18 @@
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 426.32 426.32">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+
+      .cls-2 {
+        fill: #cb2026;
+      }
+    </style>
+  </defs>
+  <rect id="Background" class="cls-1" width="426.32" height="426.32" rx="100"/>
+  <rect id="CrossCollorDiagonal" class="cls-2" x="129.91" y="48.16" width="170" height="330" rx="20"/>
+  <rect id="CrossCollorHorizontal" class="cls-2" x="129.91" y="48.16" width="170" height="330" rx="20" transform="translate(1.75 428.07) rotate(-90)"/>
+  <rect id="CrossMiddleHorizontal" class="cls-1" x="179.91" y="98.16" width="70" height="230"/>
+  <rect id="CrossMiddleDiagonal" class="cls-1" x="179.91" y="98.16" width="70" height="230" transform="translate(1.75 428.07) rotate(-90)"/>
+</svg>
