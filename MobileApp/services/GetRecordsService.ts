@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MedicalRecordsResponse } from "../models/medicalRecord";
 
 interface GetRecordResponse { 
@@ -7,22 +8,29 @@ interface GetRecordResponse {
   }
   
   export default class GetRecordsService {
-    private static apiUrl = `https://imrs-server-12m3e12kdk1k12mek.tech/api/medicalRecords/getMedicalRecords/`;
-    private static apiUrl2 = `https://imrs-server-12m3e12kdk1k12mek.tech/api/medicalRecords/`;
+    private static apiUrl = `https://imrs-server-12m3e12kdk1k12mek.tech/api/medicalRecords/getMedicalRecords`;
+    private static apiUrl2 = `https://imrs-server-12m3e12kdk1k12mek.tech/api/medicalRecords/getMedicalRecordById/`;
 
-    static async getRecords(patientId: string, page: number, recordLimit: number): Promise<GetRecordResponse> {
+    static async getRecords(page: number, recordLimit: number): Promise<GetRecordResponse> {
       const queryParams = new URLSearchParams({
         page: page.toString(),
         recordLimit: recordLimit.toString(),
       });
 
-      const urlWithPatientIdAndParams = `${this.apiUrl}${encodeURIComponent(patientId)}?${queryParams.toString()}`;
-
+      const bearerToken = await AsyncStorage.getItem("token");
+      
+      const urlWithParams = `${this.apiUrl}?${queryParams.toString()}`;
+      console.log("as ", urlWithParams);
       try {
-        const response = await fetch(urlWithPatientIdAndParams, { 
+        const response = await fetch(urlWithParams, { 
           method: "GET",
+          headers: {
+            'Authorization': `Bearer ${bearerToken}`,
+            'Content-Type': 'application/json'
+        }
         });
-  
+        console.log("EEEEEEEEEEEEEEEEEEEE ", bearerToken);
+
         if (response.ok) {
           const data = await response.json();
           console.log(data);
