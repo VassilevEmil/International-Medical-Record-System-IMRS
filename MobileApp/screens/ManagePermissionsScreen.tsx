@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/AntDesign";
 import IconE from "react-native-vector-icons/Entypo";
+import IconFA from "react-native-vector-icons/FontAwesome";
 import { getAllowedInstitutions } from "../services/GetAllowedInstitutions";
 import { searchInstitution } from "../services/SearchAllowedInstitutions";
 import { Institution } from "../models/institution";
@@ -17,26 +18,27 @@ import profilePlaceholder from "../images/profile_placeholder.jpg";
 import { removeAllowedInstitution } from "../services/RemoveAllowedInstituion";
 import { addAllowedInstitution } from "../services/AddAllowedInstitution";
 import { useAuth } from "../context/AuthContext";
+import CustomAlert from "../Components/CustomAlert";
 
 const ManagePermissionsScreen = () => {
   const [allowedInstitutions, setAllowedInstitutions] = useState<Institution[]>(
     []
   );
-  // Recently removed is used to keep track of what institutions were removed in the
-  // already authorized section so that they would not disappear for a bet UX experience
-  // it is reset on refresh
   const [recentlyRemovedInstitutions, setRecentlyRemovedInstitutions] =
     useState<Institution[]>([]);
   const [searchResults, setSearchResults] = useState<Institution[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertButtonText, setAlertButtonText] = useState("OK");
 
   const patientId = useAuth().patientId;
 
   type Func = (...args: any[]) => void;
 
-  // Used for adding a delay before automatically searching based on search input term
   const debounce = (func: Func, delay: number): ((...args: any[]) => void) => {
     let debounceTimer: NodeJS.Timeout;
     return function (...args: any[]) {
@@ -81,7 +83,6 @@ const ManagePermissionsScreen = () => {
         return;
       }
       const institutions = await getAllowedInstitutions(patientId);
-
       setAllowedInstitutions(institutions);
     } catch (error) {
       console.error("Error fetching allowed institutions:", error);
@@ -97,30 +98,53 @@ const ManagePermissionsScreen = () => {
       console.log("Not authenticated");
       return;
     }
-    await addAllowedInstitution(institutionId, patientId);
-    await fetchAllowedInstitutions();
-    if (addedInstitution) {
-      setRecentlyRemovedInstitutions((prevInstitutions) =>
-        prevInstitutions.filter(
-          (institution) =>
-            institution.institutionId !== addedInstitution.institutionId
-        )
-      );
+    try {
+      await addAllowedInstitution(institutionId, patientId);
+      await fetchAllowedInstitutions();
+      setAlertTitle("Success");
+      setAlertMessage("Institution added successfully");
+      setAlertButtonText("OK");
+      setAlertVisible(true);
+      if (addedInstitution) {
+        setRecentlyRemovedInstitutions((prevInstitutions) =>
+          prevInstitutions.filter(
+            (institution) =>
+              institution.institutionId !== addedInstitution.institutionId
+          )
+        );
+      }
+    } catch (error) {
+      setAlertTitle("Error");
+      setAlertMessage("Failed to add institution");
+      setAlertButtonText("OK");
+      setAlertVisible(true);
     }
   };
 
   const handleRemoveInstitution = async (
     institutionId: string,
-    patientId: string,
     removedInstitution: Institution
   ) => {
-    await removeAllowedInstitution(institutionId, patientId);
-    await fetchAllowedInstitutions();
-    if (removedInstitution) {
-      setRecentlyRemovedInstitutions((prevInstitutions) => [
-        ...prevInstitutions,
-        removedInstitution,
-      ]);
+    if (patientId) {
+      try {
+        await removeAllowedInstitution(institutionId, patientId);
+        await fetchAllowedInstitutions();
+        setAlertTitle("Success");
+        setAlertMessage("Institution removed successfully");
+        setAlertButtonText("OK");
+        setAlertVisible(true);
+        if (removedInstitution) {
+          setRecentlyRemovedInstitutions((prevInstitutions) => [
+            ...prevInstitutions,
+            removedInstitution,
+          ]);
+        }
+      } catch (error) {
+        setAlertTitle("Error");
+        setAlertMessage("Failed to remove institution");
+        setAlertButtonText("OK");
+        setAlertVisible(true);
+      }
     }
   };
 
@@ -136,9 +160,6 @@ const ManagePermissionsScreen = () => {
     setSelectedId(selectedId === id ? null : id);
   };
 
-  // Logic for displaying either search results or allowed list
-  // combines both allowed institutions and recently removed so that
-  // there would be no duplicates in the array displayed.
   const institutionsToDisplay = React.useMemo(() => {
     if (searchTerm) {
       return searchResults;
@@ -163,76 +184,97 @@ const ManagePermissionsScreen = () => {
   ]);
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.profileContainer}>
-        <Image source={profilePlaceholder} style={styles.profileImage} />
-        <Text style={styles.profileName}>Tomas Anonymous</Text>
-      </View>
-      <View style={styles.searchBar}>
-        <IconE name="magnifying-glass" style={styles.searchIcon} />
-        <TextInput
-          placeholder="Search"
-          style={styles.searchText}
-          value={searchTerm}
-          onChangeText={(text) => setSearchTerm(text)}
-        />
-        <TouchableOpacity onPress={handleClearSearch}>
-          <Icon name="closecircle" style={styles.searchClearIcon} />
-        </TouchableOpacity>
-      </View>
-      {isSearching ? (
-        <Text style={styles.sectionTitle}>Searching:</Text>
-      ) : searchTerm ? (
-        <Text style={styles.sectionTitle}>Search results:</Text>
-      ) : (
-        <Text style={styles.sectionTitle}>Authorized access:</Text>
-      )}
-      <View style={styles.accessContainer}>
-        {institutionsToDisplay.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            onPress={() => toggleDetails(item.institutionId)}
-            style={styles.accessItem}
-          >
-            <Icon
-              name={selectedId === item.id ? "minussquare" : "plussquare"}
-              style={styles.iconPlus}
-            />
-            <View style={styles.textContainer}>
-              <Text style={styles.institutionName}>{item.name}</Text>
-              <Text style={styles.institutionId}>{item.institutionId}</Text>
-              {selectedId === item.institutionId && (
-                <View style={styles.detailView}>
-                  <Text style={styles.detailsText}>
-                    Address: {item.address}
-                  </Text>
-                  <Text style={styles.detailsText}>
-                    Country: {item.country}
-                  </Text>
-                </View>
-              )}
-            </View>
-            {isAllowedInstitution(item) ? (
-              <TouchableOpacity
-                onPress={() =>
-                  handleRemoveInstitution(item.institutionId, "233", item)
-                }
-                style={styles.removeButton}
-              >
-                <Text style={styles.removeButtonText}>Remove</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                onPress={() => handleAddInstitution(item.institutionId, item)}
-                style={styles.addButton}
-              >
-                <Text style={styles.addButtonText}>Add</Text>
-              </TouchableOpacity>
-            )}
+    <View style={styles.container}>
+      <ScrollView>
+        <View style={styles.profileContainer}>
+          <Image source={profilePlaceholder} style={styles.profileImage} />
+          <Text style={styles.profileName}>Tomas Anonymous</Text>
+        </View>
+        <View style={styles.searchBar}>
+          <IconE name="magnifying-glass" style={styles.searchIcon} />
+          <TextInput
+            placeholder="Search"
+            style={styles.searchText}
+            value={searchTerm}
+            onChangeText={(text) => setSearchTerm(text)}
+          />
+          <TouchableOpacity onPress={handleClearSearch}>
+            <Icon name="closecircle" style={styles.searchClearIcon} />
           </TouchableOpacity>
-        ))}
-      </View>
-    </ScrollView>
+        </View>
+        {isSearching ? (
+          <Text style={styles.sectionTitle}>Searching:</Text>
+        ) : searchTerm ? (
+          <Text style={styles.sectionTitle}>Search results:</Text>
+        ) : (
+          <Text style={styles.sectionTitle}>Authorized access:</Text>
+        )}
+        <View style={styles.accessContainer}>
+          {institutionsToDisplay.length === 0 &&
+            !isSearching &&
+            !searchTerm && (
+              <Text style={styles.noResultsText}>
+                No institutions have rights to edit or view your medical records
+              </Text>
+            )}
+          {searchTerm && searchResults.length === 0 && !isSearching && (
+            <Text style={styles.noResultsText}>
+              No medical institutions found with the provided name
+            </Text>
+          )}
+          {institutionsToDisplay.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              onPress={() => toggleDetails(item.institutionId)}
+              style={styles.accessItem}
+            >
+              <IconFA
+                name="institution" // Example icon of an institution
+                style={styles.iconInstitution}
+              />
+              <View style={styles.textContainer}>
+                <Text style={styles.institutionName}>{item.name}</Text>
+                <Text style={styles.institutionId}>{item.institutionId}</Text>
+                {selectedId === item.institutionId && (
+                  <View style={styles.detailView}>
+                    <Text style={styles.detailsText}>
+                      Address: {item.address}
+                    </Text>
+                    <Text style={styles.detailsText}>
+                      Country: {item.country}
+                    </Text>
+                  </View>
+                )}
+              </View>
+              {isAllowedInstitution(item) ? (
+                <TouchableOpacity
+                  onPress={() =>
+                    handleRemoveInstitution(item.institutionId, item)
+                  }
+                  style={styles.removeButton}
+                >
+                  <Text style={styles.removeButtonText}>Remove</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => handleAddInstitution(item.institutionId, item)}
+                  style={styles.addButton}
+                >
+                  <Text style={styles.addButtonText}>Add</Text>
+                </TouchableOpacity>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        buttonText={alertButtonText}
+        onClose={() => setAlertVisible(false)}
+      />
+    </View>
   );
 };
 
@@ -314,7 +356,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 15,
   },
-  iconPlus: {
+  iconInstitution: {
     marginRight: 10,
     fontSize: 25,
     color: "#383838",
@@ -368,6 +410,12 @@ const styles = StyleSheet.create({
   detailsText: {
     fontSize: 14,
     color: "gray",
+  },
+  noResultsText: {
+    color: "gray",
+    fontSize: 16,
+    textAlign: "center",
+    marginVertical: 20,
   },
 });
 
