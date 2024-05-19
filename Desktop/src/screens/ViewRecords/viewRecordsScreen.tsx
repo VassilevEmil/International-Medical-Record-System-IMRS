@@ -12,6 +12,7 @@ import {
   Box,
   CircularProgress,
   useMediaQuery,
+  Alert,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import GetRecordsService from "../../services/GetRecordsService";
@@ -52,6 +53,7 @@ const ViewRecordsScreen: React.FC = () => {
   });
   const [totalRecords, setTotalRecords] = useState(0);
   const [recordLimit, setRecordLimit] = useState(5);
+  const [error, setError] = useState<string | null>(null);
 
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
   const theme = React.useMemo(() => {
@@ -73,6 +75,7 @@ const ViewRecordsScreen: React.FC = () => {
   ) => {
     try {
       setIsLoading(true);
+      setError(null); // Reset error state before fetching records
       if (selectedInstitution) {
         const response = await GetRecordsService.getRecords(
           patientId,
@@ -82,18 +85,20 @@ const ViewRecordsScreen: React.FC = () => {
           selectedInstitution.institutionId
         );
         if (response.success && response.data) {
-          setIsLoading(false);
           setRecords(response.data.medicalRecords);
           setTotalRecords(response.data.total);
         } else {
-          setIsLoading(false);
+          setError(response.message);
         }
+      } else {
+        setError("No institution selected.");
       }
     } catch (error) {
-      setIsLoading(false);
-      console.error(
+      setError(
         error instanceof Error ? error.message : "An unknown error occurred"
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -136,6 +141,11 @@ const ViewRecordsScreen: React.FC = () => {
           </Box>
         ) : (
           <>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
             <TableContainer component={Paper}>
               <Table aria-label="simple table">
                 <TableHead>
@@ -174,7 +184,6 @@ const ViewRecordsScreen: React.FC = () => {
                       <TableCell align="left">
                         {record.doctorFirstName + " " + record.doctorLastName}
                       </TableCell>
-
                       <TableCell align="left">{record.language}</TableCell>
                     </TableRow>
                   ))}
