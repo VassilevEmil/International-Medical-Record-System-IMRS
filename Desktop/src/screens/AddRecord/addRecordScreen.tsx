@@ -21,8 +21,10 @@ import {
   TypeOfRecord,
   formatEnumValue,
 } from "../../../enums";
+import { useAppContext } from "../../context/AppContext";
 
 const AddRecordScreen = () => {
+  const { selectedInstitution, patientData } = useAppContext();
   const [recordType, setRecordType] = useState("");
   const [languageType, setLanguageType] = useState("");
   const [title, setTitle] = useState("");
@@ -49,17 +51,32 @@ const AddRecordScreen = () => {
     try {
       const formData = new FormData();
 
-      formData.append("institutionId", "#4r4523ed");
-      formData.append("patientId", "7a234ba1-9b07-4a36-96b5-7c20a754f3c0");
+      if (selectedInstitution && patientData) {
+        formData.append("institutionId", selectedInstitution.institutionId);
+        formData.append("patientId", patientData.patientId);
+      }
       formData.append("title", title);
       formData.append("textInput", comment);
       formData.append("typeOfRecord", recordType);
-      formData.append("doctorId", "456");
-      formData.append("doctorFirstName", "William");
-      formData.append("doctorLastName", "McLovin");
+
+      if (selectedInstitution) {
+        if (selectedInstitution.doctorId) {
+          formData.append("doctorId", selectedInstitution.doctorId);
+        }
+        if (selectedInstitution.doctorFirstName) {
+          formData.append(
+            "doctorFirstName",
+            selectedInstitution.doctorFirstName
+          );
+        }
+        if (selectedInstitution.doctorLastName) {
+          formData.append("doctorLastName", selectedInstitution.doctorLastName);
+        }
+      }
+
       formData.append("language", languageType);
 
-      if (recordType == TypeOfRecord.Prescription) {
+      if (recordType === TypeOfRecord.Prescription) {
         formData.append("nameOfDrug", nameOfDrug);
         formData.append(
           "startTreatmentDate",
@@ -73,9 +90,11 @@ const AddRecordScreen = () => {
         formData.append("fileInput", file);
       });
 
-      if (recordType == TypeOfRecord.Prescription) {
+      if (recordType === TypeOfRecord.Prescription && selectedInstitution) {
         const addRecordResponse = await UploadDrugService.uploadDrugRecord(
-          formData
+          formData,
+          selectedInstitution?.apiKey,
+          selectedInstitution?.institutionId
         );
 
         if (!addRecordResponse.success) {
@@ -94,18 +113,25 @@ const AddRecordScreen = () => {
         return;
       }
 
-      const response = await UploadRecordService.uploadRecord(formData);
-      if (response.success) {
-        setUploadStatus("succeeded");
-        setSnackbarMessage("Record added successfully!");
-        setSnackbarSeverity("success");
-        setOpenSnackbar(true);
-      } else {
-        setUploadStatus("failed");
-        setErrorMessage(response.message);
-        setSnackbarMessage(response.message);
-        setSnackbarSeverity("error");
-        setOpenSnackbar(true);
+      if (selectedInstitution) {
+        const response = await UploadRecordService.uploadRecord(
+          formData,
+          selectedInstitution.apiKey,
+          selectedInstitution.institutionId
+        );
+
+        if (response.success) {
+          setUploadStatus("succeeded");
+          setSnackbarMessage("Record added successfully!");
+          setSnackbarSeverity("success");
+          setOpenSnackbar(true);
+        } else {
+          setUploadStatus("failed");
+          setErrorMessage(response.message);
+          setSnackbarMessage(response.message);
+          setSnackbarSeverity("error");
+          setOpenSnackbar(true);
+        }
       }
     } catch (error) {
       setUploadStatus("failed");
@@ -149,6 +175,7 @@ const AddRecordScreen = () => {
       <Typography
         variant="h4"
         gutterBottom
+        color={"black"}
         component="div"
         sx={{ mt: 4, mb: 4 }}
       >

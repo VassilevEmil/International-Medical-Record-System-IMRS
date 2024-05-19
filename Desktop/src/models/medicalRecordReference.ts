@@ -1,13 +1,13 @@
 import { TypeOfRecord } from "../enums";
 import { FileInfo } from "./fileInfo";
-import { Institution } from "./institution";
+import { InstitutionForDisplay } from "./institution";
 
 export interface MedicalRecordReference {
-    id: string;
-    patientId: string;
-    institution: Institution;
-    typeOfRecord: TypeOfRecord;
-    medicalRecordHash: string;
-    fileHash?: FileInfo[];
-    timeStamp: Date;
+  id: string;
+  patientId: string;
+  institution: InstitutionForDisplay;
+  typeOfRecord: TypeOfRecord;
+  medicalRecordHash: string;
+  fileHash?: FileInfo[];
+  timeStamp: Date;
 }

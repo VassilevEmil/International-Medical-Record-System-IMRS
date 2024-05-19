@@ -6,14 +6,17 @@ interface UploadResponse {
 }
 
 export default class UploadRecordService {
-  private static apiUrl =
-       "https://imrs-server-12m3e12kdk1k12mek.tech/prescription";
+  private static apiUrl = `${import.meta.env.VITE_API_URL}/drugRecords`;
 
-  static async uploadDrugRecord(formData: FormData): Promise<UploadResponse> {
+  static async uploadDrugRecord(formData: FormData, apiKey: string, institutionId: string): Promise<UploadResponse> {
     try {
       const response = await fetch(this.apiUrl, {
         method: "POST",
         body: formData,
+        headers: {
+          "x-api-key": apiKey,
+          "institution-id": institutionId,
+        },
       });
 
       if (response.ok) {
