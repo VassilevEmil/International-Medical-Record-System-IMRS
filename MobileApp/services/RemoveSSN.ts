@@ -1,4 +1,4 @@
-const apiUrl = "https://imrs-server-12m3e12kdk1k12mek.tech/ssn/deleteSSN";
+const apiUrl = `${process.env.API_BASE_URL}/ssn/deleteSSN`;
 
 export async function deleteSSN(patientId: string, ssn: string): Promise<void> {
   try {

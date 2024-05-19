@@ -7,8 +7,8 @@ interface GetRecordResponse {
   }
   
   export default class GetRecordsService {
-    private static apiUrl = "https://imrs-server-12m3e12kdk1k12mek.tech/medicalRecords/getMedicalRecords/";
-    private static apiUrl2 = "https://imrs-server-12m3e12kdk1k12mek.tech/medicalRecords/";
+    private static apiUrl = `${process.env.API_BASE_URL}/medicalRecords/getMedicalRecords/`;
+    private static apiUrl2 = `${process.env.API_BASE_URL}/medicalRecords/`;
 
     static async getRecords(patientId: string, page: number, recordLimit: number): Promise<GetRecordResponse> {
       
