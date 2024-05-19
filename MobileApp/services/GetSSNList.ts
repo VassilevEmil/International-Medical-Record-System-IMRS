@@ -1,6 +1,6 @@
 import { SSNList } from "models/SSNList";
 
-const apiUrl = `${process.env.API_BASE_URL}/ssn/getSSNList`;
+const apiUrl = `https://imrs-server-12m3e12kdk1k12mek.tech/api/ssn/getSSNList`;
 
 export async function getSSNList(patientId: string): Promise<SSNList[]> {
   if (!patientId || typeof patientId !== "string") {

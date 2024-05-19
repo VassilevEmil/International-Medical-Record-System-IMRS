@@ -70,7 +70,7 @@ const RegisterScreen = () => {
         } else {
           setErrorMsg("Failed to register patient");
         }
-      } catch (error) {
+      } catch (error: any) {
         if (error.response.data.message) {
           console.log(error);
           setErrorMsg(error.response.data.message);

@@ -37,15 +37,15 @@ const LoginScreen = () => {
   }
 
   const handleLogin = async () => {
-    if (validateInput()) {
-      try {
-        await login(email, password);
-        setErrorMsg("");
-      } catch (error) {
-        setErrorMsg("Failed to log-in. Check your credentials.");
-      }
+  if (validateInput()) {
+    try {
+      await login(email, password);
+      setErrorMsg(""); 
+    } catch (error: any) {
+      setErrorMsg(error.message); 
     }
-  };
+  }
+};
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

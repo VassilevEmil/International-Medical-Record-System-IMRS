@@ -12,7 +12,7 @@ interface GetDrugResponse {
 
 export default class GetDrugsService {
 
-  private static BASE_URL = `${process.env.API_BASE_URL}/drugRecords/getAllDrugRecords/`;
+  private static BASE_URL = `https://imrs-server-12m3e12kdk1k12mek.tech/api/drugRecords/getAllDrugRecords/`;
 
     static async fetchDrugRecordsByPatientId(patientId: string, page: number, recordLimit: number): Promise<GetDrugResponse> {
         const queryParams = new URLSearchParams({

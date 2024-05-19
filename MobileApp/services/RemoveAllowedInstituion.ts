@@ -1,5 +1,5 @@
 export async function removeAllowedInstitution(institutionId: string, patientId: string) {
-    const url = `${process.env.API_BASE_URL}/institutions/removeAllowedInstitution`;
+    const url = `https://imrs-server-12m3e12kdk1k12mek.tech/api/institutions/removeAllowedInstitution`;
 
     const requestOptions = {
         method: 'POST',
