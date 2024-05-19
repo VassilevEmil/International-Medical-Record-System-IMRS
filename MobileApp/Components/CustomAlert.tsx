@@ -1,8 +1,22 @@
 import { BlurView } from "@react-native-community/blur";
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  Image,
+} from "react-native";
 
-const CustomAlert = ({ visible, title, message, buttonText, onClose }) => {
+const CustomAlert = ({
+  visible,
+  title,
+  message,
+  buttonText,
+  onClose,
+  imageSource,
+}) => {
   return (
     <Modal
       transparent={true}
@@ -19,6 +33,9 @@ const CustomAlert = ({ visible, title, message, buttonText, onClose }) => {
         />
         <View style={styles.alertBox}>
           <Text style={styles.alertTitle}>{title} </Text>
+          {imageSource && (
+            <Image source={imageSource} style={styles.alertImage} />
+          )}
           <Text style={styles.alertMessage}>{message}</Text>
           <TouchableOpacity style={styles.alertButton} onPress={onClose}>
             <Text style={styles.alertButtonText}>{buttonText}</Text>
@@ -60,6 +77,11 @@ const styles = StyleSheet.create({
     color: "#273675",
     textAlign: "center",
     fontWeight: "bold",
+    marginBottom: 10,
+  },
+  alertImage: {
+    width: 100,
+    height: 100,
     marginBottom: 10,
   },
   alertMessage: {

@@ -7,18 +7,20 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
-  Alert,
   Modal,
   FlatList,
   ActivityIndicator,
+  TouchableWithoutFeedback,
 } from "react-native";
 import Icon from "react-native-vector-icons/AntDesign";
 import profilePlaceholder from "../images/profile_placeholder.jpg";
+import mitIdLogo from "../images/mitIdLogo.png"; // Import the image
 import { getSSNList } from "../services/GetSSNList";
 import { Country } from "../enums";
 import { addSSN } from "../services/AddSSN";
 import { deleteSSN } from "../services/RemoveSSN";
 import { useAuth } from "../context/AuthContext";
+import CustomAlert from "../Components/CustomAlert";
 
 const LinkSSNToAccountScreen = () => {
   const [ssnList, setSsnList] = useState<
@@ -29,6 +31,11 @@ const LinkSSNToAccountScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertButtonText, setAlertButtonText] = useState("OK");
+  const [alertImage, setAlertImage] = useState(null);
 
   const { patientId } = useAuth();
 
@@ -42,6 +49,7 @@ const LinkSSNToAccountScreen = () => {
         const data = await getSSNList(patientId);
         setSsnList(data);
       } catch (error) {
+        console.error("Error fetching SSN list:", error);
       } finally {
         setLoading(false);
       }
@@ -58,22 +66,37 @@ const LinkSSNToAccountScreen = () => {
     if (country && ssn && /^\d+$/.test(ssn)) {
       try {
         if (!patientId) {
-          Alert.alert("Not authenticated");
+          setAlertTitle("Error");
+          setAlertMessage("Not authenticated");
+          setAlertButtonText("OK");
+          setAlertImage(null);
+          setAlertVisible(true);
           return;
         }
         await addSSN(patientId, ssn, country);
         setSsnList([...ssnList, { country, ssn }]);
         setCountry("");
         setSsn("");
-        Alert.alert("Success", "SSN added successfully");
+        setAlertTitle("Success");
+        setAlertMessage("SSN added successfully");
+        setAlertButtonText("OK");
+        setAlertImage(mitIdLogo); // Set the image for the alert
+        setAlertVisible(true);
       } catch (error) {
-        Alert.alert("Error", "Failed to add SSN");
+        setAlertTitle("Error");
+        setAlertMessage("Failed to add SSN");
+        setAlertButtonText("OK");
+        setAlertImage(null);
+        setAlertVisible(true);
       }
     } else {
-      Alert.alert(
-        "Error",
+      setAlertTitle("Error");
+      setAlertMessage(
         "Please enter a valid country from the list and a numeric SSN."
       );
+      setAlertButtonText("OK");
+      setAlertImage(null);
+      setAlertVisible(true);
     }
   };
 
@@ -92,11 +115,20 @@ const LinkSSNToAccountScreen = () => {
           (item) => item.ssn !== ssnToDelete || item.country !== countryToDelete
         )
       );
-      Alert.alert("Success", "SSN deleted successfully");
+      setAlertTitle("Success");
+      setAlertMessage("SSN deleted successfully");
+      setAlertButtonText("OK");
+      setAlertImage(null);
+      setAlertVisible(true);
     } catch (error) {
-      Alert.alert("Error", "Failed to delete SSN");
+      setAlertTitle("Error");
+      setAlertMessage("Failed to delete SSN");
+      setAlertButtonText("OK");
+      setAlertImage(null);
+      setAlertVisible(true);
     }
   };
+
   return (
     <View style={styles.container}>
       {loading ? (
@@ -152,34 +184,54 @@ const LinkSSNToAccountScreen = () => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.searchTitle}>Supported Countries</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Search Country"
-              onChangeText={setSearchTerm}
-              value={searchTerm}
-            />
-            <FlatList
-              data={filteredCountries}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
+        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          <View style={styles.centeredView}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalView}>
+                <Text style={styles.searchTitle}>Supported Countries</Text>
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="Search Country"
+                  onChangeText={setSearchTerm}
+                  value={searchTerm}
+                />
+                <View style={styles.countryContainer}>
+                  <FlatList
+                    data={filteredCountries}
+                    keyExtractor={(item) => item}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        style={styles.countryItem}
+                        onPress={() => {
+                          setCountry(item);
+                          setModalVisible(false);
+                          setSearchTerm("");
+                        }}
+                      >
+                        <Text style={styles.countryText}>{item}</Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
                 <TouchableOpacity
-                  style={styles.countryItem}
-                  onPress={() => {
-                    setCountry(item);
-                    setModalVisible(false);
-                    setSearchTerm("");
-                  }}
+                  style={styles.closeButtonIcon}
+                  onPress={() => setModalVisible(false)}
                 >
-                  <Text style={styles.countryText}>{item}</Text>
+                  <Icon name="closecircle" size={30} color="#FF6961" />
                 </TouchableOpacity>
-              )}
-            />
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        buttonText={alertButtonText}
+        onClose={() => setAlertVisible(false)}
+        imageSource={alertImage}
+      />
     </View>
   );
 };
@@ -304,10 +356,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 22,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalView: {
-    margin: 20,
     backgroundColor: "white",
     borderRadius: 10,
     padding: 30,
@@ -317,19 +368,23 @@ const styles = StyleSheet.create({
       width: 1,
       height: 2,
     },
-    height: "90%",
+    height: "80%",
     width: "80%",
     shadowOpacity: 0.5,
     shadowRadius: 4,
     elevation: 10,
   },
+  closeButtonIcon: {
+    marginTop: 20,
+    alignSelf: "center",
+  },
   searchTitle: {
     color: "black",
     fontSize: 20,
-    marginTop: -10,
+    fontWeight: "bold",
+    marginBottom: 15,
   },
   modalInput: {
-    margin: 20,
     marginBottom: 15,
     width: "100%",
     backgroundColor: "#f9f9f9",
@@ -337,6 +392,14 @@ const styles = StyleSheet.create({
     borderColor: "#d1d1d1",
     borderWidth: 1,
     borderRadius: 10,
+  },
+  countryContainer: {
+    flex: 1,
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#d1d1d1",
+    borderRadius: 10,
+    padding: 10,
   },
   countryItem: {
     padding: 10,
