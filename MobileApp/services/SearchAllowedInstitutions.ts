@@ -1,5 +1,5 @@
 export async function searchInstitution(term: string) {
-  const url = `${process.env.API_BASE_URL}/institutions/search?term=${encodeURIComponent(term)}`;
+  const url = `https://imrs-server-12m3e12kdk1k12mek.tech/api/institutions/search?term=${encodeURIComponent(term)}`;
   
   try {
     const response = await fetch(url);

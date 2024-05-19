@@ -70,17 +70,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         { email, password }
       );
       const { token, patientId } = response.data.response;
-
-      const decoded = await jwtDecode(token, "noSecretKey", {
-        skipValidation: true,
-      });
-
+  
       await AsyncStorage.setItem("token", token);
       await AsyncStorage.setItem("patientId", patientId);
       setToken(token);
       setPatientId(patientId);
-    } catch (error) {
-      console.error("Login error: ", error);
+    } catch (error: any) {
+      let errorMessage = "Login failed. Please try again.";
+      if (error.response) {
+        switch (error.response.status) {
+          case 400:
+          case 401:
+            errorMessage = "Invalid email or password.";
+            break;
+          case 500:
+            errorMessage = "Server error. Please try again later.";
+            break;
+          default:
+            errorMessage = error.response.data.message || errorMessage;
+        }
+      }
+      console.error("Login error:", errorMessage);
+      throw new Error(errorMessage);
     }
   };
 
