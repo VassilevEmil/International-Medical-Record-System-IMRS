@@ -1,6 +1,5 @@
 export async function addAllowedInstitution(institutionId: string, patientId: string ) {
-    const url = `https://imrs-server-12m3e12kdk1k12mek.tech/institutions/addAllowedInstitution`;
-
+    const url = `${process.env.API_BASE_URL}/institutions/addAllowedInstitution`;
     try {
         const response = await fetch(url, {
             method: 'POST',

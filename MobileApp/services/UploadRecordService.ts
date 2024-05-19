@@ -6,7 +6,7 @@ interface UploadResponse {
 }
 
 export default class UploadRecordService {
-  private static apiUrl = "https://imrs-server-12m3e12kdk1k12mek.tech/medicalRecords/";
+  private static apiUrl = `${process.env.API_BASE_URL}/medicalRecords/`;
 
   static async uploadRecord(formData: FormData): Promise<UploadResponse> {
     try {

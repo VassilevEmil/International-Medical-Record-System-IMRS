@@ -1,4 +1,4 @@
-const apiUrl = "https://imrs-server-12m3e12kdk1k12mek.tech/ssn";
+const apiUrl = `${process.env.API_BASE_URL}/ssn`;
 
 export async function addSSN(
   patientId: string,

@@ -8,12 +8,11 @@ interface GetDrugResponse {
     success: boolean;
     message: string;
     data?: DrugRecordResponse[],
-    
 }
 
 export default class GetDrugsService {
 
-    private static BASE_URL = 'https://imrs-server-12m3e12kdk1k12mek.tech/drugRecords/getAllDrugRecords/';
+  private static BASE_URL = `${process.env.API_BASE_URL}/drugRecords/getAllDrugRecords/`;
 
     static async fetchDrugRecordsByPatientId(patientId: string, page: number, recordLimit: number): Promise<GetDrugResponse> {
         const queryParams = new URLSearchParams({
@@ -37,8 +36,6 @@ export default class GetDrugsService {
               success: true,
               message: "Records fetched successfully test",
               data: data
-              
-              
             };
           } else {
             const text = await response.text();
