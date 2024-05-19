@@ -97,7 +97,6 @@ const ViewRecordsScreen: React.FC = () => {
     }
   };
 
-  // Function to handle item click
   const handleItemClick = (recordId: string) => {
     sessionStorage.setItem("currentPage", page.toString());
     navigate(`/record-detail/${recordId}`);

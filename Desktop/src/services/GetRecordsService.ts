@@ -45,7 +45,6 @@ export default class GetRecordsService {
           data: data,
         };
       } else {
-        // HTTP errors
         const text = await response.text();
         return {
           success: false,
@@ -53,7 +52,6 @@ export default class GetRecordsService {
         };
       }
     } catch (error) {
-      // network errors
       return {
         success: false,
         message: `Record fetch failed: ${
@@ -63,7 +61,11 @@ export default class GetRecordsService {
     }
   }
 
-  static async fetchRecord(recordId: string, apiKey: string, institutionId: string): Promise<GetRecordResponse> {
+  static async fetchRecord(
+    recordId: string,
+    apiKey: string,
+    institutionId: string
+  ): Promise<GetRecordResponse> {
     const urlWithRecordId = this.apiUrl2 + encodeURIComponent(recordId);
     try {
       const response = await fetch(urlWithRecordId, {

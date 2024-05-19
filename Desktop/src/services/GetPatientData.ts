@@ -7,9 +7,6 @@ export const getPatientData = async (
 ): Promise<PatientData> => {
   const uri = `${import.meta.env.VITE_API_URL}/auth/getPatientData`;
   try {
-    console.log("apiKey ", apiKey);
-    console.log("inst  ", institutionId);
-
     const response = await fetch(uri, {
       method: "POST",
       headers: {
