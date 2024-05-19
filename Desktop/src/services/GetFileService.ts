@@ -15,7 +15,7 @@ interface GetFileResponse { // TO DO: NEED to specify EXACTLY THE DATA TYPES WE 
 export default class GetFileService {
 
   // Base URL of IMRS (our) API
-  private static baseApiUrl = "https://imrs-server-12m3e12kdk1k12mek.tech/medicalRecords/";
+  private static baseApiUrl = `${import.meta.env.VITE_API_URL}/medicalRecords/`;
 
   /**
  * Fetches a file from the server associated with the given medical record ID and file ID.
@@ -24,18 +24,20 @@ export default class GetFileService {
  * @returns A promise that resolves to a GetFileResponse object.
  * @throws Throws an error if the fetch operation fails.
  */
-  static async getFile(medicalRecordId: string, fileId: string): Promise<GetFileResponse> {
+  static async getFile(medicalRecordId: string, fileId: string, apiKey: string, institutionId: string): Promise<GetFileResponse> {
     const url = `${this.baseApiUrl}/getFile/${medicalRecordId}/${fileId}`;
     
     try {
       const response = await fetch(url, {
         method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "institution-id": institutionId,
+        },
       });
 
       if (response.ok) {
-        // Extract the MIME type from the response headers
         const mimeType = response.headers.get("Content-Type") || "application/octet-stream";
-        // Get the response as a Blob
         const blob = await response.blob(); 
         // Create a blob URL from the Blob
         const blobUrl = URL.createObjectURL(blob);
@@ -49,14 +51,12 @@ export default class GetFileService {
         };
 
       } else {
-        // Handle server errors
         const text = await response.text();
         return {
           success: false,
           message: `Server responded with status: ${response.status}: '${text}'`,
         };
       }
-      // Handle fetch failures
     } catch (error) {
       return {
         success: false,

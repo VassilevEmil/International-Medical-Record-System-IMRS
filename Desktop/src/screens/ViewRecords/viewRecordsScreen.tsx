@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   Container,
-  TextField,
-  Button,
   Table,
   TableBody,
   TableCell,
@@ -17,9 +15,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import GetRecordsService from "../../services/GetRecordsService";
-import { useDispatch, useSelector } from "react-redux";
-import { SET_PATIENT_ID } from "../../constants/constants";
-import { RootState } from "../../redux/store";
+import { useAppContext } from "../../context/AppContext";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { MedicalRecord } from "../../models/medicalRecord";
 
@@ -46,12 +42,8 @@ const darkTheme = createTheme({
   },
 });
 
-const ViewRecordsScreen = () => {
-  // local state to store records | well might need to put it within redux as well,
-  //bcs now we always fetching them again, when in fact no need,
-  // since there could be back and forth navigation
-  // although maybe store it within redux central state is not exactly necessary, need to figure out.
-  // Caveat if store within redux is that it dumps this on client's ram. ~ this is how redux works.
+const ViewRecordsScreen: React.FC = () => {
+  const { selectedInstitution, patientData } = useAppContext();
   const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(() => {
@@ -66,19 +58,13 @@ const ViewRecordsScreen = () => {
     return prefersDarkMode ? darkTheme : lightTheme;
   }, [prefersDarkMode]);
 
-  // Access searchTerm(Paient id) from store
-  const searchTerm = useSelector(
-    (state: RootState) => state.searchReducer.patientId
-  );
-  const dispatch = useDispatch();
-
   const navigate = useNavigate();
 
-  const [localSearchTerm, setLocalSearchTerm] = useState("");
-
   useEffect(() => {
-    fetchRecords(searchTerm, page, recordLimit);
-  }, [searchTerm, page, recordLimit]);
+    if (patientData) {
+      fetchRecords(patientData.patientId, page, recordLimit);
+    }
+  }, [patientData, page, recordLimit]);
 
   const fetchRecords = async (
     patientId: string,
@@ -87,39 +73,27 @@ const ViewRecordsScreen = () => {
   ) => {
     try {
       setIsLoading(true);
-      const response = await GetRecordsService.getRecords(
-        patientId,
-        page,
-        recordLimit
-      );
-      if (response.success && response.data) {
-        setIsLoading(false);
-        setRecords(response.data.medicalRecords);
-        setTotalRecords(response.data.total);
-      } else {
-        setIsLoading(false);
+      if (selectedInstitution) {
+        const response = await GetRecordsService.getRecords(
+          patientId,
+          page,
+          recordLimit,
+          selectedInstitution.apiKey,
+          selectedInstitution.institutionId
+        );
+        if (response.success && response.data) {
+          setIsLoading(false);
+          setRecords(response.data.medicalRecords);
+          setTotalRecords(response.data.total);
+        } else {
+          setIsLoading(false);
+        }
       }
     } catch (error) {
       setIsLoading(false);
       console.error(
         error instanceof Error ? error.message : "An unknown error occurred"
       );
-    }
-  };
-
-  const handleSearch = () => {
-    setPage(1);
-    if (localSearchTerm.trim()) {
-      dispatch({
-        type: SET_PATIENT_ID,
-        payload: localSearchTerm.trim(),
-      });
-    }
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      handleSearch();
     }
   };
 
@@ -151,29 +125,6 @@ const ViewRecordsScreen = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Medical Records Dashboard
         </Typography>
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          sx={{ mt: 2, mb: 2 }}
-        >
-          <TextField
-            label={searchTerm ? `Patient id: ${searchTerm}` : "Search patient"}
-            variant="outlined"
-            value={localSearchTerm}
-            onChange={(e) => setLocalSearchTerm(e.target.value)}
-            size="small"
-            sx={{ flexGrow: 1, mr: 1 }}
-            onKeyDown={handleKeyDown}
-          />
-          <Button
-            variant="contained"
-            onClick={handleSearch}
-            sx={{ width: "auto", p: "6px 12px" }}
-          >
-            SEARCH
-          </Button>
-        </Box>
         {isLoading ? (
           <Box
             sx={{

@@ -20,6 +20,7 @@ import HealingIcon from "@mui/icons-material/Healing";
 import PersonIcon from "@mui/icons-material/Person";
 import GetRecordsService from "../../services/GetRecordsService";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { useAppContext } from "../../context/AppContext";
 
 const darkTheme = createTheme({
   palette: {
@@ -56,6 +57,7 @@ const RecordDetailScreen = () => {
   let { id } = useParams<"id">();
   const [record, setRecord] = useState<Record>(); // not sure, need to think when fresh, might not need state
   const [isLoading, setIsLoading] = useState(true);
+  const { selectedInstitution } = useAppContext();
 
   const navigate = useNavigate();
 
@@ -70,10 +72,16 @@ const RecordDetailScreen = () => {
       setIsLoading(true);
       if (id) {
         try {
-          const response = await GetRecordsService.fetchRecord(id);
-          if (response.success && response.data) {
-            setIsLoading(false);
-            setRecord(response.data);
+          if (selectedInstitution) {
+            const response = await GetRecordsService.fetchRecord(
+              id,
+              selectedInstitution.apiKey,
+              selectedInstitution.institutionId
+            );
+            if (response.success && response.data) {
+              setIsLoading(false);
+              setRecord(response.data);
+            }
           } else {
             console.error("Failed to fetch record:", response.message);
           }
