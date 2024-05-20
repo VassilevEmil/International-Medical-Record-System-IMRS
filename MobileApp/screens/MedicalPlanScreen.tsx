@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Switch,
+  Dimensions,
 } from "react-native";
 import GetDrugsService from "../services/GetDrugRecordsService";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -14,6 +15,8 @@ import ProgressContainer from "../Components/ProgressContainer";
 import Reminder from "../Components/Reminder";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../context/AuthContext";
+
+const { width } = Dimensions.get("window");
 
 const MedicalPlanScreen = () => {
   const [drugRecords, setDrugRecords] = useState<any[]>([]);
@@ -31,7 +34,7 @@ const MedicalPlanScreen = () => {
           console.log("PatientId: ", patientId);
 
           const response = await GetDrugsService.fetchDrugRecordsByPatientId(
-           "123",
+            "123",
             1,
             10
           );
@@ -98,7 +101,7 @@ const MedicalPlanScreen = () => {
   );
 
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
         <View style={styles.toggleContainer}>
           <Text style={styles.toggleLabel}>Show Active Records</Text>
@@ -154,27 +157,22 @@ const MedicalPlanScreen = () => {
                 </View>
                 {isExpanded && (
                   <View style={styles.expandedContent}>
-                    <Text style={styles.recordSubtitle}>
-                      <View style={styles.subtitleRow}>
-                        <Text style={styles.boldText}>Duration: </Text>
-                        <Text>
-                          {record.duration} {record.durationType}
-                        </Text>
-
-                        <View style={styles.startDate}>
-                          <Text style={styles.boldText}>Start Date:</Text>
-                          <Text>{formatDate(record.startTreatmentDate)}</Text>
-                        </View>
+                    <View style={styles.subtitleRow}>
+                      <Text style={styles.boldText}>Duration: </Text>
+                      <Text>
+                        {record.duration} {record.durationType}
+                      </Text>
+                      <View style={styles.startDate}>
+                        <Text style={styles.boldText}>Start Date:</Text>
+                        <Text>{formatDate(record.startTreatmentDate)}</Text>
                       </View>
-                    </Text>
+                    </View>
                     <Text style={styles.recordSubtitle}>
                       <Text style={styles.boldText}>Comment:</Text>
                       {"\n \n"} {}
                       <Text>{record.comment}</Text> {"\n"}
                     </Text>
-                    {isExpanded && (
-                      <ProgressContainer progress={calculateProgress(record)} />
-                    )}
+                    <ProgressContainer progress={calculateProgress(record)} />
                     <Reminder
                       onPress={(selectedDate, selectedTime) =>
                         handleReminderSet(record, selectedDate, selectedTime)
@@ -211,6 +209,9 @@ const MedicalPlanScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    paddingBottom: 20,
+  },
   container: {
     flex: 1,
     backgroundColor: "#f1f1f1",
@@ -257,6 +258,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 18,
     marginBottom: 5,
+    maxWidth: "70%", // Ensures the title doesn't overflow
   },
   recordSubtitle: {
     fontSize: 16,
@@ -273,9 +275,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 5,
+    flexWrap: "wrap",
   },
   startDate: {
-    marginLeft: 300,
+    marginLeft: "auto",
   },
   expandedTitleContainer: {
     borderBottomWidth: 1,

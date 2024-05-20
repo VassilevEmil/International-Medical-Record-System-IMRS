@@ -45,7 +45,7 @@ const Reminder = ({ onReminderSet, drugName, record }) => {
   };
 
   const handleSaveReminder = () => {
-    const reminderInfo = `Reminder set for ${selectedDays.join(', ')} at ${Object.values(selectedTimes).map(time => time.toLocaleTimeString()).join(', ')} with repeat option: ${repeatOption}`;
+    const reminderInfo = ` ${selectedDays.join(', ')} at ${Object.values(selectedTimes).map(time => time.toLocaleTimeString()).join(', ')} repeat: ${repeatOption}`;
     AsyncStorage.setItem(`reminderInfo_${drugName}`, reminderInfo);
     setReminderInfo(reminderInfo);
 
@@ -90,11 +90,12 @@ const Reminder = ({ onReminderSet, drugName, record }) => {
         notificationTime: time,
       },
     });
+
+    console.log(`Notification scheduled for ${drugName} on ${day} at ${notificationTime} with repeat ${repeatType}`);
   };
 
   const scheduleMultipleNotifications = (day, time, timesPerDay) => {
     for (let i = 0; i < timesPerDay; i++) {
-      
       const notificationTime = getNextDayOfWeek(day, time, i, timesPerDay);
       PushNotification.localNotificationSchedule({
         message: `Time to take ${drugName}`,
@@ -105,6 +106,7 @@ const Reminder = ({ onReminderSet, drugName, record }) => {
           notificationTime: time,
         },
       });
+      console.log(`Notification scheduled for ${drugName} on ${day} at ${notificationTime}`);
     }
   };
 
@@ -126,16 +128,20 @@ const Reminder = ({ onReminderSet, drugName, record }) => {
     <View style={styles.container}>
       <View style={styles.leftContent}>
         <IconFace name="bell" size={15} color="grey" />
-        <Text> Remind me: </Text>
+        {(!reminderInfo || isEditing) && <Text> Remind me: </Text>}
         {!isEditing && reminderInfo ? (
           <View style={styles.reminderInfoContainer}>
-            <Text style={styles.reminderInfoText}>{reminderInfo}</Text>
+            <Text
+              style={styles.reminderInfoText}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {reminderInfo}
+            </Text>
           </View>
         ) : null}
         {isEditing && (
           <>
-          
-          
             <DayPicker
               selectedDays={selectedDays}
               onSelectDay={handleSelectDay}
@@ -156,7 +162,7 @@ const Reminder = ({ onReminderSet, drugName, record }) => {
               <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
                   <Text style={styles.modalTitle}>Repeat Options</Text>
-                  {['Never', 'Daily', 'Every Other Day', 'Forever', 'Twice a Day', 'Three Times a Day'].map((option) => (
+                  {['Never ', 'Daily ', 'Every Other Day ', 'Forever ', 'Twice a Day ', 'Three Times a Day '].map((option) => (
                     <TouchableOpacity key={option} onPress={() => handleRepeatOptionSelect(option)} style={styles.optionButton}>
                       <Text style={styles.optionText}>{option}</Text>
                     </TouchableOpacity>
@@ -202,6 +208,8 @@ const styles = StyleSheet.create({
   leftContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    width: '100%',
   },
   rightContent: {
     flexDirection: 'row',
@@ -236,6 +244,7 @@ const styles = StyleSheet.create({
   },
   reminderInfoText: {
     textAlign: 'center',
+    maxWidth: '90%',
   },
   repeatDailyContainer: {
     flexDirection: 'row',
@@ -255,7 +264,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
     marginBottom: 10,
   },

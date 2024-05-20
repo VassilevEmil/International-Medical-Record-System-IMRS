@@ -1,5 +1,7 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Dimensions } from "react-native";
+
+const { width } = Dimensions.get("window");
 
 const ProgressBar = ({ progress }) => {
   return (
@@ -18,11 +20,10 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     borderRadius: 5,
     overflow: "hidden",
-    marginLeft: 10,
   },
   progressBarBackground: {
     height: "100%",
-    width: "100%",
+    width: "80%",
     backgroundColor: "lightblue",
     borderRadius: 5,
     overflow: "hidden",
@@ -35,3 +36,4 @@ const styles = StyleSheet.create({
 });
 
 export default ProgressBar;
+

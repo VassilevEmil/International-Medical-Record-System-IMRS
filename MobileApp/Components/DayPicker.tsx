@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Dimensions } from 'react-native';
 
+const { width } = Dimensions.get('window');
 const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const DayPicker = ({ selectedDays, onSelectDay }) => {
@@ -9,39 +10,39 @@ const DayPicker = ({ selectedDays, onSelectDay }) => {
       {daysOfWeek.map((day) => (
         <TouchableOpacity
           key={day}
-          style={[
-            styles.dayCircle,
-            selectedDays.includes(day) && styles.selectedDayCircle
-          ]}
           onPress={() => onSelectDay(day)}
+          style={[
+            styles.day,
+            selectedDays.includes(day) && styles.selectedDay,
+          ]}
         >
-          <Text style={styles.dayText}>{day}</Text>
+          <Text style={styles.dayText}>{day[0]}</Text>
         </TouchableOpacity>
       ))}
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 10,
+    justifyContent: 'space-around',
+    marginVertical: 10,
   },
-  dayCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 25,
-    backgroundColor: '#81b0ff',
+  day: {
+    width: width / 10, // Adjusted for smaller screens
+    height: width / 10,
+    borderRadius: (width / 8) / 2,
     justifyContent: 'center',
     alignItems: 'center',
     margin: 5,
+    backgroundColor: 'blue',
   },
-  selectedDayCircle: {
-    backgroundColor: '#f0f0f0',
+  selectedDay: {
+    backgroundColor: 'blue',
   },
   dayText: {
-    color: '#000',
-    fontWeight: 'bold',
+    color: 'white',
   },
 });
 
