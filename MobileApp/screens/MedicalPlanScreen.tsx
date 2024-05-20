@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Switch,
 } from "react-native";
 import GetDrugsService from "../services/GetDrugRecordsService";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -15,38 +15,32 @@ import Reminder from "../Components/Reminder";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../context/AuthContext";
 
-
-
-
 const MedicalPlanScreen = () => {
   const [drugRecords, setDrugRecords] = useState<any[]>([]);
   const [reminderInfo, setReminderInfo] = useState("No Reminders");
-  const {patientId} = useAuth();
+  const { patientId } = useAuth();
   const [expandedRecordIndex, setExpandedRecordIndex] = useState<number | null>(
     null
   );
-
-
-  
+  const [showActiveRecords, setShowActiveRecords] = useState(true);
 
   useEffect(() => {
     const fetchDrugRecords = async () => {
       try {
-        if(patientId){
-        
-          
-        const response = await GetDrugsService.fetchDrugRecordsByPatientId(
+        if (patientId) {
+          console.log("PatientId: ", patientId);
 
-          patientId,
-          1,
-          10
-        );
-        if (response.success && response.data) {
-          setDrugRecords(response.data);
+          const response = await GetDrugsService.fetchDrugRecordsByPatientId(
+           "123",
+            1,
+            10
+          );
+          if (response.success && response.data) {
+            setDrugRecords(response.data);
+          }
+        } else {
+          console.log("PatientId is null ");
         }
-      } else {
-        "PatientId is null "
-      }
       } catch (error) {
         console.error("An error occurred while fetching records", error);
       }
@@ -61,7 +55,9 @@ const MedicalPlanScreen = () => {
   }, [patientId]);
 
   const toggleRecordExpansion = (index: number) => {
-    setExpandedRecordIndex((prevIndex) => (prevIndex === index ? null : index));
+    setExpandedRecordIndex((prevIndex) =>
+      prevIndex === index ? null : index
+    );
   };
 
   const calculateProgress = (record: any) => {
@@ -93,17 +89,25 @@ const MedicalPlanScreen = () => {
     notificationDateTime.setHours(selectedTime.getHours());
     notificationDateTime.setMinutes(selectedTime.getMinutes());
 
-    // this is saving the info to the local storage
-
     AsyncStorage.setItem("reminderInfo", reminderInfo);
-
     setReminderInfo(reminderInfo);
   };
+
+  const filteredRecords = drugRecords.filter((record) =>
+    showActiveRecords ? record.isActive : !record.isActive
+  );
 
   return (
     <ScrollView>
       <View style={styles.container}>
-        {drugRecords.map((record, index) => {
+        <View style={styles.toggleContainer}>
+          <Text style={styles.toggleLabel}>Show Active Records</Text>
+          <Switch
+            value={showActiveRecords}
+            onValueChange={setShowActiveRecords}
+          />
+        </View>
+        {filteredRecords.map((record, index) => {
           const isExpanded = expandedRecordIndex === index;
           return (
             <TouchableOpacity
@@ -112,7 +116,10 @@ const MedicalPlanScreen = () => {
               onPress={() => toggleRecordExpansion(index)}
             >
               <View
-                style={[styles.recordItem, isExpanded && styles.selectedRecord]}
+                style={[
+                  styles.recordItem,
+                  isExpanded && styles.selectedRecord,
+                ]}
               >
                 <View style={styles.recordHeader}>
                   <View
@@ -209,6 +216,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#f1f1f1",
     paddingHorizontal: 10,
   },
+  toggleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 10,
+  },
+  toggleLabel: {
+    fontSize: 16,
+  },
   titleContainer: {
     flex: 1,
   },
@@ -283,7 +299,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 5,
   },
-
   prescribedByText: {
     fontSize: 16,
     color: "#838383",

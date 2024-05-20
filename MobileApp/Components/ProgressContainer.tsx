@@ -3,8 +3,6 @@ import { View, Text, StyleSheet } from "react-native";
 import ProgressBar from "./ProgressBar";
 
 const ProgressContainer = ({ progress }) => {
-  console.log("from container", progress);
-  
   return (
     <View style={styles.progressContainer}>
       <Text>Progress</Text>
@@ -18,6 +16,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
+    width: "90%", 
   },
 });
 
