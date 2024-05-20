@@ -8,6 +8,8 @@ import {
   Grid,
   Box,
   Select,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import FileUpload from "../../components/FileUpload";
 import UploadRecordService from "../../services/UploadRecordService";
@@ -33,6 +35,12 @@ const AddRecordScreen = () => {
   const [startTreatmentDate, setStartTreatmentDate] = useState(new Date());
   const [selectedRecord, setSelectedRecord] = useState("");
   const [durationType, setDurationType] = useState("");
+
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success"
+  );
 
   const handleUpload = async () => {
     setUploadStatus("pending");
@@ -73,23 +81,42 @@ const AddRecordScreen = () => {
         if (!addRecordResponse.success) {
           setUploadStatus("failed");
           setErrorMessage(addRecordResponse.message);
+          setSnackbarMessage(addRecordResponse.message);
+          setSnackbarSeverity("error");
+          setOpenSnackbar(true);
+          return;
         }
 
+        setUploadStatus("succeeded");
+        setSnackbarMessage("Record added successfully!");
+        setSnackbarSeverity("success");
+        setOpenSnackbar(true);
         return;
       }
 
       const response = await UploadRecordService.uploadRecord(formData);
       if (response.success) {
         setUploadStatus("succeeded");
+        setSnackbarMessage("Record added successfully!");
+        setSnackbarSeverity("success");
+        setOpenSnackbar(true);
       } else {
         setUploadStatus("failed");
         setErrorMessage(response.message);
+        setSnackbarMessage(response.message);
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
       }
     } catch (error) {
       setUploadStatus("failed");
       setErrorMessage(
         error instanceof Error ? error.message : "An unknown error occurred"
       );
+      setSnackbarMessage(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
     }
   };
 
@@ -255,11 +282,20 @@ const AddRecordScreen = () => {
           </Grid>
         </Grid>
       </Box>
-      {errorMessage && (
-        <Typography color="error" sx={{ mt: 2 }}>
-          Error: {errorMessage}
-        </Typography>
-      )}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

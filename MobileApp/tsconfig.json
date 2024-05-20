@@ -15,5 +15,5 @@
     "target": "es2015",
     "skipLibCheck": true
   },
-  "exclude": ["node_modules", "babel.config.ts", "metro.config.js", "jest.config.ts"]
+  "exclude": ["node_modules", "metro.config.js", "jest.config.ts"]
 }

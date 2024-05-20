@@ -1,26 +1,17 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import {
-  HomeScreen,
-  MedicalRecordsScreen,
-  MedicalPlanScreen,
-} from "../screens";
+import { HomeScreen, MedicalPlanScreen } from "../screens";
 import SettingsStackNavigator from "./SettingsStackNavigator";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { tabBarOptions } from "../styles/styles";
-import { RouteProp } from "@react-navigation/native";
-
-type TabBarIconProps = {
-  route: RouteProp<Record<string, object | undefined>, string>;
-  focused: boolean;
-};
+import MedicalRecordsStackNavigator from "./MedicalRecordsStackNavigator";
 
 const Tab = createBottomTabNavigator();
 
-const TabBarIcon: React.FC<TabBarIconProps> = ({ route, focused }) => {
+const TabBarIcon = ({ route, focused }) => {
   const icons = {
     Home: "home",
-    MedicalRecords: "list",
+    MedicalRecordsStack: "list",
     MedicalPlan: "medkit",
     Settings: "settings",
   };
@@ -40,7 +31,7 @@ const TabBarIcon: React.FC<TabBarIconProps> = ({ route, focused }) => {
   );
 };
 
-export const AuthenticatedTabNavigator: React.FC = () => {
+export const AuthenticatedTabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -61,8 +52,8 @@ export const AuthenticatedTabNavigator: React.FC = () => {
         options={{ tabBarLabel: "Home" }}
       />
       <Tab.Screen
-        name="MedicalRecords"
-        component={MedicalRecordsScreen}
+        name="MedicalRecordsStack"
+        component={MedicalRecordsStackNavigator}
         options={{ tabBarLabel: "Records" }}
       />
       <Tab.Screen
