@@ -50,8 +50,13 @@ const ViewRecordsScreen: React.FC = () => {
     const savedPage = sessionStorage.getItem("currentPage");
     return savedPage ? parseInt(savedPage, 10) : 1;
   });
+  const [recordLimit, setRecordLimit] = useState(() => {
+    const savedRecordLimit = sessionStorage.getItem("recordLimit");
+    return savedRecordLimit ? parseInt(savedRecordLimit, 10) : 5;
+  });
+  
   const [totalRecords, setTotalRecords] = useState(0);
-  const [recordLimit, setRecordLimit] = useState(5);
+  
 
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
   const theme = React.useMemo(() => {
@@ -116,6 +121,7 @@ const ViewRecordsScreen: React.FC = () => {
   ) => {
     const value = parseInt(event.target.value, 10);
     setRecordLimit(value);
+    sessionStorage.setItem("recordLimit", value.toString()); // truko 
     setPage(1);
   };
 
