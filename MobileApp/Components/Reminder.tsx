@@ -159,7 +159,7 @@ const Reminder = ({ onReminderSet, drugName, record }) => {
               <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
                   <Text style={styles.modalTitle}>Repeat Options</Text>
-                  {['Never', 'Daily', 'Every Other Day', 'Forever', 'Twice a Day', 'Three Times a Day'].map((option) => (
+                  {['Never ', 'Daily ', 'Every Other Day ', 'Forever ', 'Twice a Day ', 'Three Times a Day '].map((option) => (
                     <TouchableOpacity key={option} onPress={() => handleRepeatOptionSelect(option)} style={styles.optionButton}>
                       <Text style={styles.optionText}>{option}</Text>
                     </TouchableOpacity>
