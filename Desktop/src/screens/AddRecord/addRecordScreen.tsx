@@ -266,6 +266,7 @@ const AddRecordScreen = () => {
                 spacing={2}
                 marginBottom={-2}
                 marginTop={3}
+                color={"black"}
               >
                 <Grid marginLeft={1}>
                   <MenuItem value="" disabled>
