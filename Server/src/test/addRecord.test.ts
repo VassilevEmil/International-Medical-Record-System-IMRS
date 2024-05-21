@@ -46,7 +46,7 @@ describe("add record", () => {
         const file2 = Buffer.from("file2 contents", "utf-8");
 
         const response = await request(app)
-          .post("/medicalRecords")
+          .post("/api/medicalRecords")
           .field("institutionId", requestBody.institutionId)
           .field("patientId", requestBody.patientId)
           .field("title", requestBody.title)
@@ -97,7 +97,7 @@ describe("add record  with invalid data", () => {
       };
 
       const response = await request(app)
-        .post("/medicalRecords")
+        .post("api/medicalRecords")
         .send(requestBody);
       expect(response.status).toBe(400);
     });

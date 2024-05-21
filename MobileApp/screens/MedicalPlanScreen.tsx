@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Switch,
+  Dimensions,
 } from "react-native";
 import GetDrugsService from "../services/GetDrugRecordsService";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -13,25 +14,35 @@ import IconFace from "react-native-vector-icons/FontAwesome";
 import ProgressContainer from "../Components/ProgressContainer";
 import Reminder from "../Components/Reminder";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "../context/AuthContext";
 
-const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
+const { width } = Dimensions.get("window");
+
+const MedicalPlanScreen = () => {
   const [drugRecords, setDrugRecords] = useState<any[]>([]);
   const [reminderInfo, setReminderInfo] = useState("No Reminders");
-
+  const { patientId } = useAuth();
   const [expandedRecordIndex, setExpandedRecordIndex] = useState<number | null>(
     null
   );
+  const [showActiveRecords, setShowActiveRecords] = useState(true);
 
   useEffect(() => {
     const fetchDrugRecords = async () => {
       try {
-        const response = await GetDrugsService.fetchDrugRecordsByPatientId(
-          "123",
-          1,
-          10
-        );
-        if (response.success && response.data) {
-          setDrugRecords(response.data);
+        if (patientId) {
+          console.log("PatientId: ", patientId);
+
+          const response = await GetDrugsService.fetchDrugRecordsByPatientId(
+            "123",
+            1,
+            10
+          );
+          if (response.success && response.data) {
+            setDrugRecords(response.data);
+          }
+        } else {
+          console.log("PatientId is null ");
         }
       } catch (error) {
         console.error("An error occurred while fetching records", error);
@@ -47,7 +58,9 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
   }, [patientId]);
 
   const toggleRecordExpansion = (index: number) => {
-    setExpandedRecordIndex((prevIndex) => (prevIndex === index ? null : index));
+    setExpandedRecordIndex((prevIndex) =>
+      prevIndex === index ? null : index
+    );
   };
 
   const calculateProgress = (record: any) => {
@@ -79,17 +92,25 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
     notificationDateTime.setHours(selectedTime.getHours());
     notificationDateTime.setMinutes(selectedTime.getMinutes());
 
-    // this is saving the info to the local storage
-
     AsyncStorage.setItem("reminderInfo", reminderInfo);
-
     setReminderInfo(reminderInfo);
   };
 
+  const filteredRecords = drugRecords.filter((record) =>
+    showActiveRecords ? record.isActive : !record.isActive
+  );
+
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        {drugRecords.map((record, index) => {
+        <View style={styles.toggleContainer}>
+          <Text style={styles.toggleLabel}>Show Active Records</Text>
+          <Switch
+            value={showActiveRecords}
+            onValueChange={setShowActiveRecords}
+          />
+        </View>
+        {filteredRecords.map((record, index) => {
           const isExpanded = expandedRecordIndex === index;
           return (
             <TouchableOpacity
@@ -98,7 +119,10 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
               onPress={() => toggleRecordExpansion(index)}
             >
               <View
-                style={[styles.recordItem, isExpanded && styles.selectedRecord]}
+                style={[
+                  styles.recordItem,
+                  isExpanded && styles.selectedRecord,
+                ]}
               >
                 <View style={styles.recordHeader}>
                   <View
@@ -133,27 +157,22 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
                 </View>
                 {isExpanded && (
                   <View style={styles.expandedContent}>
-                    <Text style={styles.recordSubtitle}>
-                      <View style={styles.subtitleRow}>
-                        <Text style={styles.boldText}>Duration: </Text>
-                        <Text>
-                          {record.duration} {record.durationType}
-                        </Text>
-
-                        <View style={styles.startDate}>
-                          <Text style={styles.boldText}>Start Date:</Text>
-                          <Text>{formatDate(record.startTreatmentDate)}</Text>
-                        </View>
+                    <View style={styles.subtitleRow}>
+                      <Text style={styles.boldText}>Duration: </Text>
+                      <Text>
+                        {record.duration} {record.durationType}
+                      </Text>
+                      <View style={styles.startDate}>
+                        <Text style={styles.boldText}>Start Date:</Text>
+                        <Text>{formatDate(record.startTreatmentDate)}</Text>
                       </View>
-                    </Text>
+                    </View>
                     <Text style={styles.recordSubtitle}>
                       <Text style={styles.boldText}>Comment:</Text>
                       {"\n \n"} {}
                       <Text>{record.comment}</Text> {"\n"}
                     </Text>
-                    {isExpanded && (
-                      <ProgressContainer progress={calculateProgress(record)} />
-                    )}
+                    <ProgressContainer progress={calculateProgress(record)} />
                     <Reminder
                       onPress={(selectedDate, selectedTime) =>
                         handleReminderSet(record, selectedDate, selectedTime)
@@ -190,10 +209,22 @@ const MedicalPlanScreen = ({ patientId }: { patientId: string }) => {
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    paddingBottom: 20,
+  },
   container: {
     flex: 1,
     backgroundColor: "#f1f1f1",
     paddingHorizontal: 10,
+  },
+  toggleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 10,
+  },
+  toggleLabel: {
+    fontSize: 16,
   },
   titleContainer: {
     flex: 1,
@@ -227,6 +258,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 18,
     marginBottom: 5,
+    maxWidth: "70%", // Ensures the title doesn't overflow
   },
   recordSubtitle: {
     fontSize: 16,
@@ -243,9 +275,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 5,
+    flexWrap: "wrap",
   },
   startDate: {
-    marginLeft: 300,
+    marginLeft: "auto",
   },
   expandedTitleContainer: {
     borderBottomWidth: 1,
@@ -269,7 +302,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 5,
   },
-
   prescribedByText: {
     fontSize: 16,
     color: "#838383",
