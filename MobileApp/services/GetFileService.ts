@@ -15,7 +15,7 @@ interface GetFileResponse { // TO DO: NEED to specify EXACTLY THE DATA TYPES WE 
 export default class GetFileService {
 
   // Base URL of IMRS (our) API
-  private static baseApiUrl = "https://imrs-server-12m3e12kdk1k12mek.tech/medicalRecords";
+  private static baseApiUrl = `https://imrs-server-12m3e12kdk1k12mek.tech/api/medicalRecords`;
 
   /**
  * Fetches a file from the server associated with the given medical record ID and file ID.

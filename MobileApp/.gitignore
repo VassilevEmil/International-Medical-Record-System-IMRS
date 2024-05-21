@@ -65,4 +65,6 @@ yarn-error.log
 # testing
 /coverage
 
+.env
+
 /android/app/src/main/assets

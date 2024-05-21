@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@types/form-data": "^2.5.0",
+    "@types/node": "^20.12.12",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
     "@typescript-eslint/eslint-plugin": "^7.1.1",

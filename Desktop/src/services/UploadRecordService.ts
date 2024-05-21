@@ -6,14 +6,21 @@ interface UploadResponse {
 }
 
 export default class UploadRecordService {
-  private static apiUrl =
-    "https://imrs-server-12m3e12kdk1k12mek.tech/medicalRecords";
+  private static apiUrl = `${import.meta.env.VITE_API_URL}/medicalRecords`;
 
-  static async uploadRecord(formData: FormData): Promise<UploadResponse> {
+  static async uploadRecord(
+    formData: FormData,
+    apiKey: string,
+    institutionId: string
+  ): Promise<UploadResponse> {
     try {
       const response = await fetch(this.apiUrl, {
         method: "POST",
         body: formData,
+        headers: {
+          "x-api-key": apiKey,
+          "institution-id": institutionId,
+        },
       });
 
       if (response.ok) {
@@ -26,7 +33,6 @@ export default class UploadRecordService {
             data: data,
           };
         } else {
-          // Handle plain text response
           return {
             success: true,
             message: "Record uploaded successfully",
@@ -34,7 +40,7 @@ export default class UploadRecordService {
           };
         }
       } else {
-        const text = await response.text(); // Ensure you await the text
+        const text = await response.text();
         return {
           success: false,
           message: `Server responded with status: ${response.status}: '${text}'`,

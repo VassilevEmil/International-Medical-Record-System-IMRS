@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import GetFileService from "../../services/GetFileService";
 import CircularProgress from "@mui/material/CircularProgress";
+import { useAppContext } from "../../context/AppContext";
 
 interface File {
   id: string;
@@ -15,6 +16,7 @@ interface FileContent {
 }
 
 const FileScreen = () => {
+  const { selectedInstitution } = useAppContext();
   const location = useLocation();
   const [fileContent, setFileContent] = useState<FileContent>({
     url: "",
@@ -37,15 +39,22 @@ const FileScreen = () => {
   const fetchFile = async (medicalRecordId: string, fileId: string) => {
     setIsLoading(true);
     try {
-      const response = await GetFileService.getFile(medicalRecordId, fileId);
-      if (response.success && response.data) {
-        const mimeType = response.mimeType
-          ? response.mimeType.split(";")[0]
-          : undefined;
-        setFileContent({
-          url: response.data,
-          mimeType: mimeType ?? "",
-        });
+      if (selectedInstitution) {
+        const response = await GetFileService.getFile(
+          medicalRecordId,
+          fileId,
+          selectedInstitution.apiKey,
+          selectedInstitution.institutionId
+        );
+        if (response.success && response.data) {
+          const mimeType = response.mimeType
+            ? response.mimeType.split(";")[0]
+            : undefined;
+          setFileContent({
+            url: response.data,
+            mimeType: mimeType ?? "",
+          });
+        }
       } else {
         console.log("Server responded with an error status");
       }
