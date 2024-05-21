@@ -19,18 +19,14 @@ const MedicalRecordsScreen = () => {
 
   useEffect(() => {
     const initializeRecords = async () => {
-      const medicalRecords = await fetchRecords();
-      if (medicalRecords) {
-        const grouped = groupRecordsByYear(medicalRecords);
-        setGroupedRecords(grouped);
-      }
+      await fetchRecords();
     };
     initializeRecords();
   }, []);
 
   const fetchRecords = async () => {
     try {
-      const response = await GetRecordsService.getRecords(233, 1, 10); // Hardcoded for now // until reg and login is implemented
+      const response = await GetRecordsService.getRecords(1, 10); 
 
       if (response.success && response.data) {
         const grouped = groupRecordsByYear(response.data.medicalRecords);
@@ -45,10 +41,10 @@ const MedicalRecordsScreen = () => {
 
   // group records by year and sort dates for each year / needed for UI later on
   // the way we display...
-  const groupRecordsByYear = (records) => {
+  const groupRecordsByYear = (records: any) => {
     const grouped = {};
 
-    records.forEach((record) => {
+    records.forEach((record: any) => {
       const timestamp = new Date(record.timeStamp);
       const year = timestamp.getFullYear().toString();
       const month = timestamp.toLocaleString("en-US", { month: "short" });

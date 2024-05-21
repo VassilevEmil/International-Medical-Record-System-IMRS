@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import IconMC from 'react-native-vector-icons/MaterialCommunityIcons'
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
 
@@ -22,7 +23,6 @@ const SettingsScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Top Options */}
       <TouchableOpacity
         style={styles.option}
         onPress={() => handleOptionPress("ManagePermissions")}
@@ -37,6 +37,13 @@ const SettingsScreen: React.FC = () => {
       >
         <Icon name="headset-outline" style={styles.iconsPictures} />
         <Text style={styles.text}>Help & Support</Text>
+        <Icon name="chevron-forward-outline" style={styles.iconsArrows} />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.option}
+        onPress={() => handleOptionPress('LinkSSNToAccountScreen')}>
+        <IconMC name="link-variant-plus" style={styles.iconsPictures}  />
+        <Text style={styles.text}>Link SSN to account</Text>
         <Icon name="chevron-forward-outline" style={styles.iconsArrows} />
       </TouchableOpacity>
 
@@ -96,10 +103,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 20,
     marginBottom: 20,
+    borderColor: "#d1d1d1",
+    borderBottomWidth: 1,
   },
   logoutText: {
     fontSize: 18,
-    color: "#000000",
+    color: "#000",
   },
 });
 
