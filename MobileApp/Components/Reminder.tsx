@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Switch, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 import IconFace from 'react-native-vector-icons/FontAwesome';
 import PushNotification from 'react-native-push-notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -45,53 +45,48 @@ const Reminder = ({ onReminderSet, drugName, record }) => {
   };
 
   const handleSaveReminder = () => {
-    const reminderInfo = ` ${selectedDays.join(', ')} at ${Object.values(selectedTimes).map(time => time.toLocaleTimeString()).join(', ')} repeat: ${repeatOption}`;
+    selectedDays.forEach((day) => {
+      const notificationTime = getNextDayOfWeek(day, selectedTimes[day]);
+      let repeatType;
+
+      switch (repeatOption) {
+        case 'Daily':
+          repeatType = 'day';
+          break;
+        case 'Every Other Day':
+          repeatType = 'day';
+          break;
+        case 'Forever':
+          repeatType = 'week';
+          break;
+        case 'Twice a Day':
+          scheduleMultipleNotifications(day, selectedTimes[day], 2);
+          return;
+        case 'Three Times a Day':
+          scheduleMultipleNotifications(day, selectedTimes[day], 3);
+          return;
+        default:
+          repeatType = undefined;
+      }
+
+      PushNotification.localNotificationSchedule({
+        message: `Time to take ${drugName}`,
+        date: notificationTime,
+        repeatType: repeatType === 'Every Other Day' ? 'day' : repeatType,
+        repeatTime: repeatOption === 'Every Other Day' ? 2 : undefined,
+        userInfo: {
+          drugName: drugName,
+          notificationTime: selectedTimes[day],
+        },
+      });
+
+      console.log(`Notification scheduled for ${drugName} on ${day} at ${notificationTime} with repeat ${repeatType}`);
+    });
+
+    const reminderInfo = `${selectedDays.join(', ')} at ${Object.values(selectedTimes).map(time => time.toLocaleTimeString()).join(', ')} repeat: ${repeatOption}`;
     AsyncStorage.setItem(`reminderInfo_${drugName}`, reminderInfo);
     setReminderInfo(reminderInfo);
-
-    selectedDays.forEach((day) => {
-      scheduleNotification(day, selectedTimes[day]);
-    });
-
     setIsEditing(false);
-  };
-
-  const scheduleNotification = (day, time) => {
-    const notificationTime = getNextDayOfWeek(day, time);
-    let repeatType;
-
-    switch (repeatOption) {
-      case 'Daily':
-        repeatType = 'day';
-        break;
-      case 'Every Other Day':
-        repeatType = 'day';
-        break;
-      case 'Forever':
-        repeatType = 'week';
-        break;
-      case 'Twice a Day':
-        scheduleMultipleNotifications(day, time, 2);
-        return;
-      case 'Three Times a Day':
-        scheduleMultipleNotifications(day, time, 3);
-        return;
-      default:
-        repeatType = undefined;
-    }
-
-    PushNotification.localNotificationSchedule({
-      message: `Time to take ${drugName}`,
-      date: notificationTime,
-      repeatType: repeatType,
-      repeatTime: repeatOption === 'Every Other Day' ? 2 : undefined,
-      userInfo: {
-        drugName: drugName,
-        notificationTime: time,
-      },
-    });
-
-    console.log(`Notification scheduled for ${drugName} on ${day} at ${notificationTime} with repeat ${repeatType}`);
   };
 
   const scheduleMultipleNotifications = (day, time, timesPerDay) => {
@@ -162,7 +157,7 @@ const Reminder = ({ onReminderSet, drugName, record }) => {
               <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
                   <Text style={styles.modalTitle}>Repeat Options</Text>
-                  {['Never ', 'Daily ', 'Every Other Day ', 'Forever ', 'Twice a Day ', 'Three Times a Day '].map((option) => (
+                  {['Never', 'Daily', 'Every Other Day', 'Forever', 'Twice a Day', 'Three Times a Day'].map((option) => (
                     <TouchableOpacity key={option} onPress={() => handleRepeatOptionSelect(option)} style={styles.optionButton}>
                       <Text style={styles.optionText}>{option}</Text>
                     </TouchableOpacity>

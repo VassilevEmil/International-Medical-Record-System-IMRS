@@ -9,14 +9,14 @@ import NotificationService from "./services/NotificationService";
 function AppNavigator() {
   const { token, isLoading } = useAuth();
 
-  useEffect(() => {
-    const initializeNotifications = async () => {
-      await NotificationService.requestPermissions();
-      NotificationService.configurePushNotifications();
-    };
+  // useEffect(() => {
+  //   const initializeNotifications = async () => {
+  //     await NotificationService.requestPermissions();
+  //     NotificationService.configurePushNotifications();
+  //   };
 
-    initializeNotifications();
-  }, []);
+  //   initializeNotifications();
+  // }, []);
 
   if (isLoading) {
     return <LoadingScreen />;

@@ -16,6 +16,23 @@ class NotificationService {
             buttonPositive: "OK",
           }
         );
+
+        const checkPermissions = async () => {
+          if (Platform.OS === "android") {
+            const granted = await PermissionsAndroid.check(
+              PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+            );
+            if (!granted) {
+              await this.requestPermissions();
+            }
+          } else if (Platform.OS === "ios") {
+            const result = await check(PERMISSIONS.IOS.NOTIFICATIONS);
+            if (result !== RESULTS.GRANTED) {
+              await this.requestPermissions();
+            }
+          }
+        };
+
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           console.log("You can use notifications");
         } else {

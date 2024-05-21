@@ -1,8 +1,9 @@
+// DayPicker.js
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet,Dimensions } from 'react-native';
 
+const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const { width } = Dimensions.get('window');
-const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const DayPicker = ({ selectedDays, onSelectDay }) => {
   return (
@@ -30,16 +31,16 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   day: {
-    width: width / 10, // Adjusted for smaller screens
+    width: width / 10,
     height: width / 10,
-    borderRadius: (width / 8) / 2,
+    borderRadius: (width / 10) / 2,
     justifyContent: 'center',
     alignItems: 'center',
     margin: 5,
     backgroundColor: 'blue',
   },
   selectedDay: {
-    backgroundColor: 'blue',
+    backgroundColor: '#2196F3',
   },
   dayText: {
     color: 'white',
