@@ -29,11 +29,9 @@ interface GetRecordResponse {
             'Content-Type': 'application/json'
         }
         });
-        console.log("EEEEEEEEEEEEEEEEEEEE ", bearerToken);
 
         if (response.ok) {
           const data = await response.json();
-          console.log(data);
           return {
             success: true,
             message: "Records fetched successfully",
