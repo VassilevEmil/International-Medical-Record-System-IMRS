@@ -4,86 +4,74 @@ import { MedicalRecordsResponse } from "../models/medicalRecord";
 interface GetRecordResponse { 
     success: boolean;
     message: string;
-    data?: MedicalRecordsResponse
-  }
-  
-  export default class GetRecordsService {
-    private static apiUrl = `https://imrs-server-12m3e12kdk1k12mek.tech/api/medicalRecords/getMedicalRecords`;
-    private static apiUrl2 = `https://imrs-server-12m3e12kdk1k12mek.tech/api/medicalRecords/getMedicalRecordById/`;
+    data?: MedicalRecordsResponse;
+}
 
-    static async getRecords(page: number, recordLimit: number): Promise<GetRecordResponse> {
-      const queryParams = new URLSearchParams({
-        page: page.toString(),
-        recordLimit: recordLimit.toString(),
-      });
+const apiUrl = `https://imrs-server-12m3e12kdk1k12mek.tech/api/medicalRecords/getMedicalRecords`;
+const apiUrl2 = `https://imrs-server-12m3e12kdk1k12mek.tech/api/medicalRecords/getMedicalRecordById`;
 
-      const bearerToken = await AsyncStorage.getItem("token");
-      
-      const urlWithParams = `${this.apiUrl}?${queryParams.toString()}`;
-      console.log("as ", urlWithParams);
-      try {
-        const response = await fetch(urlWithParams, { 
-          method: "GET",
-          headers: {
-            'Authorization': `Bearer ${bearerToken}`,
-            'Content-Type': 'application/json'
-        }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          return {
-            success: true,
-            message: "Records fetched successfully",
-            data: data,
-          };
-        } else {
-          // HTTP errors
-          const text = await response.text();
-          return {
-            success: false,
-            message: `Server responded with status: ${response.status}: '${text}'`,
-          };
-        }
-      } catch (error) {
-        return {
-          success: false,
-          message: `Record fetch failed: ${error instanceof Error ? error.message : 'A network error occurred'}`,
-        };
-      }
+const fetchFromApi = async (url: string, logout: () => Promise<void>): Promise<Response> => {
+  const bearerToken = await AsyncStorage.getItem("token");
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      'Authorization': `Bearer ${bearerToken}`,
+      'Content-Type': 'application/json'
     }
+  });
 
-    static async fetchRecord(recordId: string) : Promise<GetRecordResponse> {
-
-      const urlWithRecordId = this.apiUrl2 + encodeURIComponent(recordId);
-      try {
-        const response = await fetch(urlWithRecordId, { 
-          method: "GET",
-        });
-  
-        if (response.ok) {
-          const data = await response.json();
-          return {
-            success: true,
-            message: "Record fetched successfully",
-            data: data,
-          };
-        } else {
-          // HTTP errors
-          const text = await response.text();
-          return {
-            success: false,
-            message: `Server responded with status: ${response.status}: '${text}'`,
-          };
-        }
-      } catch (error) {
-        // network errors
-        return {
-          success: false,
-          message: `Record fetch failed: ${error instanceof Error ? error.message : error}`,
-        };
-      }
+  const responseBody = await response;  
+  if (!response.ok) {
+    if (response.status === 400 || responseBody.message === "Invalid token!") {
+      await logout();
+      throw new Error('Unauthorized access or invalid token. Logging out.');
     }
+    throw new Error(`Server responded with status: ${response.status}`);
   }
-  
-  
+
+  return response;
+};
+
+export const getRecords = async (page: number, recordLimit: number, logout: () => Promise<void>): Promise<GetRecordResponse> => {
+  const queryParams = new URLSearchParams({
+    page: page.toString(),
+    recordLimit: recordLimit.toString(),
+  });
+
+  const urlWithParams = `${apiUrl}?${queryParams}`;
+
+  try {
+    const response = await fetchFromApi(urlWithParams, logout);
+    const data = await response.json();
+    return {
+      success: true,
+      message: "Records fetched successfully",
+      data: data,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: `Record fetch failed: ${error.message}`,
+    };
+  }
+};
+
+export const fetchRecord = async (recordId: string, logout: () => Promise<void>): Promise<GetRecordResponse> => {
+  const urlWithRecordId = `${apiUrl2}/${encodeURIComponent(recordId)}`;
+
+  try {
+    const response = await fetchFromApi(urlWithRecordId, logout);
+    const data = await response.json();
+    return {
+      success: true,
+      message: "Record fetched successfully",
+      data: data,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: `Record fetch failed: ${error.message}`,
+    };
+  }
+};
+

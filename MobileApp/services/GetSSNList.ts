@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SSNList } from "models/SSNList";
 
 const apiUrl = `https://imrs-server-12m3e12kdk1k12mek.tech/api/ssn/getSSNList`;
@@ -8,7 +9,12 @@ export async function getSSNList(patientId: string): Promise<SSNList[]> {
   }
 
   try {
-    const response = await fetch(`${apiUrl}/${patientId}`);
+    const bearerToken = await AsyncStorage.getItem("token");
+    const response = await fetch(`${apiUrl}/${patientId}`, {
+      headers: {
+        'Authorization': `Bearer ${bearerToken}`,
+    }
+    });
 
     if (!response.ok) {
       throw new Error("Failed to fetch SSN list");

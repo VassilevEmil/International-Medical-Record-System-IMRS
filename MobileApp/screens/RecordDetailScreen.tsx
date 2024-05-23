@@ -10,11 +10,13 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import GetRecordsService from "../services/GetRecordsService";
+import { fetchRecord } from "../services/GetRecordsService";
+import { useAuth } from "../context/AuthContext";
 
 const RecordDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const { logout } = useAuth();
   const { recordId } = route.params;
   const [record, setRecord] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,10 +30,11 @@ const RecordDetailScreen = () => {
   };
 
   useEffect(() => {
-    const fetchRecord = async () => {
+    const getRecord = async () => {
       setIsLoading(true);
       try {
-        const response = await GetRecordsService.fetchRecord(recordId);
+        console.log(recordId)
+        const response = await fetchRecord(recordId, logout);
         if (response.success && response.data) {
           setRecord(response.data);
         } else {
@@ -45,7 +48,7 @@ const RecordDetailScreen = () => {
     };
 
     if (recordId) {
-      fetchRecord();
+      getRecord();
     }
   }, [recordId]);
 
