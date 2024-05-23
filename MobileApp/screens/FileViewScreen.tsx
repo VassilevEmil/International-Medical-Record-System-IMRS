@@ -10,13 +10,11 @@ import {
 } from "react-native";
 import ImageZoom from "react-native-image-pan-zoom";
 import { useRoute } from "@react-navigation/native";
+import GetFileService from "../services/GetFileService";
 import Pdf from "react-native-pdf";
-import { getFile } from "../services/GetFileService";
-import { useAuth } from "../context/AuthContext";
 
 const FileViewScreen = () => {
   const route = useRoute();
-  const { logout } = useAuth();
   const { recordId, fileId } = route.params;
   const [fileContent, setFileContent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +22,6 @@ const FileViewScreen = () => {
     width: Dimensions.get("window").width,
     height: Dimensions.get("window").height,
   });
-
   useEffect(() => {
     const onChange = () => {
       setScreenDimensions({
@@ -32,19 +29,18 @@ const FileViewScreen = () => {
         height: Dimensions.get("window").height,
       });
     };
-
     const subscription = Dimensions.addEventListener("change", onChange);
     return () => {
       subscription?.remove();
     };
   }, []);
-
   useEffect(() => {
     const fetchFile = async () => {
       setIsLoading(true);
       try {
-        const response = await getFile(recordId, fileId, logout);
+        const response = await GetFileService.getFile(recordId, fileId);
         if (response.success && response.data) {
+          console.log(response.data)
           setFileContent({
             url: response.data,
             mimeType: response.mimeType.split(";")[0],
@@ -52,19 +48,14 @@ const FileViewScreen = () => {
         } else {
           console.log("Server responded with an error status");
         }
-      } catch (error: any) {
-        if (error.response.status === 401 || error.response.data.message === 'Session token invalid') {
-          logout();
-        }
+      } catch (error) {
         console.error(error);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchFile();
   }, [recordId, fileId]);
-
   const renderFile = () => {
     if (isLoading) {
       return <ActivityIndicator size="large" color="#0000ff" />;
@@ -92,27 +83,29 @@ const FileViewScreen = () => {
       );
     } else if (fileContent.mimeType === "application/pdf") {
       return (
+        <View style={styles.pdf}>
         <Pdf
-          source={{ uri: fileContent.url, cache: true }}
+          source={{ uri: fileContent.url, cache: false }}
+          trustAllCerts={Platform.OS === "ios"} // not going to work without
           style={{
             flex: 1,
             width: screenDimensions.width,
             height: screenDimensions.height,
           }}
         />
+        </View>
       );
     } else {
       return <Text>Unsupported file type.</Text>;
     }
+    
   };
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {renderFile()}
     </ScrollView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -120,7 +113,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
+  pdf: {
+    paddingBottom: 65,
+  }
 });
 
 export default FileViewScreen;
-
