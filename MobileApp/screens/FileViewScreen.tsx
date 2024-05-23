@@ -10,11 +10,13 @@ import {
 } from "react-native";
 import ImageZoom from "react-native-image-pan-zoom";
 import { useRoute } from "@react-navigation/native";
-import GetFileService from "../services/GetFileService";
 import Pdf from "react-native-pdf";
+import { getFile } from "../services/GetFileService";
+import { useAuth } from "../context/AuthContext";
 
 const FileViewScreen = () => {
   const route = useRoute();
+  const { logout } = useAuth();
   const { recordId, fileId } = route.params;
   const [fileContent, setFileContent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +43,7 @@ const FileViewScreen = () => {
     const fetchFile = async () => {
       setIsLoading(true);
       try {
-        const response = await GetFileService.getFile(recordId, fileId);
+        const response = await getFile(recordId, fileId, logout);
         if (response.success && response.data) {
           setFileContent({
             url: response.data,
@@ -50,7 +52,10 @@ const FileViewScreen = () => {
         } else {
           console.log("Server responded with an error status");
         }
-      } catch (error) {
+      } catch (error: any) {
+        if (error.response.status === 401 || error.response.data.message === 'Session token invalid') {
+          logout();
+        }
         console.error(error);
       } finally {
         setIsLoading(false);
@@ -118,3 +123,4 @@ const styles = StyleSheet.create({
 });
 
 export default FileViewScreen;
+

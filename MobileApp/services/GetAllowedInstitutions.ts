@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Institution } from "../models/institution";
 
 export async function getAllowedInstitutions(
@@ -6,9 +7,14 @@ export async function getAllowedInstitutions(
   limit = 10
 ): Promise<Institution[]> {
   const url = `https://imrs-server-12m3e12kdk1k12mek.tech/api/institutions/allowedInstitutions/${patientId}?page=${page}&limit=${limit}`;
+  const bearerToken = await AsyncStorage.getItem("token");
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${bearerToken}`,
+    }
+    });
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }

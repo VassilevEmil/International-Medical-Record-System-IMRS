@@ -1,9 +1,13 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 export async function removeAllowedInstitution(institutionId: string, patientId: string) {
     const url = `https://imrs-server-12m3e12kdk1k12mek.tech/api/institutions/removeAllowedInstitution`;
-
+    
+    const bearerToken = await AsyncStorage.getItem("token");
     const requestOptions = {
         method: 'POST',
         headers: {
+            'Authorization': `Bearer ${bearerToken}`,
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({ patientId, institutionId }),

@@ -11,11 +11,13 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-import GetRecordsService from "../services/GetRecordsService";
+import { useAuth } from "../context/AuthContext";
+import { getRecords } from "../services/GetRecordsService";
 
 const MedicalRecordsScreen = () => {
   const [groupedRecords, setGroupedRecords] = useState([]);
   const navigation = useNavigation();
+  const { logout } = useAuth();
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -28,15 +30,15 @@ const MedicalRecordsScreen = () => {
     if (loading || !hasMore) return;
     setLoading(true);
     try {
-      const response = await GetRecordsService.getRecords(page, 10);
+      const response = await getRecords(page, 10, logout);
       console.log("Fetched records:", response);
 
       if (response.success && response.data) {
         const newGrouped = groupRecordsByYear(response.data.medicalRecords);
         console.log("GROUPED records:", newGrouped);
-        setGroupedRecords(prev => [...prev, ...newGrouped]);
+        setGroupedRecords((prev) => [...prev, ...newGrouped]);
         setHasMore(response.data.medicalRecords.length === 10);
-        setPage(prev => prev + 1);
+        setPage((prev) => prev + 1);
       } else {
         setHasMore(false);
       }

@@ -39,12 +39,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           if (decoded.payload.exp * 1000 > Date.now()) {
             setToken(storedToken);
             setPatientId(storedPatientId);
-            console.log(
-              "He he heeeeeey Drauguzi: ",
-              decoded.payload.exp * 1000
-            );
-            console.log("Tai gal prisijuuuuunk prie musu?: ", Date.now());
-          } else {
+              } else {
             await AsyncStorage.removeItem("token");
             await AsyncStorage.removeItem("patientId");
             setToken(null);
@@ -118,3 +113,4 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+

@@ -1,8 +1,15 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 export async function searchInstitution(term: string) {
   const url = `https://imrs-server-12m3e12kdk1k12mek.tech/api/institutions/search?term=${encodeURIComponent(term)}`;
   
   try {
-    const response = await fetch(url);
+    const bearerToken = await AsyncStorage.getItem("token");
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${bearerToken}`,
+      }
+    });
 
     if (!response.ok) {
       throw new Error('Network response was not ok');
