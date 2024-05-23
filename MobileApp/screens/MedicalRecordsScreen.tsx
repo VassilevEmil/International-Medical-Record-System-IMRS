@@ -70,7 +70,7 @@ const MedicalRecordsScreen = () => {
         id: record.id,
         date: formattedDate,
         type: record.typeOfRecord,
-        location: record.institution?.id || "N/A",
+        location: record.institution?.address || "N/A",
         title: record.title,
         files: record.files,
         iconName: "flask-outline",
