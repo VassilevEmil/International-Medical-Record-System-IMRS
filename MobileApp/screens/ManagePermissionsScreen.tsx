@@ -20,7 +20,7 @@ import { addAllowedInstitution } from "../services/AddAllowedInstitution";
 import { useAuth } from "../context/AuthContext";
 import CustomAlert from "../Components/CustomAlert";
 
-const ManagePermissionsScreen = () => {
+const ManagePermissionsScreen: React.FC = () => {
   const [allowedInstitutions, setAllowedInstitutions] = useState<Institution[]>(
     []
   );

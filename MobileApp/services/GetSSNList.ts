@@ -1,4 +1,4 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import EncryptedStorage from "react-native-encrypted-storage";
 import { SSNList } from "models/SSNList";
 
 const apiUrl = `https://imrs-server-12m3e12kdk1k12mek.tech/api/ssn/getSSNList`;
@@ -9,7 +9,7 @@ export async function getSSNList(patientId: string): Promise<SSNList[]> {
   }
 
   try {
-    const bearerToken = await AsyncStorage.getItem("token");
+    const bearerToken = await EncryptedStorage.getItem("token");
     const response = await fetch(`${apiUrl}/${patientId}`, {
       headers: {
         'Authorization': `Bearer ${bearerToken}`,

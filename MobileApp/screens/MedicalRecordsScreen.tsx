@@ -9,18 +9,63 @@ import {
   SafeAreaView,
   SectionList,
 } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import { useAuth } from "../context/AuthContext";
 import { getRecords } from "../services/GetRecordsService";
+import { MedicalRecord } from "models/medicalRecord";
+import { FileInfo } from "models/fileInfo";
+import { NavigationProp } from '@react-navigation/native';
+import { TypeOfRecord } from "enums";
 
-const MedicalRecordsScreen = () => {
-  const [groupedRecords, setGroupedRecords] = useState([]);
-  const navigation = useNavigation();
+type RootStackParamList = {
+  MedicalRecordsMain: undefined;
+  RecordDetail: { recordId: string };  
+  FileView: { fileId: string };
+};
+
+type MedicalRecordsScreenNavigationProp = NavigationProp<RootStackParamList, 'MedicalRecordsMain'>;
+
+interface GroupedRecords {
+  year: string;
+  data: {
+    date: string;
+    records: Array<{
+      id: string;
+      date: string;
+      type: string;
+      institutionName: string;
+      title: string;
+      files: FileInfo[] | undefined;
+      iconName: string;
+    }>;
+  }[];
+}
+
+const getIconName = (type: TypeOfRecord) => {
+  switch (type) {
+    case 'DIAGNOSIS':
+      return 'description';  
+    case 'GENERAL_VISIT':
+      return 'assignment';  
+    case 'BLOODWORK':
+      return 'bloodtype';  
+    case 'MEDICAL_IMAGING':
+      return 'flip';  
+    case 'Other':
+    default:
+      return 'emergency';  
+  }
+}
+
+const MedicalRecordsScreen: React.FC  = () => {
+ 
+  const [groupedRecords, setGroupedRecords] = useState<GroupedRecords[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const navigation = useNavigation<MedicalRecordsScreenNavigationProp>();
   const { logout } = useAuth();
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchRecords();
@@ -28,55 +73,51 @@ const MedicalRecordsScreen = () => {
 
   const fetchRecords = async () => {
     if (loading || !hasMore) return;
-    setLoading(true);
     try {
-      const response = await getRecords(page, 10, logout);
-      console.log("Fetched records:", response);
-
+      setLoading(true);
+      const response = await getRecords(page, 10, logout); 
+      console.log(response)
       if (response.success && response.data) {
         const newGrouped = groupRecordsByYear(response.data.medicalRecords);
-        console.log("GROUPED records:", newGrouped);
-        setGroupedRecords((prev) => [...prev, ...newGrouped]);
+        setGroupedRecords(prev => [...prev, ...newGrouped]);
         setHasMore(response.data.medicalRecords.length === 10);
-        setPage((prev) => prev + 1);
+        setPage(prev => prev + 1);
       } else {
         setHasMore(false);
       }
-    } catch (error) {
-      console.error(error instanceof Error ? error.message : "An unknown error occurred");
+    } catch (error: any) {
+      alert(`An error occurred: ${error.message || 'Unknown error'}`);
     }
     setLoading(false);
   };
-
-  const groupRecordsByYear = (records) => {
-    const grouped = {};
-
-    records.forEach((record) => {
-      const timestamp = new Date(record.timeStamp);
-      const year = timestamp.getFullYear().toString();
-      const month = timestamp.toLocaleString("en-US", { month: "short" });
-      const day = timestamp.getDate();
+  
+  const groupRecordsByYear = (medicalRecords: MedicalRecord[]): GroupedRecords[] => {
+    const grouped: { [key: string]: { [date: string]: GroupedRecords['data'][number]['records'] } } = {};
+    medicalRecords.forEach(record => {
+      const timeStamp = new Date(record.timeStamp);
+      const year = timeStamp.getFullYear().toString();
+      const month = timeStamp.toLocaleString("en-US", { month: "short" });
+      const day = timeStamp.getDate();
       const formattedDate = `${day} ${month} ${year}`;
-
+  
       if (!grouped[year]) {
         grouped[year] = {};
       }
-
       if (!grouped[year][formattedDate]) {
         grouped[year][formattedDate] = [];
       }
-
+  
       grouped[year][formattedDate].push({
         id: record.id,
         date: formattedDate,
         type: record.typeOfRecord,
-        location: record.institution?.address || "N/A",
+        institutionName: record.institution?.name || "N/A",
         title: record.title,
         files: record.files,
-        iconName: "flask-outline",
+        iconName: getIconName(record.typeOfRecord),
+
       });
     });
-
     return Object.entries(grouped).map(([year, dates]) => ({
       year,
       data: Object.entries(dates).map(([date, records]) => ({
@@ -85,8 +126,9 @@ const MedicalRecordsScreen = () => {
       })),
     }));
   };
+  
 
-  const renderItem = useCallback(({ item }) => (
+  const renderItem = useCallback(({ item }: { item: GroupedRecords['data'][number] }) => (
     <View>
       <Text style={styles.dateText}>{item.date}</Text>
       {item.records.map((record) => (
@@ -100,10 +142,10 @@ const MedicalRecordsScreen = () => {
             });
           }}
         >
-          <Icon name={record.iconName} size={24} color="#666" />
+          <MaterialIcon name={record.iconName} size={24} color="#666" />
           <View style={styles.recordContent}>
             <Text style={styles.recordTitle}>{record.title}</Text>
-            <Text style={styles.recordSubtitle}>{record.location}</Text>
+            <Text style={styles.recordSubtitle}>{record.institutionName}</Text>
             <View style={styles.actionContainer}>
               <View style={styles.typeActionContainer}>
                 <Text style={styles.typeActionText}>
@@ -123,17 +165,13 @@ const MedicalRecordsScreen = () => {
     </View>
   ), [navigation]);
 
-  const renderSectionHeader = ({ section: { year } }) => (
+  const renderSectionHeader = ({ section }: { section: GroupedRecords }) => (
     <View style={styles.yearLabel}>
-      <Text style={styles.yearText}>{year}</Text>
+      <Text style={styles.yearText}>{section.year}</Text>
     </View>
   );
-
-  const keyExtractor = (item, index) => {
-    // the year and the exact date (day and month)
-    // ensures uniquess for our "sections" in our case.
-    // Our components here are section blocks of unique date (year / month and day)
-    console.log(`${item.date}`)
+  
+  const keyExtractor = (item: GroupedRecords['data'][number], index: number) => {
     return `${item.date}`;
   }
 
@@ -141,7 +179,7 @@ const MedicalRecordsScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.innerContainer}>
-          <View style={styles.timeline} />
+        {groupedRecords.length > 0 && <View style={styles.timeline} />}
       <SectionList
         sections={groupedRecords}
         renderItem={renderItem}
@@ -263,4 +301,8 @@ const styles = StyleSheet.create({
 });
 
 export default MedicalRecordsScreen;
+
+function alert(arg0: string) {
+  throw new Error("Function not implemented.");
+}
 
