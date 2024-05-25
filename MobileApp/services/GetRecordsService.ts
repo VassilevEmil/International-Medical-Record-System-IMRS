@@ -8,6 +8,7 @@ interface GetRecordResponse {
 }
 
 const apiUrl2 = `https://imrs-server-12m3e12kdk1k12mek.tech/api/medicalRecords/getMedicalRecordById`;
+
 const apiUrl = `https://imrs-server-12m3e12kdk1k12mek.tech/api/medicalRecords/getMedicalRecords`;
 
 const fetchFromApi = async (url: string, logout: () => Promise<void>): Promise<any> => {

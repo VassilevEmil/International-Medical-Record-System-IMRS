@@ -25,6 +25,7 @@ type RootStackParamList = {
 
 type MedicalRecordsScreenNavigationProp = NavigationProp<RootStackParamList, 'MedicalRecordsMain'>;
 
+
 interface GroupedRecords {
   year: string;
   data: {
@@ -76,7 +77,6 @@ const MedicalRecordsScreen: React.FC  = () => {
     try {
       setLoading(true);
       const response = await getRecords(page, 10, logout); 
-      console.log(response)
       if (response.success && response.data) {
         const newGrouped = groupRecordsByYear(response.data.medicalRecords);
         setGroupedRecords(prev => [...prev, ...newGrouped]);
@@ -128,39 +128,40 @@ const MedicalRecordsScreen: React.FC  = () => {
   };
   
 
-  const renderItem = useCallback(({ item }: { item: GroupedRecords['data'][number] }) => (
+  const MemoizedRecordItem = React.memo(({ record, navigateToDetail }) => (
+    <TouchableOpacity
+      key={record.id}
+      style={styles.recordItem}
+      onPress={() => navigateToDetail(record.id)}
+    >
+      <MaterialIcon name={record.iconName} size={24} color="#666" />
+      <View style={styles.recordContent}>
+        <Text style={styles.recordTitle}>{record.title}</Text>
+        <Text style={styles.recordSubtitle}>{record.institutionName}</Text>
+        <View style={styles.actionContainer}>
+          <View style={styles.typeActionContainer}>
+            <Text style={styles.typeActionText}>Type: {record.type}</Text>
+          </View>
+          {record.files && record.files.length > 0 && (
+            <View style={styles.filesActionContainer}>
+              <Text style={styles.filesActionText}>Files</Text>
+            </View>
+          )}
+        </View>
+      </View>
+      <MaterialIcon name="chevron-right" size={24} color="#666" />
+    </TouchableOpacity>
+  ));
+
+  const navigateToDetail = useCallback((id: string) => {
+    navigation.navigate("RecordDetail", { recordId: id });
+}, [navigation]);
+  
+  const renderItem = useCallback(({ item }) => (
     <View>
       <Text style={styles.dateText}>{item.date}</Text>
-      {item.records.map((record) => (
-        
-        <TouchableOpacity
-          key={record.id}
-          style={styles.recordItem}
-          onPress={() => {
-            navigation.navigate("RecordDetail", {
-              recordId: record.id,
-            });
-          }}
-        >
-          <MaterialIcon name={record.iconName} size={24} color="#666" />
-          <View style={styles.recordContent}>
-            <Text style={styles.recordTitle}>{record.title}</Text>
-            <Text style={styles.recordSubtitle}>{record.institutionName}</Text>
-            <View style={styles.actionContainer}>
-              <View style={styles.typeActionContainer}>
-                <Text style={styles.typeActionText}>
-                  Type: {record.type}
-                </Text>
-              </View>
-              {record.files && record.files.length > 0 && (
-                <View style={styles.filesActionContainer}>
-                  <Text style={styles.filesActionText}>Files</Text>
-                </View>
-              )}
-            </View>
-          </View>
-          <MaterialIcon name="chevron-right" size={24} color="#666" />
-        </TouchableOpacity>
+      {item.records.map(record => (
+        <MemoizedRecordItem key={record.id} record={record} navigateToDetail={navigateToDetail}/>
       ))}
     </View>
   ), [navigation]);
@@ -193,6 +194,9 @@ const MedicalRecordsScreen: React.FC  = () => {
           </View>
         )}
         contentContainerStyle={{ paddingBottom: 60 }}
+        initialNumToRender={10} 
+        maxToRenderPerBatch={10} 
+        windowSize={5}
       />
      </View>
       </View>
@@ -301,8 +305,3 @@ const styles = StyleSheet.create({
 });
 
 export default MedicalRecordsScreen;
-
-function alert(arg0: string) {
-  throw new Error("Function not implemented.");
-}
-
