@@ -1,9 +1,9 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import EncryptedStorage from "react-native-encrypted-storage";
 
 export async function removeAllowedInstitution(institutionId: string, patientId: string) {
     const url = `https://imrs-server-12m3e12kdk1k12mek.tech/api/institutions/removeAllowedInstitution`;
     
-    const bearerToken = await AsyncStorage.getItem("token");
+    const bearerToken = await EncryptedStorage.getItem("token");
     const requestOptions = {
         method: 'POST',
         headers: {

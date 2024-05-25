@@ -10,11 +10,9 @@
     "test": "jest"
   },
   "dependencies": {
-    "@notifee/react-native": "^7.8.2",
     "@react-native-async-storage/async-storage": "^1.23.0",
     "@react-native-community/blur": "^4.4.0",
     "@react-native-community/datetimepicker": "^8.0.0",
-    "@react-native-picker/picker": "^2.7.5",
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.9.25",
@@ -22,6 +20,7 @@
     "react": "18.2.0",
     "react-native": "0.73.6",
     "react-native-blob-util": "^0.19.9",
+    "react-native-encrypted-storage": "^4.0.3",
     "react-native-image-pan-zoom": "^2.1.12",
     "react-native-modal-datetime-picker": "^17.1.0",
     "react-native-pdf": "^6.7.5",

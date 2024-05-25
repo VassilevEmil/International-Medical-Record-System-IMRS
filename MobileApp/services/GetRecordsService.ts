@@ -1,17 +1,19 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import EncryptedStorage from "react-native-encrypted-storage";
 import { MedicalRecordsResponse } from "../models/medicalRecord";
 
-interface GetRecordResponse { 
-    success: boolean;
-    message: string;
-    data?: MedicalRecordsResponse;
+interface GetRecordResponse {
+  success: boolean;
+  message: string;
+  data?: MedicalRecordsResponse;
 }
 
-const apiUrl = `https://imrs-server-12m3e12kdk1k12mek.tech/api/medicalRecords/getMedicalRecords`;
 const apiUrl2 = `https://imrs-server-12m3e12kdk1k12mek.tech/api/medicalRecords/getMedicalRecordById`;
+const apiUrl = `https://imrs-server-12m3e12kdk1k12mek.tech/api/medicalRecords/getMedicalRecords`;
 
-const fetchFromApi = async (url: string, logout: () => Promise<void>): Promise<Response> => {
-  const bearerToken = await AsyncStorage.getItem("token");
+const fetchFromApi = async (url: string, logout: () => Promise<void>): Promise<any> => {
+  const bearerToken = await EncryptedStorage.getItem("token");
+  console.log(bearerToken);
+
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -19,17 +21,16 @@ const fetchFromApi = async (url: string, logout: () => Promise<void>): Promise<R
       'Content-Type': 'application/json'
     }
   });
-
-  const responseBody = await response;  
+  
+  const responseBody = await response.json();
   if (!response.ok) {
-    if (response.status === 400 || responseBody.message === "Invalid token!") {
+    if (response.status === 400 || responseBody.message.includes("Invalid token!")) {
       await logout();
       throw new Error('Unauthorized access or invalid token. Logging out.');
     }
     throw new Error(`Server responded with status: ${response.status}`);
   }
-
-  return response;
+  return responseBody;
 };
 
 export const getRecords = async (page: number, recordLimit: number, logout: () => Promise<void>): Promise<GetRecordResponse> => {
@@ -41,8 +42,7 @@ export const getRecords = async (page: number, recordLimit: number, logout: () =
   const urlWithParams = `${apiUrl}?${queryParams}`;
 
   try {
-    const response = await fetchFromApi(urlWithParams, logout);
-    const data = await response.json();
+    const data = await fetchFromApi(urlWithParams, logout);
     return {
       success: true,
       message: "Records fetched successfully",
@@ -60,8 +60,7 @@ export const fetchRecord = async (recordId: string, logout: () => Promise<void>)
   const urlWithRecordId = `${apiUrl2}/${encodeURIComponent(recordId)}`;
 
   try {
-    const response = await fetchFromApi(urlWithRecordId, logout);
-    const data = await response.json();
+    const data = await fetchFromApi(urlWithRecordId, logout);
     return {
       success: true,
       message: "Record fetched successfully",
@@ -74,4 +73,3 @@ export const fetchRecord = async (recordId: string, logout: () => Promise<void>)
     };
   }
 };
-

@@ -1,9 +1,9 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import EncryptedStorage from "react-native-encrypted-storage";
 
 export async function addAllowedInstitution(institutionId: string, patientId: string ) {
     const url = `https://imrs-server-12m3e12kdk1k12mek.tech/api/institutions/addAllowedInstitution`;
     try {
-        const bearerToken = await AsyncStorage.getItem("token");
+        const bearerToken = await EncryptedStorage.getItem("token");
         const response = await fetch(url, {
             method: 'POST',
             headers: {

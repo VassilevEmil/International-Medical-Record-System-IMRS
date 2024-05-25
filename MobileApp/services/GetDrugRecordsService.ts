@@ -1,4 +1,3 @@
-import axios from "axios";
 import { DrugRecordResponse } from "../models/drugRecord";
 
 interface GetDrugResponse {

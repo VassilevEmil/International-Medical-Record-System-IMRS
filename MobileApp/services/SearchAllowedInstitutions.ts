@@ -1,10 +1,10 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import EncryptedStorage from "react-native-encrypted-storage";
 
 export async function searchInstitution(term: string) {
   const url = `https://imrs-server-12m3e12kdk1k12mek.tech/api/institutions/search?term=${encodeURIComponent(term)}`;
   
   try {
-    const bearerToken = await AsyncStorage.getItem("token");
+    const bearerToken = await EncryptedStorage.getItem("token");
     const response = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${bearerToken}`,
