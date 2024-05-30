@@ -3,7 +3,7 @@ import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import { FaPlus, FaList } from "react-icons/fa";
 import { useAppContext } from "../context/AppContext";
 
-const Header = () => {
+const Header: React.FC = () => {
   const { selectedInstitution, patientData } = useAppContext();
   const isPatientAndInstitutionSelected =
     !!patientData && !!selectedInstitution;

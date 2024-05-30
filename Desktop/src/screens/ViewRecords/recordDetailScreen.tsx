@@ -9,7 +9,6 @@ import {
   Box,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
   Button,
   CircularProgress,
@@ -48,22 +47,22 @@ interface Record {
   institution: Institution;
   language: string;
   text: string;
-  timestamp: string;
+  timeStamp: Date;
   title: string;
   typeOfRecord: string;
 }
 
 const RecordDetailScreen = () => {
   let { id } = useParams<"id">();
-  const [record, setRecord] = useState<Record>(); // not sure, need to think when fresh, might not need state
+  const [record, setRecord] = useState<Record>();
   const [isLoading, setIsLoading] = useState(true);
-  const { selectedInstitution } = useAppContext();
+  const { selectedInstitution, patientData } = useAppContext();
 
   const navigate = useNavigate();
 
   const handleClickFile = (file: File) => {
     navigate("/file-view", {
-      state: { file: file, recordId: record?.id }, // we pass current record id, to which the file is connected to
+      state: { file: file, recordId: record?.id },
     });
   };
 
@@ -103,8 +102,6 @@ const RecordDetailScreen = () => {
           maxWidth="sm"
           sx={{
             display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
             height: "100vh",
           }}
         >
@@ -120,11 +117,8 @@ const RecordDetailScreen = () => {
         <Container
           maxWidth="sm"
           sx={{
-            textAlign: "center",
-            height: "100vh",
             display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
+            height: "100vh",
           }}
         >
           <Typography variant="h6">Record not found</Typography>
@@ -139,42 +133,54 @@ const RecordDetailScreen = () => {
       </ThemeProvider>
     );
   }
+
   return (
     <ThemeProvider theme={darkTheme}>
-      <Container maxWidth="sm">
-        <Card elevation={3} sx={{ marginTop: 2, minWidth: 600 }}>
+      <Container
+        maxWidth="sm"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <Card elevation={3} sx={{ minWidth: 600 }}>
           <CardContent>
             <Typography variant="h5" component="h2" gutterBottom>
               Record Details
             </Typography>
-            <Box display="flex" alignItems="center" marginBottom={2}>
+            <Box display="flex" marginBottom={2} alignItems="center">
               <PersonIcon color="action" />
               <Typography variant="subtitle1" marginLeft={1}>
-                Patient Name: {record?.doctorFirstName}
+                Patient Name:{" "}
+                {patientData?.patientFirstName +
+                  " " +
+                  patientData?.patientLastName}
               </Typography>
             </Box>
             <Divider />
-            <Box display="flex" alignItems="center" marginY={2}>
+            <Box display="flex" marginY={2} alignItems="center">
               <AccessTimeIcon color="action" />
               <Typography variant="subtitle1" marginLeft={1}>
-                Date of Visit: {record?.doctorId}
+                Date of Visit:{" "}
+                {new Date(record?.timeStamp).toLocaleDateString()}
               </Typography>
             </Box>
             <Divider />
-            <Box display="flex" alignItems="center" marginY={2}>
+            <Box display="flex" marginY={2} alignItems="center">
               <LocalHospitalIcon color="action" />
               <Typography variant="subtitle1" marginLeft={1}>
-                Diagnosis: {record?.doctorLastName}
+                Diagnosis: {record?.title}
               </Typography>
             </Box>
             <Divider />
-            <Box display="flex" alignItems="center" marginY={2}>
+            <Box display="flex" marginY={2} alignItems="flex-start">
               <HealingIcon color="action" />
-              <Typography variant="subtitle1" marginLeft={1}>
-                Treatment: {record?.title}
+              <Typography variant="subtitle1" marginLeft={1} align="left">
+                Treatment: {record?.text}
               </Typography>
             </Box>
-
             <Divider />
             <Box display="flex" flexDirection="column" marginY={2}>
               <Typography variant="subtitle1" gutterBottom>
@@ -185,10 +191,9 @@ const RecordDetailScreen = () => {
                   {record.files.map((file, index) => (
                     <ListItem
                       key={index}
-                      button
                       onClick={() => handleClickFile(file)}
+                      sx={{ display: "flex" }}
                     >
-                      <ListItemIcon></ListItemIcon>
                       <ListItemText
                         primary={file.name}
                         secondary={`Type: ${file.mimetype}`}

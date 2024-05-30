@@ -23,7 +23,7 @@ import {
 } from "../../../enums";
 import { useAppContext } from "../../context/AppContext";
 
-const AddRecordScreen = () => {
+const AddRecordScreen : React.FC= () => {
   const { selectedInstitution, patientData } = useAppContext();
   const [recordType, setRecordType] = useState("");
   const [languageType, setLanguageType] = useState("");
