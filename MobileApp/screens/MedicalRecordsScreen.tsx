@@ -187,7 +187,7 @@ const MedicalRecordsScreen: React.FC  = () => {
         renderSectionHeader={renderSectionHeader}
         keyExtractor={keyExtractor}
         onEndReached={fetchRecords}
-        onEndReachedThreshold={0.1}
+        onEndReachedThreshold={0.8}
         ListFooterComponent={() => (
           <View style={{ height: 35, justifyContent: 'center', alignItems: 'center' }}>
             {loading && <ActivityIndicator size="large" color="#0340b6" />}
